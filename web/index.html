@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Cross Platform Final Term">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="finalterm">
+  <meta name="google-signin-client_id" content="704272791990-v4nif87slbi6qift49ulh7l1d3gls1fe.apps.googleusercontent.com">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>finalterm</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK Configuration -->
+  <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-analytics.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnvLCDcQRYhYMWk7uR26sjUfuwDUINaQU",
+      authDomain: "cross-platform-final-term.firebaseapp.com",
+      databaseURL: "https://cross-platform-final-term-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cross-platform-final-term",
+      storageBucket: "cross-platform-final-term.appspot.com",
+      messagingSenderId: "704272791990",
+      appId: "1:704272791990:web:3534613e20b295278a6917",
+      measurementId: "G-LS152KH0C7"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+  </script>
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = null;
+  </script>
+
+  <!-- Google Identity Services for Google SignIn Button -->
+  <script>
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId());
+      // Here, send the ID token to your server or use it in your Dart code
+    }
+
+    function renderButton() {
+      google.accounts.id.initialize({
+        client_id: '704272791990-v4nif87slbi6qift49ulh7l1d3gls1fe.apps.googleusercontent.com',
+        callback: onSignIn
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('signInDiv'),
+        { theme: 'outline', size: 'large' }
+      );
+    }
+  </script>
+
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+<div id="signInDiv"></div>  <!-- Container for the Google SignIn Button -->
+<script>
+  window.addEventListener('load', function(ev) {
+    // Download main.dart.js and render Google SignIn Button
+    _flutter.loader.loadEntrypoint({
+      serviceWorker: {
+        serviceWorkerVersion: serviceWorkerVersion,
+      },
+      onEntrypointLoaded: function(engineInitializer) {
+        engineInitializer.initializeEngine().then(function(appRunner) {
+          appRunner.runApp();
+          renderButton();  // Ensure this is called after app initialization
+        });
+      }
+    });
+  });
+</script>
+</body>
+</html>
