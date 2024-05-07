@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "704272791990",
+    "firebase_url": "https://cross-platform-final-term-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "cross-platform-final-term",
+    "storage_bucket": "cross-platform-final-term.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:704272791990:android:4f0b5499fdf5215f8a6917",
+        "android_client_info": {
+          "package_name": "com.example.finalterm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "704272791990-k7e19oaub26k812vem6jsvg89drsmnpv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.finalterm",
+            "certificate_hash": "250d9fc9cf4fea0a20b57e05bccb7bc9a4085628"
+          }
+        },
+        {
+          "client_id": "704272791990-v4nif87slbi6qift49ulh7l1d3gls1fe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE6o1LCQU7mFSuqBiUkDFddwG1nGW1dho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "704272791990-v4nif87slbi6qift49ulh7l1d3gls1fe.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "704272791990-30mrk1rekg9qfvp7qqn74jekcqjjeok1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.finalterm"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
