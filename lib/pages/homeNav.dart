@@ -1,6 +1,7 @@
 import 'package:Fluffy/objects/user.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/pages/profile.dart';
+import 'libraryWidget.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.userID});
@@ -18,11 +19,11 @@ class _MyHomePageState extends State<MyHomePage> {
     Text('Loading...'), // Placeholder widget
   ];
 
-  void getUser() async{
+  void getUser() async {
     user = await fetchUserDataFromDatabase(widget.userID);
     widgetOptions = <Widget>[
       Text('Home'),
-      Text('Topic'),
+      Library(),
       Profile(user: user),
     ];
     print(user.toString());
@@ -50,16 +51,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child:
-        widgetOptions
-            .elementAt(selectedIndex),
+        child: widgetOptions.elementAt(selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, //disable zoom
+        type: BottomNavigationBarType.fixed,
+        //disable zoom
         items: <BottomNavigationBarItem>[
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          const BottomNavigationBarItem(icon: Icon(Icons.topic), label: 'Topic'),
-          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.topic), label: 'Library'),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.person), label: 'Profile'),
         ],
         currentIndex: selectedIndex,
         selectedItemColor: Colors.lightBlue,
