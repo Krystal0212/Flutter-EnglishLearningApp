@@ -1,4 +1,4 @@
-import 'package:Fluffy/pages/homepage.dart';
+import 'package:Fluffy/pages/homeNav.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:github_sign_in_plus/github_sign_in_plus.dart';
@@ -34,7 +34,6 @@ class LogInPageState extends State<LogInPage> {
   @override
   void initState() {
     super.initState();
-    //var temp = auth.currentUser?.uid;
     emailController = TextEditingController();
     passwordController = TextEditingController();
     auth.authStateChanges().listen((event) {
@@ -335,19 +334,18 @@ class LogInPageState extends State<LogInPage> {
     return ElevatedButton(
       onPressed: () async {
         late UserCredential userCredential;
-        try
-        {
-          if (kIsWeb)
-          {
+        try {
+          if (kIsWeb) {
             // The `GoogleAuthProvider` can only be used while running on the web
             GoogleAuthProvider authProvider = GoogleAuthProvider();
 
             userCredential = await auth.signInWithPopup(authProvider);
-          }
-          else
-          {
-            final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-            final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+          } else {
+            final GoogleSignInAccount? googleUser =
+                await GoogleSignIn().signIn();
+            final GoogleSignInAuthentication googleAuth =
+                await googleUser!.authentication;
+
             // Create a GoogleAuthProvider credential
             final AuthCredential credential = GoogleAuthProvider.credential(
               accessToken: googleAuth.accessToken,
@@ -355,8 +353,10 @@ class LogInPageState extends State<LogInPage> {
             );
 
             // Sign in to Firebase with Google credentials
-            userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+            userCredential =
+                await FirebaseAuth.instance.signInWithCredential(credential);
             final User? user = userCredential.user;
+
             assert(!user!.isAnonymous);
             assert(await user!.getIdToken() != null);
 
@@ -369,11 +369,8 @@ class LogInPageState extends State<LogInPage> {
           if (userID != "User ID not found") {
             LogUserIn(userID);
           }
-        }
-        on FirebaseAuthException catch (e)
-        {
-          if (e.code == 'account-exists-with-different-credential')
-          {
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'account-exists-with-different-credential') {
             RegisteredDialog();
           }
         }
@@ -412,16 +409,19 @@ class LogInPageState extends State<LogInPage> {
             final GitHubSignIn gitHubSignIn = GitHubSignIn(
                 clientId: 'Ov23liBeBpdnsMt5BO3a',
                 clientSecret: '339fdd7c0ded5227d9a50c63e22e157caf262de2',
-                redirectUrl: 'https://cross-platform-final-term.firebaseapp.com/__/auth/handler');
+                redirectUrl:
+                    'https://cross-platform-final-term.firebaseapp.com/__/auth/handler');
 
             final result = await gitHubSignIn.signIn(context);
             if (result.token != null) {
               // Create a credential from the GitHub access token
               final String token = result.token!;
-              final AuthCredential credential = GithubAuthProvider.credential(token);
+              final AuthCredential credential =
+                  GithubAuthProvider.credential(token);
 
               // Once signed in, return the UserCredential
-              userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+              userCredential =
+                  await FirebaseAuth.instance.signInWithCredential(credential);
             }
 
             String userID = userCredential.user!.uid;
@@ -497,7 +497,12 @@ class LogInPageState extends State<LogInPage> {
       ),
     );
 
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(userID: userID,)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MyHomePage(
+                  userID: userID,
+                )));
   }
 
   @override

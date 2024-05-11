@@ -36,7 +36,10 @@ class Profile extends StatelessWidget {
   ImageProvider<Object> getAvatar() {
     ImageProvider<Object> avatar;
     if (user.avatarUrl.isNotEmpty) {
-      avatar = NetworkImage(user.avatarUrl,scale: 1.0,);
+      avatar = NetworkImage(
+        user.avatarUrl,
+        scale: 1.0,
+      );
     } else {
       avatar = AssetImage("assets/images/profile-img.jpg");
     }
@@ -50,14 +53,13 @@ class Profile extends StatelessWidget {
       backgroundColor: LabColors.bgColorScreen,
       body: Stack(
         children: <Widget>[
-
           Column(
             children: [
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image:AssetImage("assets/images/bg-profile.png"),
+                        image: AssetImage("assets/images/bg-profile.png"),
                         fit: BoxFit.cover)),
                 child: Stack(
                   children: <Widget>[
@@ -66,13 +68,13 @@ class Profile extends StatelessWidget {
                       right: false,
                       left: false,
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 0, right: 0, top: 20),
+                        padding:
+                            const EdgeInsets.only(left: 0, right: 0, top: 20),
                         child: Center(
                           child: Column(
                             children: [
                               CircleAvatar(
-                                  backgroundImage: getAvatar(),
-                                  radius: 65.0),
+                                  backgroundImage: getAvatar(), radius: 65.0),
                               Padding(
                                 padding: const EdgeInsets.only(top: 24.0),
                                 child: Text(user.displayName.toString(),
@@ -85,7 +87,8 @@ class Profile extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Text(user.email.toString(),
                                     style: TextStyle(
-                                        color: LabColors.white.withOpacity(0.85),
+                                        color:
+                                            LabColors.white.withOpacity(0.85),
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600)),
                               ),
@@ -122,8 +125,8 @@ class Profile extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32.0),
                         ),
-                        padding: EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 12),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                       ),
                       onPressed: () {
                         // Respond to button press
@@ -132,10 +135,13 @@ class Profile extends StatelessWidget {
                       child: Text("Follow", style: TextStyle(fontSize: 13.0)),
                     ),
                   ),
-                  SizedBox(height: 8,),
+                  SizedBox(
+                    height: 8,
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(136, 136, 136, 1.0), // background color
+                      backgroundColor: Color.fromRGBO(
+                          136, 136, 136, 1.0), // background color
                       shape: CircleBorder(), // circular shape
                       padding: EdgeInsets.all(0), // padding inside the button
                       elevation: 4.0, // elevation of button
@@ -144,10 +150,13 @@ class Profile extends StatelessWidget {
                     onPressed: () {},
                     child: Icon(Icons.edit, size: 14.0, color: Colors.white),
                   ),
-                  SizedBox(height: 8,),
+                  SizedBox(
+                    height: 8,
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(136, 136, 136, 1.0), // background color
+                      backgroundColor: Color.fromRGBO(
+                          136, 136, 136, 1.0), // background color
                       shape: CircleBorder(), // circular shape
                       padding: EdgeInsets.all(0), // padding inside the button
                       elevation: 4.0, // elevation of button
