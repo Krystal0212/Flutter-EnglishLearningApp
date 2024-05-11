@@ -34,6 +34,7 @@ class LogInPageState extends State<LogInPage> {
   @override
   void initState() {
     super.initState();
+    //var temp = auth.currentUser?.uid;
     emailController = TextEditingController();
     passwordController = TextEditingController();
     auth.authStateChanges().listen((event) {
@@ -334,16 +335,19 @@ class LogInPageState extends State<LogInPage> {
     return ElevatedButton(
       onPressed: () async {
         late UserCredential userCredential;
-        try {
-          if (kIsWeb) {
+        try
+        {
+          if (kIsWeb)
+          {
             // The `GoogleAuthProvider` can only be used while running on the web
             GoogleAuthProvider authProvider = GoogleAuthProvider();
 
             userCredential = await auth.signInWithPopup(authProvider);
-          } else {
+          }
+          else
+          {
             final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
             final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
-
             // Create a GoogleAuthProvider credential
             final AuthCredential credential = GoogleAuthProvider.credential(
               accessToken: googleAuth.accessToken,
@@ -353,7 +357,6 @@ class LogInPageState extends State<LogInPage> {
             // Sign in to Firebase with Google credentials
             userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
             final User? user = userCredential.user;
-
             assert(!user!.isAnonymous);
             assert(await user!.getIdToken() != null);
 
@@ -366,8 +369,11 @@ class LogInPageState extends State<LogInPage> {
           if (userID != "User ID not found") {
             LogUserIn(userID);
           }
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'account-exists-with-different-credential') {
+        }
+        on FirebaseAuthException catch (e)
+        {
+          if (e.code == 'account-exists-with-different-credential')
+          {
             RegisteredDialog();
           }
         }
@@ -491,7 +497,7 @@ class LogInPageState extends State<LogInPage> {
       ),
     );
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(userID: userID,)));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(userID: userID,)));
   }
 
   @override

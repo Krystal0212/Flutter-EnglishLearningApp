@@ -22,7 +22,7 @@ class Profile extends StatelessWidget {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.remove("userID");
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) => LogInPage(
