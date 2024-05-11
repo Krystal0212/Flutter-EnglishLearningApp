@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:Fluffy/objects/user.dart' as localUser;
+import 'package:Fluffy/objects/user.dart';
 import 'package:Fluffy/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Profile extends StatelessWidget {
   Profile({super.key, required this.user});
 
-  localUser.User user;
+  TheUser user;
 
   Future<void> signOutUser(BuildContext context) async {
     final FirebaseAuth auth = FirebaseAuth.instance;
@@ -22,7 +23,7 @@ class Profile extends StatelessWidget {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.remove("userID");
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) => LogInPage(
