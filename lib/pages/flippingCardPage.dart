@@ -1,56 +1,46 @@
 import 'dart:math';
 
-//import 'package:finalterm_test/wordList.dart'; //await word list.!!
-import 'package:flutter/cupertino.dart';
+
+import 'package:Fluffy/objects/word.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:Fluffy/objects/card.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import '../objects/topic.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const FlippingCardPage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
 
 class FlippingCardPage extends StatefulWidget {
-  const FlippingCardPage({super.key, required this.title});
-  final String title;
+  const FlippingCardPage({super.key,required this.topic});
+  final Topic topic;
 
   @override
-  State<FlippingCardPage> createState() => _MyHomePageState();
+  State<FlippingCardPage> createState() => _FlippingCardPageState();
 }
 
-class _MyHomePageState extends State<FlippingCardPage> {
+class _FlippingCardPageState extends State<FlippingCardPage> {
 
-  static Color appbarColor = Colors.deepOrange,
-      appbarTextColor = Colors.white,
-      cardPageBackground = const Color(0xFFeac3b8);
+  static Color appbarColor = Colors.blue[200] as Color,
+      appbarTextColor = Colors.black,
+      cardPageBackground = Colors.blue[50] as Color;
+
+  static double appbarTextSize = 20;
 
   late PageController _controller;
   static int _currentIndex = 0;
   final double _viewportFraction = kIsWeb?0.4:0.65;
 
-  late dynamic cards;
+  late List<Word> wordList;
 
   @override
   void initState() {
-    cards.shuffle(Random());
-    initCardsAnimation();
+    initWordList();
     super.initState();
+  }
+
+  void initWordList() {
+    wordList = widget.topic.word as List<Word>;
+    wordList.shuffle(Random());
+    initCardsAnimation();
   }
 
   void initCardsAnimation() {
@@ -83,7 +73,7 @@ class _MyHomePageState extends State<FlippingCardPage> {
                 _currentIndex = index;
               });
             },
-            itemCount: cards.length,
+            itemCount: wordList.length,
             itemBuilder: (context, index) {
               return animatedCard(context, index);
             },
@@ -119,10 +109,7 @@ class _MyHomePageState extends State<FlippingCardPage> {
           );
         },
         child: MyFlippingCard(
-          english: cards[index]['english']!,
-          vietnamese: cards[index]['vietnamese']!,
-          eDef: cards[index]['eDef']!,
-          vDef: cards[index]['vDef']!,
+          word: wordList[index],
         )
     );
   }
@@ -167,7 +154,7 @@ class _MyHomePageState extends State<FlippingCardPage> {
           alignment: Alignment.center,
           height: 100,
           child: Text(
-            '${_currentIndex+1}/${cards.length}',
+            '${_currentIndex+1}/${wordList.length}',
             style: const TextStyle(
               fontSize: 30,
             ),
@@ -177,7 +164,7 @@ class _MyHomePageState extends State<FlippingCardPage> {
         SizedBox(
           child: FloatingActionButton(
             onPressed: () {
-              if (_currentIndex < cards.length) {
+              if (_currentIndex < wordList.length) {
                 _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
               }
             },
@@ -189,10 +176,10 @@ class _MyHomePageState extends State<FlippingCardPage> {
         SizedBox(
           child: FloatingActionButton(
             onPressed: () {
-              if (_currentIndex != cards.length-1) {
-                int animateTime = (cards.length - _currentIndex)*100 + 200;
+              if (_currentIndex != wordList.length-1) {
+                int animateTime = (wordList.length - _currentIndex)*100 + 200;
                 _controller.animateToPage(
-                    cards.length-1,
+                    wordList.length-1,
                     duration: Duration(milliseconds: animateTime),
                     curve: Curves.easeIn
                 );
@@ -231,20 +218,23 @@ class _MyHomePageState extends State<FlippingCardPage> {
     return Scaffold(
       appBar : AppBar(
         centerTitle : true,
-        title : const Text('Test Application'),
+        title :Text(
+            'Topic: ${widget.topic.title??"Not found"}'
+        ),
         backgroundColor: appbarColor,
         titleTextStyle: TextStyle(
             color: appbarTextColor,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
+            fontSize: appbarTextSize,
         ),
       ),
-      body:Column(
+      body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           mainPageContext(),
           bottomPageContext()
         ],
-      ) ,
+      )
     );
   }
 }

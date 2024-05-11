@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:Fluffy/objects/word.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
@@ -6,20 +7,16 @@ import 'package:flutter_flip_card/flutter_flip_card.dart';
 
 
 class MyFlippingCard extends StatelessWidget {
-  final String english;
-  final String vietnamese;
-  final String eDef;
-  final String vDef;
+  final Word word;
   //final String image;
 
   const MyFlippingCard({
     super.key,
-    required this.english,
-    required this.vietnamese,
-    required this.eDef,
-    required this.vDef,
+    required this.word
     //required this.image,
   });
+
+
 
   static late double cardWidth,
       cardHeight,
@@ -35,11 +32,12 @@ class MyFlippingCard extends StatelessWidget {
       cardBorderColor = Colors.black;
 
   static FlutterTts flutterTts = FlutterTts();
+  static const enVoice = 'en-US',
+               vietVoice = 'fr-FR';
 
 
-
-  Future _speak(String inputText) async{
-    flutterTts.setLanguage("en-US");
+  Future _speak(String inputText, String language) async{
+    flutterTts.setLanguage(language);
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
   }
@@ -49,9 +47,9 @@ class MyFlippingCard extends StatelessWidget {
   }
 
   //  ----------------------------------------------------- //
-  //             return final single card design            //
+  //                       card design                      //
   //  ----------------------------------------------------- //
-  Widget cardContext(String word, String definition, String image) {
+  Widget cardContext(String word, String? description,String language, String image) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -113,7 +111,7 @@ class MyFlippingCard extends StatelessWidget {
                       IconButton(
                           iconSize: 40,
                           onPressed: () {
-                            _speak(word);
+                            _speak(word,language);
                             //_stop();
                           },
                           icon: const Icon(Icons.volume_down)),
@@ -125,7 +123,7 @@ class MyFlippingCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Text(
-                  definition,
+                  description??"No description",
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 15,
@@ -167,7 +165,7 @@ class MyFlippingCard extends StatelessWidget {
                 ),
                 width: cardWidth,
                 height: cardHeight,
-                child: cardContext(english,eDef,'assets/images/stelle.png'),
+                child: cardContext(word.english as String,word.description as String,enVoice,'assets/images/stelle.png'),
               ),
             ),
             backWidget: Center(
@@ -184,7 +182,7 @@ class MyFlippingCard extends StatelessWidget {
                 ),
                 width: cardWidth,
                 height: cardHeight,
-                child: cardContext(vietnamese,vDef,'assets/images/stelle2.png'),
+                child: cardContext(word.vietnamese as String,word.description as String,vietVoice,'assets/images/stelle2.png'),
               ),
             )
         );

@@ -497,7 +497,7 @@ class LogInPageState extends State<LogInPage> {
       ),
     );
 
-    Navigator.push(
+    Navigator.pushReplacement(
         context,
         MaterialPageRoute(
             builder: (context) => MyHomePage(
