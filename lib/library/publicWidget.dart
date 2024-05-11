@@ -4,7 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../pages/flippingCardPage.dart';
+import '../topicDetail/topicDetailWidget.dart';
 
 class Public extends StatefulWidget {
   const Public({super.key});
@@ -98,9 +98,9 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
         ),
         onTap: () {
           Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context)=>FlippingCardPage(topic: topic,))
-          );
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TopicDetail(topic: topic)));
         },
         shape: RoundedRectangleBorder(
           side: BorderSide(color: Colors.blue[300] as Color, width: 1),
