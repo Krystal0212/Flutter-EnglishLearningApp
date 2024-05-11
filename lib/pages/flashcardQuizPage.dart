@@ -5,25 +5,28 @@ import 'package:Fluffy/objects/word.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/card.dart';
+import 'package:flutter_flip_card/flutter_flip_card.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../objects/topic.dart';
 
 
-class FlippingCardPage extends StatefulWidget {
-  const FlippingCardPage({super.key,required this.topic});
+class FlashcardQuizPage extends StatefulWidget {
+  const FlashcardQuizPage({super.key,required this.topic});
   final Topic topic;
 
   @override
-  State<FlippingCardPage> createState() => _FlippingCardPageState();
+  State<FlashcardQuizPage> createState() => _FlashcardQuizPageState();
 }
 
-class _FlippingCardPageState extends State<FlippingCardPage> {
+class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
 
   static Color appbarColor = Colors.blue[200] as Color,
       appbarTextColor = Colors.black,
       cardPageBackground = Colors.blue[50] as Color;
 
   static double appbarTextSize = 20;
+  static bool isAutoFlashcard = false;
 
   late PageController _controller;
   static int _currentIndex = 0;
@@ -31,16 +34,30 @@ class _FlippingCardPageState extends State<FlippingCardPage> {
 
   late List<Word> wordList;
 
+  late Map<String, GestureFlipCardController> cardDeckControllers = {};
+  late Map<String, MyFlippingCard> cardDecks = {};
+
   @override
   void initState() {
     initWordList();
+    generateCardDeck();
+    initCardsAnimation();
     super.initState();
+  }
+
+  void generateCardDeck() {
+      for (int i = 0; i < widget.topic.word!.length; i++){
+        cardDeckControllers['cardController$i'] = GestureFlipCardController();
+        cardDecks['card$i'] = MyFlippingCard(
+            word: wordList[i],
+            flippingCardController: cardDeckControllers['cardController$i']!,
+        );
+      }
   }
 
   void initWordList() {
     wordList = widget.topic.word as List<Word>;
     wordList.shuffle(Random());
-    initCardsAnimation();
   }
 
   void initCardsAnimation() {
@@ -91,7 +108,6 @@ class _FlippingCardPageState extends State<FlippingCardPage> {
         builder: (context,child) {
           double scale = 1.0;
           double opacity = 1.0;
-
           if (_controller.position.haveDimensions)
           {
             double dimParam = _controller.page! - index;
@@ -108,9 +124,7 @@ class _FlippingCardPageState extends State<FlippingCardPage> {
             ),
           );
         },
-        child: MyFlippingCard(
-          word: wordList[index],
-        )
+        child: cardDecks['card$index']
     );
   }
 
@@ -124,17 +138,56 @@ class _FlippingCardPageState extends State<FlippingCardPage> {
         //first card button
         SizedBox(
           child: FloatingActionButton(
-            onPressed: () {
-              if (_currentIndex != 0) {
-                int animateTime =  _currentIndex*100 + 200;
-                _controller.animateTo(
-                    0 ,
-                    duration: Duration(milliseconds: animateTime),
-                    curve: Curves.easeIn);
+            onPressed: () async {
+              setState(() {
+                if (isAutoFlashcard){
+                  isAutoFlashcard = false;
+                }
+                else {
+                  isAutoFlashcard = true;
+                }
+              });
+
+              /*
+              logic:
+                speak + wait => flip => speak + wait => move then continue
+               */
+
+              while (_currentIndex < wordList.length-1 && isAutoFlashcard) {
+                if (isAutoFlashcard){
+                  cardDecks['card$_currentIndex']!.speakEng();
+                  await Future.delayed(Duration(milliseconds: 2500));
+                  if (isAutoFlashcard){
+                    cardDecks['card$_currentIndex']!.flipCard();
+                    await Future.delayed(Duration(milliseconds: 2500));
+                    if (isAutoFlashcard){
+                      cardDecks['card$_currentIndex']!.speakVie();
+                      await Future.delayed(Duration(milliseconds: 2500));
+                      if (isAutoFlashcard){
+                        _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                        await Future.delayed(Duration(milliseconds: 2500));
+                      }
+                      else{
+                        break;
+                      }
+                    }
+                    else{
+                      break;
+                    }
+                  }
+                  else{
+                    break;
+                  }
+                }
+                else{
+                  break;
+                }
               }
+
             },
             shape: const CircleBorder(),
-            child: const Icon(Icons.fast_rewind), // Use RoundedRectangleBorder for compatibility
+            child: isAutoFlashcard?Icon(Icons.pause):
+                Icon(Icons.play_arrow), // Use RoundedRectangleBorder for compatibility
           ),
         ),
         //previous arrow button

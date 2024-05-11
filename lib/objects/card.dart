@@ -8,15 +8,15 @@ import 'package:flutter_flip_card/flutter_flip_card.dart';
 
 class MyFlippingCard extends StatelessWidget {
   final Word word;
+  final GestureFlipCardController flippingCardController;
   //final String image;
 
   const MyFlippingCard({
     super.key,
-    required this.word
+    required this.word,
+    required this.flippingCardController
     //required this.image,
   });
-
-
 
   static late double cardWidth,
       cardHeight,
@@ -32,24 +32,31 @@ class MyFlippingCard extends StatelessWidget {
       cardBorderColor = Colors.black;
 
   static FlutterTts flutterTts = FlutterTts();
-  static const enVoice = 'en-US',
-               vietVoice = 'fr-FR';
 
 
-  Future _speak(String inputText, String language) async{
-    flutterTts.setLanguage(language);
+
+  Future _speak(String inputText) async{
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
   }
 
-  Future _stop() async{
-    await flutterTts.stop();
+  void flipCard(){
+    flippingCardController.flipcard();
   }
+
+  void speakEng(){
+    _speak(word.english as String);
+  }
+
+  void speakVie(){
+    _speak(word.vietnamese as String);
+  }
+
 
   //  ----------------------------------------------------- //
   //                       card design                      //
   //  ----------------------------------------------------- //
-  Widget cardContext(String word, String? description,String language, String image) {
+  Widget cardContext(String word, String? description, String image) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -111,7 +118,7 @@ class MyFlippingCard extends StatelessWidget {
                       IconButton(
                           iconSize: 40,
                           onPressed: () {
-                            _speak(word,language);
+                            _speak(word);
                             //_stop();
                           },
                           icon: const Icon(Icons.volume_down)),
@@ -149,7 +156,7 @@ class MyFlippingCard extends StatelessWidget {
         return GestureFlipCard(
             animationDuration: const Duration(milliseconds: 400),
             axis: FlipAxis.horizontal,
-            controller: GestureFlipCardController(),
+            controller: flippingCardController,
             enableController: true,
 
             frontWidget: Center(
@@ -165,7 +172,7 @@ class MyFlippingCard extends StatelessWidget {
                 ),
                 width: cardWidth,
                 height: cardHeight,
-                child: cardContext(word.english as String,word.description as String,enVoice,'assets/images/stelle.png'),
+                child: cardContext(word.english as String,word.description as String,'assets/images/stelle.png'),
               ),
             ),
             backWidget: Center(
@@ -182,7 +189,7 @@ class MyFlippingCard extends StatelessWidget {
                 ),
                 width: cardWidth,
                 height: cardHeight,
-                child: cardContext(word.vietnamese as String,word.description as String,vietVoice,'assets/images/stelle2.png'),
+                child: cardContext(word.vietnamese as String,word.description as String,'assets/images/stelle2.png'),
               ),
             )
         );
