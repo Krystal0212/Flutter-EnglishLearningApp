@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:Fluffy/objects/participant.dart';
+import 'package:Fluffy/topicDetail/topicDetailWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/topic.dart';
@@ -132,7 +133,12 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
           topic.owner as String,
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
         ),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TopicDetail(topic: topic)));
+        },
         shape: RoundedRectangleBorder(
           side: BorderSide(color: Colors.blue[300] as Color, width: 1),
           borderRadius: BorderRadius.circular(8),
@@ -410,15 +416,39 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
         _topicTitleEditingController.clear();
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.red,
-          content: Text("Please fill at least 4 words",
-              style: TextStyle(color: Colors.white))));
+      showAlertDialog();
     }
   }
 
   bool validateCreateTopic() {
     if (_titleKey.currentState!.validate()) return true;
     return false;
+  }
+
+  void showAlertDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          backgroundColor: Colors.red,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Icon(Icons.warning_amber),
+              ),
+              SizedBox(
+                height: 12,
+              ),
+              Text("Please fill at least 4 words",
+                  style: TextStyle(color: Colors.white, fontSize: 20)),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
