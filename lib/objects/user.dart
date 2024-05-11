@@ -17,7 +17,6 @@ class User {
   }) : recentActivity = recentActivity ??
             {'lastVisitedTime': "", 'owner': "", "score": 0, "topicTitle": ""};
 
-  // Named constructor for creating User object from map
   User.fromMap(Map<String, dynamic> map)
       : displayName = map['displayName'] ?? '',
         avatarUrl = map['avtUrl'] ?? 'assets/images/bg-profile.png',
@@ -25,14 +24,18 @@ class User {
         id = map['id'] ?? '',
         recentActivity = map['recentActivity'] != null
             ? Map<String, dynamic>.from(map['recentActivity'])
-            : {'lastVisitedTime': "", 'owner': "", "score": 0, "topicTitle": ""};
+            : {
+                'lastVisitedTime': "",
+                'owner': "",
+                "score": 0,
+                "topicTitle": ""
+              };
 
   Future<void> saveUserDataToDatabase() async {
     DatabaseReference databaseReference = FirebaseDatabase.instance.reference();
     await databaseReference.child('User').child(id).set(toMap());
   }
 
-// Convert User object to Map
   Map<String, dynamic> toMap() {
     return {
       'displayName': displayName,
@@ -49,14 +52,14 @@ class User {
   }
 }
 
-
 Future<User> fetchUserDataFromDatabase(String userID) async {
   DatabaseReference databaseReference = FirebaseDatabase.instance.reference();
   DataSnapshot dataSnapshot =
       (await databaseReference.child('User').child(userID).once()).snapshot;
 
   if (dataSnapshot.value != null) {
-    Map<String, dynamic> data = Map<String, dynamic>.from(dataSnapshot.value as Map<dynamic, dynamic>);
+    Map<String, dynamic> data =
+        Map<String, dynamic>.from(dataSnapshot.value as Map<dynamic, dynamic>);
 
     return User.fromMap(data);
   } else {

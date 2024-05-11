@@ -1,3 +1,4 @@
+import 'package:Fluffy/library/publicWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,24 +11,39 @@ class Library extends StatefulWidget {
   State<Library> createState() => _LibraryState();
 }
 
-class _LibraryState extends State<Library> {
+class _LibraryState extends State<Library>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   DatabaseReference dbRef = FirebaseDatabase.instance.ref();
   final FirebaseAuth auth = FirebaseAuth.instance;
-  TextEditingController _topicTitleEditingController = TextEditingController();
+  late TabController _tabController;
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
+    _tabController = TabController(length: 3, vsync: this);
     super.initState();
   }
 
-  // List<Topic> topics = fetchTopicFromDatabase();
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          bottom: const TabBar(
+          automaticallyImplyLeading: false,
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: Colors.blue,
+            indicatorColor: Colors.blue,
             tabAlignment: TabAlignment.start,
             tabs: [
               Tab(
@@ -43,17 +59,14 @@ class _LibraryState extends State<Library> {
             isScrollable: true,
           ),
           title: Text("Library"),
+          backgroundColor: Colors.blue[50],
         ),
-        body: const TabBarView(children: [
+        body: TabBarView(controller: _tabController, children: [
           Set(),
-          Icon(Icons.directions_transit),
+          Public(),
           Icon(Icons.directions_bike),
         ]),
       ),
     );
   }
-
-// List<Topic> fetchTopicFromDatabase() {
-//   return topics;
-// }
 }

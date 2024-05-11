@@ -13,46 +13,59 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int selectedIndex = 0;
-  late User user;
-  List<Widget> widgetOptions = <Widget>[
-    Text('Loading...'), // Placeholder widget
-  ];
+  var selectedIndex;
+  late List<Widget> _pages;
+  late PageController _pageController;
+  User? user;
 
   void getUser() async {
-    user = await fetchUserDataFromDatabase(widget.userID);
-    widgetOptions = <Widget>[
-      Text('Home'),
-      Library(),
-      Profile(user: user),
-    ];
+    User fetchedUser = await fetchUserDataFromDatabase(widget.userID);
+    setState(() {
+      user = fetchedUser;
+      _pages = [
+        Center(child: Text('Home')),
+        Library(),
+        Profile(user: user!),
+      ];
+    });
     print(user.toString());
   }
 
   @override
   void initState() {
+    selectedIndex = 0;
+    _pageController = PageController(initialPage: selectedIndex);
+
     getUser();
     super.initState();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _pageController.dispose();
     super.dispose();
   }
 
   void onItemTapped(int index) {
     setState(() {
       selectedIndex = index;
+      _pageController.jumpToPage(index);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: widgetOptions.elementAt(selectedIndex),
-      ),
+      body: user == null
+          ? Center(
+              child: CircularProgressIndicator(
+              color: Colors.blue,
+            ))
+          : PageView(
+              controller: _pageController,
+              physics: NeverScrollableScrollPhysics(),
+              children: _pages,
+            ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         //disable zoom
