@@ -1,12 +1,16 @@
-import 'package:Fluffy/pages/homeNav.dart';
-import 'package:animate_do/animate_do.dart';
-import 'package:flutter/material.dart';
-import 'package:github_sign_in_plus/github_sign_in_plus.dart';
+
+import 'package:Fluffy/objects/user.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'register.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:Fluffy/pages/homepage.dart';
+import 'package:Fluffy/constants/loading-indacator.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:github_sign_in_plus/github_sign_in_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LogInPage extends StatefulWidget {
   LogInPage({super.key, required this.title});
@@ -26,21 +30,17 @@ class LogInPageState extends State<LogInPage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late TextEditingController emailController;
   late TextEditingController passwordController;
+  late TextEditingController resetPasswordController;
 
+  bool isLoading = false;
   bool showPassword = false;
-
-  User? user;
 
   @override
   void initState() {
     super.initState();
     emailController = TextEditingController();
     passwordController = TextEditingController();
-    auth.authStateChanges().listen((event) {
-      setState(() {
-        user = event;
-      });
-    });
+    resetPasswordController = TextEditingController();
   }
 
   @override
@@ -48,6 +48,18 @@ class LogInPageState extends State<LogInPage> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  void setIndicatorFalse() {
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void setIndicatorTrue(){
+    setState(() {
+      isLoading = true;
+    });
   }
 
   Widget getBackGround() {
@@ -66,7 +78,7 @@ class LogInPageState extends State<LogInPage> {
                 margin: EdgeInsets.only(top: 230, right: 190),
                 child: Center(
                   child: Text(
-                    "Login",
+                    widget.title,
                     style: TextStyle(
                         color: Colors.black54,
                         fontSize: 65,
@@ -198,18 +210,18 @@ class LogInPageState extends State<LogInPage> {
                 ),
               )),
           SizedBox(
-            height: 40,
+            height: 18,
           ),
           FadeInUp(
               duration: Duration(milliseconds: 1900),
               child: Container(
                 height: 50,
                 child: Center(
-                  child: signInGroup(),
-                ),
+                    child: signInGroup(),
+                    ),
               )),
           SizedBox(
-            height: 40,
+            height: 18,
           ),
           FadeInUp(
               duration: Duration(milliseconds: 1900), child: casualSignIn()),
@@ -219,7 +231,9 @@ class LogInPageState extends State<LogInPage> {
           FadeInUp(
               duration: Duration(milliseconds: 2000),
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  showEmailDialog(context);
+                },
                 child: Text(
                   "Forgot Password?",
                   style: TextStyle(color: Color.fromRGBO(143, 148, 251, 1)),
@@ -251,6 +265,46 @@ class LogInPageState extends State<LogInPage> {
     );
   }
 
+  void showEmailDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Reset Password"),
+          content: TextField(
+            controller: resetPasswordController,
+            decoration: InputDecoration(hintText: "Enter your email"),
+            keyboardType: TextInputType.emailAddress,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Confirm"),
+              onPressed: () {
+                resetPassword(resetPasswordController.text);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      print(e.code);
+      print(e.message);
+    }
+  }
+
   String validateInput(String? email, String password) {
     if (email == null || email.isEmpty) {
       return 'Please enter your email';
@@ -267,36 +321,51 @@ class LogInPageState extends State<LogInPage> {
   Widget casualSignIn() {
     return InkWell(
       onTap: () async {
+        setIndicatorTrue();
+
         String validateResult =
             validateInput(emailController.text, passwordController.text);
         if (validateResult == "Validated") {
           try {
-            UserCredential userCredential =
-                await auth.signInWithEmailAndPassword(
+            await auth
+                .signInWithEmailAndPassword(
               email: emailController.text,
               password: passwordController.text,
-            );
+            )
+                .then((_) {
+              if (auth.currentUser != null) {
+                // Access user details
+                User user = auth.currentUser!;
 
-            // Store userID in shared preferences
-            String userID = userCredential.user!.uid;
+                print("Logged in as: ${user.email}");
+                String uid = user
+                    .uid; // This should be the correct UID from Firebase Auth
+                print("UID: $uid");
 
-            await LogUserIn(userID);
+                if (!user.emailVerified) {
+                  UnverifiedDialog();
+                } else {
+                  LogUserIn(user);
+                }
+              }
+            }).whenComplete(() {
+              setIndicatorFalse();
+            });
           } on FirebaseAuthException catch (error) {
-            if (error.code == 'wrong-password' ||
-                error.code == 'invalid-credential') {
-              // Show a snackbar indicating that the password is incorrect
+            if (error.code == 'wrong-password' || error.code == 'invalid-credential') {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   duration: Duration(seconds: 2),
-                  content: Text('Incorrect password. Please try again.'),
+                  content: Text('Account is not existed or incorrect password. Please try again.'),
                 ),
               );
-            } else if (error.code ==
-                'account-exists-with-different-credential') {
+            } else if (error.code == 'account-exists-with-different-credential') {
               RegisteredDialog();
             } else {
               print(error);
             }
+
+            setIndicatorFalse();
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -334,11 +403,12 @@ class LogInPageState extends State<LogInPage> {
     return ElevatedButton(
       onPressed: () async {
         late UserCredential userCredential;
+        
+
         try {
           if (kIsWeb) {
             // The `GoogleAuthProvider` can only be used while running on the web
             GoogleAuthProvider authProvider = GoogleAuthProvider();
-
             userCredential = await auth.signInWithPopup(authProvider);
           } else {
             final GoogleSignInAccount? googleUser =
@@ -353,26 +423,24 @@ class LogInPageState extends State<LogInPage> {
             );
 
             // Sign in to Firebase with Google credentials
-            userCredential =
-                await FirebaseAuth.instance.signInWithCredential(credential);
-            final User? user = userCredential.user;
-
-            assert(!user!.isAnonymous);
-            assert(await user!.getIdToken() != null);
-
-            final User? currentUser = auth.currentUser;
-            assert(user!.uid == currentUser!.uid);
+            userCredential = await auth.signInWithCredential(credential);
           }
 
+          final User? userFromCredential = userCredential.user;
+          final User? currentUser = auth.currentUser;
+          assert(userFromCredential!.uid == currentUser!.uid);
+          
           String userID = userCredential.user?.uid ?? "User ID not found";
+          User user = userCredential.user!;
 
           if (userID != "User ID not found") {
-            LogUserIn(userID);
+            LogUserIn(user);
           }
         } on FirebaseAuthException catch (e) {
           if (e.code == 'account-exists-with-different-credential') {
             RegisteredDialog();
           }
+          setIndicatorFalse();
         }
       },
       style: ElevatedButton.styleFrom(
@@ -392,6 +460,7 @@ class LogInPageState extends State<LogInPage> {
       onPressed: () async {
         final GithubAuthProvider githubProvider = GithubAuthProvider();
         late UserCredential userCredential;
+        setIndicatorTrue();
 
         githubProvider.addScope('user:email');
 
@@ -399,10 +468,8 @@ class LogInPageState extends State<LogInPage> {
           //Platform is web
           if (kIsWeb) {
             userCredential =
-                await FirebaseAuth.instance.signInWithPopup(githubProvider);
-
-            String userID = userCredential.user!.uid;
-            LogUserIn(userID);
+                await auth.signInWithPopup(githubProvider);
+            
           } else {
             //Platform is mobile
 
@@ -421,36 +488,25 @@ class LogInPageState extends State<LogInPage> {
 
               // Once signed in, return the UserCredential
               userCredential =
-                  await FirebaseAuth.instance.signInWithCredential(credential);
+                  await auth.signInWithCredential(credential);
             }
+          }
 
-            String userID = userCredential.user!.uid;
-            LogUserIn(userID);
-            // final url = 'https://github.com/login/oauth/authorize' +
-            //     '?client_id=Ov23liBeBpdnsMt5BO3a'
-            //     '&scope=user:email';
-            //
-            // // Perform the authentication
-            // final result = await FlutterWebAuth.authenticate(
-            //     url: url,
-            //     callbackUrlScheme:
-            //         "com.example.finalterm"); // Your custom scheme set in native code
-            //
-            // // Extract token from result
-            // final token = Uri.parse(result).queryParameters['code'];
-            // if (token != null) {
-            //   // Use the token to sign in with Firebase
-            //   final AuthCredential credential =
-            //       GithubAuthProvider.credential(token);
-            //   userCredential =
-            //       await FirebaseAuth.instance.signInWithCredential(credential);
-            //   LogUserIn(userCredential?.user!.uid);
-            // }
+          final User? userFromCredential = userCredential.user;
+          final User? currentUser = auth.currentUser;
+          assert(userFromCredential!.uid == currentUser!.uid);
+
+          String userID = userCredential.user?.uid ?? "User ID not found";
+          User user = userCredential.user!;
+
+          if (userID != "User ID not found") {
+            LogUserIn(user);
           }
         } on FirebaseAuthException catch (e) {
           if (e.code == 'account-exists-with-different-credential') {
             RegisteredDialog();
           }
+          setIndicatorFalse();
         }
       },
       style: ElevatedButton.styleFrom(
@@ -462,6 +518,27 @@ class LogInPageState extends State<LogInPage> {
         width: 40,
         height: 40,
       ),
+    );
+  }
+
+  void UnverifiedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Account is not verified'),
+          content:
+              Text('Please verify your email in our email verification sent !'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -487,21 +564,24 @@ class LogInPageState extends State<LogInPage> {
     );
   }
 
-  Future<void> LogUserIn(String userID) async {
-    await storeUserID(userID);
-    // print(userID);
-
+  Future<void> LogUserIn(User currentUser) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        duration: Duration(seconds: 1),
         content: Text('Login successful.'),
       ),
     );
+
+
+    TheUser user = await fetchUserDataFromDatabase(currentUser);
+
+    setIndicatorFalse();
 
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
             builder: (context) => MyHomePage(
-                  userID: userID,
+                  user: user,
                 )));
   }
 
@@ -509,12 +589,24 @@ class LogInPageState extends State<LogInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Container(
-          child: Column(
-            children: [getBackGround(), getLogInTextFieldsAndNavigators()],
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [getBackGround(), getLogInTextFieldsAndNavigators()],
+            ),
           ),
-        ),
+          if (isLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                // Semi-transparent overlay
+                child: Center(
+                  child: LoadingIndicator(), // Your custom loading indicator
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
