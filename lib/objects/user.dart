@@ -1,16 +1,19 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class User {
+class TheUser {
   String displayName;
   String avatarUrl;
   String email;
   String id;
   Map<String, dynamic> recentActivity;
 
+  static const defaultAvatarLink = "https://firebasestorage.googleapis.com/v0/b/cross-platform-final-term.appspot.com/o/profile-img.jpg?alt=media&token=a3619fea-311e-4529-bbc6-dc9809ce8f80";
+
   // Default constructor
-  User({
+  TheUser({
     this.displayName = '',
-    this.avatarUrl = 'assets/images/bg-profile.png',
+    this.avatarUrl = defaultAvatarLink,
     this.email = '',
     this.id = '',
     Map<String, dynamic>? recentActivity,
@@ -18,9 +21,9 @@ class User {
             {'lastVisitedTime': "", 'owner': "", "score": 0, "topicTitle": ""};
 
   // Named constructor for creating User object from map
-  User.fromMap(Map<String, dynamic> map)
+  TheUser.fromMap(Map<String, dynamic> map)
       : displayName = map['displayName'] ?? '',
-        avatarUrl = map['avtUrl'] ?? 'assets/images/bg-profile.png',
+        avatarUrl = map['avatarUrl'] ?? defaultAvatarLink,
         email = map['email'] ?? '',
         id = map['id'] ?? '',
         recentActivity = map['recentActivity'] != null
@@ -49,18 +52,24 @@ class User {
   }
 }
 
-
-Future<User> fetchUserDataFromDatabase(String userID) async {
+Future<TheUser> fetchUserDataFromDatabase(User fetchedUser) async {
   DatabaseReference databaseReference = FirebaseDatabase.instance.reference();
   DataSnapshot dataSnapshot =
-      (await databaseReference.child('User').child(userID).once()).snapshot;
+      (await databaseReference.child('User').child(fetchedUser.uid).once()).snapshot;
 
   if (dataSnapshot.value != null) {
-    Map<String, dynamic> data = Map<String, dynamic>.from(dataSnapshot.value as Map<dynamic, dynamic>);
+    Map<String, dynamic> data =
+    Map<String, dynamic>.from(dataSnapshot.value as Map<dynamic, dynamic>);
 
-    return User.fromMap(data);
+    return TheUser.fromMap(data);
   } else {
-    print("User not exist");
-    return User();
+    TheUser currentUser = TheUser(
+        displayName: fetchedUser.displayName!,
+        avatarUrl: fetchedUser.photoURL ?? TheUser.defaultAvatarLink,
+        id: fetchedUser.uid,
+        email: fetchedUser.email!,
+        recentActivity: null);
+    currentUser.saveUserDataToDatabase();
+    return currentUser;
   }
 }

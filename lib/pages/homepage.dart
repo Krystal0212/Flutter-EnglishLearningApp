@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:Fluffy/pages/profile.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.userID});
+  const MyHomePage({super.key, required this.user});
 
-  final String userID;
+  final TheUser user;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -13,25 +13,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
-  late User user;
-  List<Widget> widgetOptions = <Widget>[
-    Text('Loading...'), // Placeholder widget
+  late TheUser user;
+  late List<Widget> widgetOptions = [
+    Text('Home'),
+    Text('Topic'),
+    Profile(user: widget.user), // Directly use widget.user
   ];
-
-  void getUser() async{
-    user = await fetchUserDataFromDatabase(widget.userID);
-    widgetOptions = <Widget>[
-      Text('Home'),
-      Text('Topic'),
-      Profile(user: user),
-    ];
-    print(user.toString());
-  }
 
   @override
   void initState() {
-    getUser();
     super.initState();
+    user = widget.user;
+    print(user.toString());
   }
 
   @override
