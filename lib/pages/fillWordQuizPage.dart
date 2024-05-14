@@ -34,6 +34,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
   static String resultTitle = '';
   static dynamic resultTitleColor = Colors.black;
 
+  static String actionText = 'Result';
+
   final TextEditingController _textResultController = TextEditingController();
   late PageController _pageController;
 
@@ -62,6 +64,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     isQuizFinished = false;
     resultTitle = '';
     resultTitleColor = Colors.black;
+    actionText = 'Result';
   }
 
   void initWordList() {
@@ -312,9 +315,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
 
   Widget mainResultTitle(){
     double titleFontSize = kIsWeb ? 70 : 30;
-
+    resultTitle = "Your Score: ${finishedCardCorrectly.length*500}";
     if (finishedCardCorrectly.length == finishedCard.length){
-      resultTitle = "Excellent!";
       resultTitleColor = [
         Colors.purple,
         Colors.indigo,
@@ -337,7 +339,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       );
     }
     else if (finishedCardCorrectly.length >= finishedCard.length*0.75) {
-      resultTitle = "Pretty Good, keep it up!";
       resultTitleColor = const Color(0xFFd4af37);
       return Text(
         resultTitle,
@@ -349,7 +350,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       );
     }
     else if (finishedCardCorrectly.length >= finishedCard.length*0.5) {
-      resultTitle = "Not bad, improvement still necessary";
       resultTitleColor = const Color(0xFFBcc6cc);
       return Text(
         resultTitle,
@@ -361,7 +361,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       );
     }
     else if (finishedCardCorrectly.length >= finishedCard.length*0.25){
-      resultTitle = "Not the worst, but still have tough road to go";
       resultTitleColor = const Color(0xFF5B391E);
       return Text(
         resultTitle,
@@ -373,7 +372,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       );
     }
     else {
-      resultTitle = "Too Bad, better try next time !";
       resultTitleColor = Colors.black87;
       return Text(
         resultTitle,
@@ -619,12 +617,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text(
-                        'Total Cards: ${wordList.length}',
-                        style: const TextStyle(
-                            fontSize: kIsWeb? 35 : 20
-                        ),
-                      ),
                       Container(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           width: mainPageWidth * 0.3,
@@ -819,6 +811,49 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
               Navigator.pop(context);
             },
           ),
+          actions: [
+            (currentIndex==wordList.length-1 && !isQuizFinished)?
+            TextButton(
+              onPressed: () async {
+                setState(() {
+                  actionText = "Processing. . .";
+                });
+                if (currentIndex<wordList.length-1){
+                  _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut
+                  );
+                }
+                else {
+                  if (finishedCard.length == wordList.length)
+                  {
+                    //await Future.delayed(const Duration(milliseconds: 4000));
+                    setState(() {});
+                    isQuizFinished = true;
+                  }
+                  else {
+                    setSkipToUnanswered();
+                    setState(() {});
+                    await Future.delayed(const Duration(milliseconds: 4000));
+                    setState(() {});
+                    isQuizFinished = true;
+                  }
+                }
+              },
+              style: TextButton.styleFrom(
+                side: BorderSide(color: Colors.green.shade700, width: 3),
+                backgroundColor: Colors.green.shade300
+              ),
+              child: Text(
+                actionText,
+                style: TextStyle(
+                  color: Colors.white,
+
+                ),
+              ),
+            )
+                :const SizedBox.shrink()
+          ],
           automaticallyImplyLeading: false,
           centerTitle : true,
           title : const Text('Fill word quiz'),

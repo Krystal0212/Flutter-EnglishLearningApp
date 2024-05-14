@@ -41,6 +41,18 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
     super.initState();
   }
 
+  @override
+  void dispose(){
+    returnDefaultState();
+    super.dispose();
+  }
+
+  void returnDefaultState(){
+    cardDecks = {};
+    cardDeckControllers = {};
+    isAutoFlashcard = false;
+  }
+
   void generateCardDeck() {
       for (int i = 0; i < widget.topic.word!.length; i++){
         cardDeckControllers['cardController$i'] = GestureFlipCardController();
@@ -266,6 +278,14 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar : AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: (){
+            returnDefaultState();
+            Navigator.pop(context);
+          },
+        ),
+        automaticallyImplyLeading: false,
         centerTitle : true,
         title :Text(
             'Topic: ${widget.topic.title??"Not found"}'

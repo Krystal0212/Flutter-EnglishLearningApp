@@ -257,20 +257,21 @@ class MyNormalCard extends StatelessWidget {
       cardBorderColor = Colors.black;
 
   final String cardBackground = 'assets/images/cardBackgroundImage.jpg';
+  static final String img1 = 'assets/images/stelle.png',
+                     img2 = 'assets/images/stelle2.png';
 
   static FlutterTts flutterTts = FlutterTts();
-
-
 
   Future _speak(String inputText) async{
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
   }
 
+
   //  ----------------------------------------------------- //
   //                       card design                      //
   //  ----------------------------------------------------- //
-  Widget cardContext(String word, String? description, String image) {
+  Widget cardContext(String image, String? description, String word, {String? result = ''}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -331,15 +332,42 @@ class MyNormalCard extends StatelessWidget {
                             fontWeight: FontWeight.bold
                         ),
                       ),
+                      result.toString().isNotEmpty?
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Result: ",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold
+                            ),
+                          ),
+                          Text(
+                            result!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold
+                            ),
+                          ),
+                        ],
+                      )
+                          :SizedBox.shrink(),
 
                       //Speaking button
+                      /*
                       IconButton(
                           iconSize: 40,
                           onPressed: () {
                             _speak(word);
                             //_stop();
                           },
-                          icon: const Icon(Icons.volume_down)),
+                          icon: const Icon(Icons.volume_down)
+                      ),
+                       */
                     ],
                   )
               ),
@@ -388,8 +416,15 @@ class MyNormalCard extends StatelessWidget {
             width: cardWidth,
             height: cardHeight,
             child: isResultShown?
-            cardContext(word.vietnamese as String,word.description as String,'assets/images/stelle.png'):
-            cardContext(word.english as String,word.description as String,'assets/images/stelle2.png'),
+            cardContext(
+                img1,
+                word.description as String,
+                word.english as String,
+                result: word.vietnamese as String):
+            cardContext(
+                img2,
+                word.description as String,
+                word.english as String),
           );
         }
     );
