@@ -59,14 +59,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: user == null
           ? Center(
-              child: CircularProgressIndicator(
-              color: Colors.blue,
-            ))
+          child: CircularProgressIndicator(
+            color: Colors.blue,
+          ))
           : PageView(
-              controller: _pageController,
-              physics: NeverScrollableScrollPhysics(),
-              children: _pages,
-            ),
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         //disable zoom

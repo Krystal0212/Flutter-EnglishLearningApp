@@ -1,13 +1,9 @@
 import 'dart:math';
-
-
 import 'package:Fluffy/objects/word.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/card.dart';
 import 'package:flutter_flip_card/flutter_flip_card.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-
 import '../objects/topic.dart';
 
 
@@ -43,6 +39,18 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
     generateCardDeck();
     initCardsAnimation();
     super.initState();
+  }
+
+  @override
+  void dispose(){
+    returnDefaultState();
+    super.dispose();
+  }
+
+  void returnDefaultState(){
+    cardDecks = {};
+    cardDeckControllers = {};
+    isAutoFlashcard = false;
   }
 
   void generateCardDeck() {
@@ -270,6 +278,14 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar : AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: (){
+            returnDefaultState();
+            Navigator.pop(context);
+          },
+        ),
+        automaticallyImplyLeading: false,
         centerTitle : true,
         title :Text(
             'Topic: ${widget.topic.title??"Not found"}'
