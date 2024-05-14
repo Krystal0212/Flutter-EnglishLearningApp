@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,9 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         body: userActivity != null
             ? Column(
                 children: [
+                  CachedNetworkImage(
+                      height: 36,
+                      imageUrl: recentAccessTopic!.ownerAvtUrl as String),
                   Row(
                     children: [
                       Text(
