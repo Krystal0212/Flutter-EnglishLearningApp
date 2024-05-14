@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:Fluffy/objects/participant.dart';
 import 'package:Fluffy/topicDetail/topicDetailWidget.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/topic.dart';
@@ -35,11 +36,13 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
   List<Participant> participants = [];
   List<Word> words = [];
   bool isLoading = true;
+  bool isAccessible = false;
+  FocusNode focusForTitle = FocusNode();
 
   @override
   void initState() {
-    fetchTopicFromDatabase();
-    Future.delayed(const Duration(seconds: 5), () {
+    syncTopicFromDatabase();
+    Future.delayed(const Duration(seconds: 3), () {
       if (topics.isEmpty) {
         setState(() {
           isLoading = false;
@@ -64,6 +67,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     super.build(context);
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: Center(
           child: Text("My study set"),
@@ -83,71 +87,81 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                   itemCount: topics.length,
                 ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'btn1',
         backgroundColor: Colors.blue.shade300,
         onPressed: () {
           addTopicDialog();
         },
         child: Icon(
           Icons.add,
-          color: Colors.black54,
+          color: Colors.white,
         ),
       ),
     );
   }
 
   Widget topicBlock(Topic topic) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.all(9),
-      color: Colors.blue[50],
-      child: ListTile(
-        leading: ClipOval(
-          child: CachedNetworkImage(
-            width: 36,
-            height: 36,
-            fit: BoxFit.cover,
-            imageUrl: topic.ownerAvtUrl == 'url here'
-                ? 'https://firebasestorage.googleapis.com/v0/b/finaltermandroid-ba01a.appspot.com/o/icons8-avatar-64.png?alt=media&token=efb2e06d-589a-40f0-96a0-a1eddfdbb352'
-                : topic.ownerAvtUrl as String,
-            placeholder: (context, url) => CircularProgressIndicator(),
-          ),
-        ),
-        title: Text(
-          topic.title as String,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-        ),
-        subtitle: Wrap(
-          runSpacing: 4.0,
-          children: [
-            Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Text('${topic.word?.length} terms',
-                    style: TextStyle(color: Colors.blue[800]))),
-          ],
-        ),
-        trailing: Text(
-          topic.owner as String,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        ),
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => TopicDetail(topic: topic)));
-        },
+    return Stack(children: [
+      Card(
+        elevation: 4,
+        margin: EdgeInsets.all(9),
+        color: Colors.blue[50],
         shape: RoundedRectangleBorder(
           side: BorderSide(color: Colors.blue[300] as Color, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
+        child: ListTile(
+          leading: ClipOval(
+            child: CachedNetworkImage(
+              width: 36,
+              height: 36,
+              fit: BoxFit.cover,
+              imageUrl: topic.ownerAvtUrl as String,
+              placeholder: (context, url) => CircularProgressIndicator(),
+            ),
+          ),
+          title: Text(
+            topic.title as String,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          ),
+          subtitle: Wrap(
+            runSpacing: 4.0,
+            children: [
+              Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                  child: Text('${topic.word?.length} terms',
+                      style: TextStyle(color: Colors.blue[800]))),
+            ],
+          ),
+          trailing: Text(
+            topic.owner as String,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TopicDetail(topic: topic)));
+          },
+        ),
       ),
-    );
+      if (topic.access == "PRIVATE")
+        Positioned(
+          left: 5.0,
+          top: 5.0,
+          child: Image.asset(
+            'lib/icon/locked.png',
+            height: 20,
+          ),
+        ),
+    ]);
   }
 
-  void fetchTopicFromDatabase() {
+  void syncTopicFromDatabase() {
     // listen once to fetch all topics,
     // then continue listen to future added topic
     // only topic that belongs to current user is gonna be added
@@ -155,12 +169,45 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
       Topic topic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       // add participant checking step here in the future
-      if (topic.owner == auth.currentUser?.displayName) {
+      // cụ thể là check xem user hien tai co trong participant khong
+      if (topic.owner == auth.currentUser?.displayName ||
+          topic.participant!.any((p) => p.userID == auth.currentUser?.uid)) {
         setState(() {
           topics.insert(0, topic);
           isLoading = false;
         });
       }
+    });
+    // listen to all change in Topic node
+    dbRef.child('Topic').onChildChanged.listen((data) {
+      Topic changedTopic =
+          Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
+      bool isParticipant = changedTopic.participant
+              ?.any((p) => p.userID == auth.currentUser?.uid) ??
+          false;
+      int index = topics.indexWhere((element) => element.id == changedTopic.id);
+
+      if (isParticipant) {
+        // neu topic chua tung xuat hien, se thuc hien them topic
+        if (index == -1) {
+          setState(() {
+            topics.insert(0, changedTopic);
+          });
+        }
+      }
+      setState(() {
+        topics.removeAt(index);
+        topics.insert(index, changedTopic);
+      });
+    });
+    // listen to deleted topic event in Topic node
+    dbRef.child('Topic').onChildRemoved.listen((data) {
+      Topic deletedTopic =
+          Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
+      int index = topics.indexWhere((element) => element.id == deletedTopic.id);
+      setState(() {
+        topics.removeAt(index);
+      });
     });
   }
 
@@ -181,8 +228,21 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
             TextEditingController newDescriptionController =
                 TextEditingController();
 
+            // Function to handle deletion
+            void onDelete() {
+              int index = termControllers.indexOf(newTermController);
+              if (index != -1) {
+                termControllers.removeAt(index);
+                definitionControllers.removeAt(index);
+                descriptionControllers.removeAt(index);
+                termsWidgets.removeAt(index);
+                focusNodes.removeAt(index);
+                setState(() {});
+              }
+            }
+
             termsWidgets.add(textFieldForTerm(newFocusNode, newTermController,
-                newDefinitionController, newDescriptionController));
+                newDefinitionController, newDescriptionController, onDelete));
             // add term controller for word
             termControllers.add(newTermController);
             // add definition controller for word
@@ -205,34 +265,37 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     //Header
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text("Create new topic",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15)),
-                          ),
-                          TextButton(
-                              onPressed: () {
-                                if (validateCreateTopic()) {
-                                  saveTopic(
-                                      termControllers,
-                                      definitionControllers,
-                                      descriptionControllers);
-                                }
-                              },
-                              child: Text(
-                                "Done",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold),
-                              ))
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        Expanded(child: SizedBox()),
+                        Expanded(
+                          flex: 4,
+                          child: Text("Create new topic",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15)),
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              if (validateCreateTopic()) {
+                                saveTopic(
+                                    termControllers,
+                                    definitionControllers,
+                                    descriptionControllers);
+                              } else {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  focusForTitle.requestFocus();
+                                });
+                              }
+                            },
+                            child: Text(
+                              "Done",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ],
                     ),
                     // content
                     Expanded(
@@ -242,6 +305,8 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 20),
                               child: TextFormField(
+                                enableInteractiveSelection: false,
+                                focusNode: focusForTitle,
                                 key: _titleKey,
                                 autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
@@ -256,12 +321,50 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                                 decoration: const InputDecoration(
                                     helperText: "Title",
                                     hintText: "Topic, chapter,...",
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.blue)),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black)),
                                     helperStyle: TextStyle(fontSize: 13)),
                               ),
                             ),
                             SizedBox(
                               height: 12,
                             ),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                children: [
+                                  Text("Everyone can access "),
+                                  SizedBox(
+                                    width: 12,
+                                  ),
+                                  Switch(
+                                      activeColor: Colors.blue,
+                                      inactiveTrackColor: Colors.white,
+                                      value: isAccessible,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          isAccessible = value;
+                                        });
+                                      }),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Container(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(
+                                  "(Swipe to delete a word)",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black.withOpacity(0.5),
+                                  ),
+                                )),
                             ...termsWidgets,
                             SizedBox(
                               height: 12,
@@ -289,13 +392,29 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                                     TextEditingController();
 
                                 FocusNode newFocusNode = FocusNode();
+
+                                // Function to handle deletion
+                                void onDelete() {
+                                  int index = termControllers
+                                      .indexOf(newTermController);
+                                  if (index != -1) {
+                                    termControllers.removeAt(index);
+                                    definitionControllers.removeAt(index);
+                                    descriptionControllers.removeAt(index);
+                                    termsWidgets.removeAt(index);
+                                    focusNodes.removeAt(index);
+                                    setState(() {});
+                                  }
+                                }
+
                                 setState(() {
                                   // add new word widget form
                                   termsWidgets.add(textFieldForTerm(
                                       newFocusNode,
                                       newTermController,
                                       newDefinitionController,
-                                      newDescriptionController));
+                                      newDescriptionController,
+                                      onDelete));
                                   // add term controller for new word
                                   termControllers.add(newTermController);
                                   // add definition controller for new word
@@ -327,8 +446,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
           );
         }).then((value) {
       _topicTitleEditingController.clear();
+      // Clear 2 list nay de tranh truong hop giu lai du lieu topic cu~
       participants.clear();
       words.clear();
+      isAccessible = false;
     });
   }
 
@@ -336,41 +457,68 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
       FocusNode focusNode,
       TextEditingController termController,
       TextEditingController definitionController,
-      TextEditingController descriptionController) {
-    return Container(
-      color: Colors.blue[50],
-      padding: EdgeInsets.all(8),
-      margin: EdgeInsets.all(12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            focusNode: focusNode,
-            controller: termController,
-            cursorColor: Colors.blue,
-            decoration: InputDecoration(
-                helperText: "Term", helperStyle: TextStyle(fontSize: 13)),
-          ),
-          SizedBox(
-            height: 12,
-          ),
-          TextField(
-            controller: definitionController,
-            cursorColor: Colors.blue,
-            decoration: InputDecoration(
-                helperText: "Definition", helperStyle: TextStyle(fontSize: 13)),
-          ),
-          SizedBox(
-            height: 12,
-          ),
-          TextField(
-            controller: descriptionController,
-            cursorColor: Colors.blue,
-            decoration: const InputDecoration(
-                helperText: "Description (optional)",
-                helperStyle: TextStyle(fontSize: 13)),
-          ),
-        ],
+      TextEditingController descriptionController,
+      VoidCallback onDelete) {
+    return Dismissible(
+      key: ValueKey(termController),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        onDelete();
+      },
+      background: Container(
+        color: Colors.red.withOpacity(0.75),
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Image.asset(height: 60, "lib/icon/delete.png"),
+      ),
+      child: Container(
+        color: Colors.blue[50],
+        padding: EdgeInsets.all(8),
+        margin: EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              enableInteractiveSelection: false,
+              focusNode: focusNode,
+              controller: termController,
+              cursorColor: Colors.blue,
+              decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black)),
+                  helperText: "Term",
+                  helperStyle: TextStyle(fontSize: 13)),
+            ),
+            SizedBox(height: 12),
+            TextField(
+              enableInteractiveSelection: false,
+              controller: definitionController,
+              cursorColor: Colors.blue,
+              decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black)),
+                  helperText: "Definition",
+                  helperStyle: TextStyle(fontSize: 13)),
+            ),
+            SizedBox(height: 12),
+            TextField(
+              enableInteractiveSelection: false,
+              controller: descriptionController,
+              cursorColor: Colors.blue,
+              decoration: InputDecoration(
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black)),
+                  helperText: "Description (optional)",
+                  helperStyle: TextStyle(fontSize: 13)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -378,15 +526,15 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
   void saveTopic(
       List<TextEditingController> termControllers,
       List<TextEditingController> definitionControllers,
-      List<TextEditingController> descriptionControllers) {
+      List<TextEditingController> descriptionControllers) async {
     String? key = dbRef.child("Topic").push().key;
+    // VAN DE O DAY KHI MERGE CODE
+    // SUA cách gán name bằng đối tượng User từ DB (hoac la khong can ?)
     String? name = auth.currentUser?.displayName;
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('dd/MM/yy').format(now);
-    // Get current user as the first participant
-    Participant participant = Participant(auth.currentUser?.uid, null, null);
-    participants.add(participant);
-    // Get word list
+    String formattedDate = DateFormat('dd/MM/yyyy').format(now);
+    // Get word list, we have to clear it first to get rid of old data
+    words.clear();
     for (int i = 0; i < termControllers.length; i++) {
       if (termControllers[i].text.isNotEmpty &&
           definitionControllers[i].text.isNotEmpty) {
@@ -395,13 +543,17 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
       }
     }
     if (words.length >= 4) {
+      // Get current user as the first participant
+      Participant participant = Participant(auth.currentUser?.uid, null, null);
+      participants.add(participant);
       Topic toAddTopic = Topic(
-          "PRIVATE",
+          isAccessible == false ? "PRIVATE" : "PUBLIC",
           formattedDate,
           key!,
           _topicTitleEditingController.text,
           name!,
-          "url here",
+          // SUA O DAY KHI CO DUOC AVT CUA USER
+          auth.currentUser?.photoURL,
           participants,
           words);
 
@@ -410,7 +562,8 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
             backgroundColor: Colors.blue,
             content: Text(
               "Success",
-              style: TextStyle(color: Colors.white),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             )));
         Navigator.of(context).pop();
         _topicTitleEditingController.clear();
@@ -421,8 +574,11 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
   }
 
   bool validateCreateTopic() {
-    if (_titleKey.currentState!.validate()) return true;
-    return false;
+    if (_titleKey.currentState!.validate()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void showAlertDialog() {
