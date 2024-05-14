@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/painting.dart';
 
 import '../objects/participant.dart';
+import '../objects/userActivity.dart';
 import '../topicDetail/topicDetailWidget.dart';
 
 class Public extends StatefulWidget {
@@ -42,6 +43,8 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        forceMaterialTransparency: true,
         automaticallyImplyLeading: false,
         title: Padding(
           padding: const EdgeInsets.only(top: 15.0, bottom: 15),
@@ -175,10 +178,19 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
     });
   }
 
+  void updateUserActivity(Topic topic) {
+    String? key = auth.currentUser?.uid;
+    Map<String, bool> topics = {'${topic.id}': true};
+    UserActivity userActivity = UserActivity(
+        DateTime.now().millisecondsSinceEpoch.toString(), key, topics);
+    dbRef.child('UserActivity/$key').update(userActivity.toMap());
+  }
+
   Future<void> onClickPublicTopic(Topic topic) async {
     String? userName = auth.currentUser?.displayName;
     String? uId = auth.currentUser?.uid;
     if (userName == topic.owner) {
+      updateUserActivity(topic);
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => TopicDetail(topic: topic)));
       return;
@@ -190,6 +202,7 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
           topic.participant?.any((p) => p.userID == uId) ?? false;
 
       if (isParticipant) {
+        updateUserActivity(topic);
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => TopicDetail(topic: topic)));
       } else {
@@ -284,6 +297,7 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ));
+      updateUserActivity(topic);
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => TopicDetail(topic: topic)));
     });

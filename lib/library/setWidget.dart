@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../objects/userActivity.dart';
 import '../objects/word.dart';
 
 class Set extends StatefulWidget {
@@ -142,6 +143,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
           ),
           onTap: () {
+            updateUserActivity(topic);
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -159,6 +161,14 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
           ),
         ),
     ]);
+  }
+
+  void updateUserActivity(Topic topic) {
+    String? key = auth.currentUser?.uid;
+    Map<String, bool> topics = {'${topic.id}': true};
+    UserActivity userActivity = UserActivity(
+        DateTime.now().millisecondsSinceEpoch.toString(), key, topics);
+    dbRef.child('UserActivity/$key').update(userActivity.toMap());
   }
 
   void syncTopicFromDatabase() {

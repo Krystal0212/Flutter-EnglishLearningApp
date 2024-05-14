@@ -6,9 +6,9 @@ import 'package:Fluffy/objects/card.dart';
 import 'package:flutter_flip_card/flutter_flip_card.dart';
 import '../objects/topic.dart';
 
-
 class FlashcardQuizPage extends StatefulWidget {
-  const FlashcardQuizPage({super.key,required this.topic});
+  const FlashcardQuizPage({super.key, required this.topic});
+
   final Topic topic;
 
   @override
@@ -16,7 +16,6 @@ class FlashcardQuizPage extends StatefulWidget {
 }
 
 class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
-
   static Color appbarColor = Colors.blue[200] as Color,
       appbarTextColor = Colors.black,
       cardPageBackground = Colors.blue[50] as Color;
@@ -26,7 +25,7 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
 
   late PageController _controller;
   static int _currentIndex = 0;
-  final double _viewportFraction = kIsWeb?0.4:0.65;
+  final double _viewportFraction = kIsWeb ? 0.4 : 0.65;
 
   late List<Word> wordList;
 
@@ -42,25 +41,25 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     returnDefaultState();
     super.dispose();
   }
 
-  void returnDefaultState(){
+  void returnDefaultState() {
     cardDecks = {};
     cardDeckControllers = {};
     isAutoFlashcard = false;
   }
 
   void generateCardDeck() {
-      for (int i = 0; i < widget.topic.word!.length; i++){
-        cardDeckControllers['cardController$i'] = GestureFlipCardController();
-        cardDecks['card$i'] = MyFlippingCard(
-            word: wordList[i],
-            flippingCardController: cardDeckControllers['cardController$i']!,
-        );
-      }
+    for (int i = 0; i < widget.topic.word!.length; i++) {
+      cardDeckControllers['cardController$i'] = GestureFlipCardController();
+      cardDecks['card$i'] = MyFlippingCard(
+        word: wordList[i],
+        flippingCardController: cardDeckControllers['cardController$i']!,
+      );
+    }
   }
 
   void initWordList() {
@@ -71,14 +70,13 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
   void initCardsAnimation() {
     setState(() {
       _controller = PageController(
-          initialPage: _currentIndex,
-          viewportFraction: _viewportFraction
-      );
+          initialPage: _currentIndex, viewportFraction: _viewportFraction);
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        _controller.animateTo(0, duration: const Duration(milliseconds: 1), curve: Curves.easeIn);
+        _controller.animateTo(0,
+            duration: const Duration(milliseconds: 1), curve: Curves.easeIn);
       });
     });
   }
@@ -103,21 +101,19 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
               return animatedCard(context, index);
             },
           ),
-        )
-    );
+        ));
   }
 
   //  ----------------------------------------------------- //
   //  Make card opacity and size decreased when not primary //
   //  ----------------------------------------------------- //
-  Widget animatedCard(BuildContext context, int index){
+  Widget animatedCard(BuildContext context, int index) {
     return AnimatedBuilder(
         animation: _controller,
-        builder: (context,child) {
+        builder: (context, child) {
           double scale = 1.0;
           double opacity = 1.0;
-          if (_controller.position.haveDimensions)
-          {
+          if (_controller.position.haveDimensions) {
             double dimParam = _controller.page! - index;
             scale = (1 - (dimParam.abs() * 0.3)).clamp(0.7, 1.0);
             opacity = (1 - (dimParam.abs() * 0.5)).clamp(0.05, 1.0);
@@ -132,26 +128,25 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
             ),
           );
         },
-        child: cardDecks['card$index']
-    );
+        child: cardDecks['card$index']);
   }
 
   //  ----------------------------------------------------- //
   //      main page bottom context (indicator display)      //
   //  ----------------------------------------------------- //
-  Widget bottomPageContext(){
+  Widget bottomPageContext() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         //first card button
         SizedBox(
           child: FloatingActionButton(
+            heroTag: 'btn1',
             onPressed: () async {
               setState(() {
-                if (isAutoFlashcard){
+                if (isAutoFlashcard) {
                   isAutoFlashcard = false;
-                }
-                else {
+                } else {
                   isAutoFlashcard = true;
                 }
               });
@@ -161,53 +156,56 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
                 speak + wait => flip => speak + wait => move then continue
                */
 
-              while (_currentIndex < wordList.length-1 && isAutoFlashcard) {
-                if (isAutoFlashcard){
+              while (_currentIndex < wordList.length - 1 && isAutoFlashcard) {
+                if (isAutoFlashcard) {
                   cardDecks['card$_currentIndex']!.speakEng();
                   await Future.delayed(Duration(milliseconds: 2500));
-                  if (isAutoFlashcard){
+                  if (isAutoFlashcard) {
                     cardDecks['card$_currentIndex']!.flipCard();
                     await Future.delayed(Duration(milliseconds: 2500));
-                    if (isAutoFlashcard){
+                    if (isAutoFlashcard) {
                       cardDecks['card$_currentIndex']!.speakVie();
                       await Future.delayed(Duration(milliseconds: 2500));
-                      if (isAutoFlashcard){
-                        _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                      if (isAutoFlashcard) {
+                        _controller.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut);
                         await Future.delayed(Duration(milliseconds: 2500));
-                      }
-                      else{
+                      } else {
                         break;
                       }
-                    }
-                    else{
+                    } else {
                       break;
                     }
-                  }
-                  else{
+                  } else {
                     break;
                   }
-                }
-                else{
+                } else {
                   break;
                 }
               }
-
             },
             shape: const CircleBorder(),
-            child: isAutoFlashcard?Icon(Icons.pause):
-                Icon(Icons.play_arrow), // Use RoundedRectangleBorder for compatibility
+            child: isAutoFlashcard
+                ? Icon(Icons.pause)
+                : Icon(Icons
+                    .play_arrow), // Use RoundedRectangleBorder for compatibility
           ),
         ),
         //previous arrow button
         SizedBox(
           child: FloatingActionButton(
+            heroTag: 'btn2',
             onPressed: () {
               if (_currentIndex > 0) {
-                _controller.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+                _controller.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn);
               }
             },
             shape: const CircleBorder(),
-            child: const Icon(Icons.arrow_back), // Use RoundedRectangleBorder for compatibility
+            child: const Icon(Icons
+                .arrow_back), // Use RoundedRectangleBorder for compatibility
           ),
         ),
         //number indicator
@@ -215,7 +213,7 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
           alignment: Alignment.center,
           height: 100,
           child: Text(
-            '${_currentIndex+1}/${wordList.length}',
+            '${_currentIndex + 1}/${wordList.length}',
             style: const TextStyle(
               fontSize: 30,
             ),
@@ -224,30 +222,34 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
         //forward arrow button
         SizedBox(
           child: FloatingActionButton(
+            heroTag: 'btn3',
             onPressed: () {
               if (_currentIndex < wordList.length) {
-                _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                _controller.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut);
               }
             },
             shape: const CircleBorder(),
-            child: const Icon(Icons.arrow_forward), // Use RoundedRectangleBorder for compatibility
+            child: const Icon(Icons
+                .arrow_forward), // Use RoundedRectangleBorder for compatibility
           ),
         ),
         //last card button
         SizedBox(
           child: FloatingActionButton(
+            heroTag: 'btn4',
             onPressed: () {
-              if (_currentIndex != wordList.length-1) {
-                int animateTime = (wordList.length - _currentIndex)*100 + 200;
-                _controller.animateToPage(
-                    wordList.length-1,
+              if (_currentIndex != wordList.length - 1) {
+                int animateTime = (wordList.length - _currentIndex) * 100 + 200;
+                _controller.animateToPage(wordList.length - 1,
                     duration: Duration(milliseconds: animateTime),
-                    curve: Curves.easeIn
-                );
+                    curve: Curves.easeIn);
               }
             },
             shape: const CircleBorder(),
-            child: const Icon(Icons.fast_forward), // Use RoundedRectangleBorder for compatibility
+            child: const Icon(Icons
+                .fast_forward), // Use RoundedRectangleBorder for compatibility
           ),
         ),
       ],
@@ -257,53 +259,44 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
   //  ----------------------------------------------------- //
   //            main page context (Card display)            //
   //  ----------------------------------------------------- //
-  Widget mainPageContext(){
+  Widget mainPageContext() {
     return Expanded(
       child: Align(
         alignment: Alignment.center,
-        child: LayoutBuilder(
-            builder: (context, constraints){
-              double cardPageHeight = constraints.maxHeight;
-              return SingleChildScrollView(
-                child: cardPage(cardPageHeight),
-              );
-            }
-        ),
+        child: LayoutBuilder(builder: (context, constraints) {
+          double cardPageHeight = constraints.maxHeight;
+          return SingleChildScrollView(
+            child: cardPage(cardPageHeight),
+          );
+        }),
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar : AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: (){
-            returnDefaultState();
-            Navigator.pop(context);
-          },
-        ),
-        automaticallyImplyLeading: false,
-        centerTitle : true,
-        title :Text(
-            'Topic: ${widget.topic.title??"Not found"}'
-        ),
-        backgroundColor: appbarColor,
-        titleTextStyle: TextStyle(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              returnDefaultState();
+              Navigator.pop(context);
+            },
+          ),
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          title: Text('Topic: ${widget.topic.title ?? "Not found"}'),
+          backgroundColor: appbarColor,
+          titleTextStyle: TextStyle(
             color: appbarTextColor,
             fontWeight: FontWeight.bold,
             fontSize: appbarTextSize,
+          ),
         ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          mainPageContext(),
-          bottomPageContext()
-        ],
-      )
-    );
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [mainPageContext(), bottomPageContext()],
+        ));
   }
 }

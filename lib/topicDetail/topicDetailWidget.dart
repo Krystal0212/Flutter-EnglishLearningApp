@@ -10,7 +10,6 @@ import '../objects/topic.dart';
 import '../objects/word.dart';
 import '../pages/fillWordQuizPage.dart';
 
-
 class TopicDetail extends StatefulWidget {
   Topic topic;
 
@@ -98,9 +97,7 @@ class _TopicDetailState extends State<TopicDetail> {
                       width: 36,
                       height: 36,
                       fit: BoxFit.cover,
-                      imageUrl: widget.topic.ownerAvtUrl == 'url here'
-                          ? 'https://firebasestorage.googleapis.com/v0/b/finaltermandroid-ba01a.appspot.com/o/icons8-avatar-64.png?alt=media&token=efb2e06d-589a-40f0-96a0-a1eddfdbb352'
-                          : widget.topic.ownerAvtUrl as String,
+                      imageUrl: widget.topic.ownerAvtUrl as String,
                       placeholder: (context, url) =>
                           CircularProgressIndicator(),
                     ),
@@ -145,10 +142,8 @@ class _TopicDetailState extends State<TopicDetail> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context)=>
-                                    FlashcardQuizPage(topic: widget.topic)
-                            )
-                        );
+                                builder: (context) =>
+                                    FlashcardQuizPage(topic: widget.topic)));
                       },
                     ),
                   ),
@@ -173,10 +168,8 @@ class _TopicDetailState extends State<TopicDetail> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context)=>
-                                    FillWordQuizPage(topic: widget.topic)
-                            )
-                        );
+                                builder: (context) =>
+                                    FillWordQuizPage(topic: widget.topic)));
                       },
                     ),
                   ),
