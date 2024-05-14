@@ -1,4 +1,7 @@
 import 'dart:math';
+import 'package:Fluffy/objects/participant.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -20,6 +23,9 @@ class FillWordQuizPage extends StatefulWidget {
 class _FillWordQuizPageState extends State<FillWordQuizPage>
     with SingleTickerProviderStateMixin {
 
+  DatabaseReference dbRef = FirebaseDatabase.instance.ref();
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   static late List<Word> wordList;
   static List<int> finishedCard = [];
   static List<int> finishedCardCorrectly = [];
@@ -33,7 +39,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
   static bool isQuizFinished = false;
   static String resultTitle = '';
   static dynamic resultTitleColor = Colors.black;
-
+  static int score = 0;
   static String actionText = 'Result';
 
   final TextEditingController _textResultController = TextEditingController();
@@ -65,6 +71,21 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     resultTitle = '';
     resultTitleColor = Colors.black;
     actionText = 'Result';
+    score = 0;
+  }
+
+  void callSnackbar(String message, int duration, Color color){
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Center(
+            child: Text(
+              message,
+            ),
+          ),
+          duration: Duration(milliseconds: duration),
+          backgroundColor: color,
+        )
+    );
   }
 
   void initWordList() {
@@ -106,33 +127,10 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         userInputResult[currentIndex] = result;
 
         if (isAnsweredCorrectly(word)){
-
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Center(
-                  child: Text(
-                    'Awesome !',
-                  ),
-                ),
-                duration: Duration(milliseconds: 2000),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              )
-          );
+          callSnackbar('Awesome !',2000, Colors.green.shade300);
         }
         else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Center(
-                  child: Text(
-                    'Wrong !',
-                  ),
-                ),
-                duration: Duration(milliseconds: 2000),
-                backgroundColor: Colors.redAccent,
-                behavior: SnackBarBehavior.floating,
-              )
-          );
+          callSnackbar('Wrong !',2000, Colors.red.shade300);
         }
 
         setState(() {});
@@ -154,18 +152,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       }
     }
     else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Center(
-              child: Text(
-                'Skipped !',
-              ),
-            ),
-            duration: const Duration(milliseconds: 2000),
-            backgroundColor: Colors.grey[900],
-            behavior: SnackBarBehavior.floating,
-          )
-      );
+      callSnackbar("Skipped!", 2000, Colors.grey.shade300);
       finishedCard.add(currentIndex);
       userInputResult[currentIndex] = "Not Answered";
       skippedCard.add(currentIndex);
@@ -315,7 +302,9 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
 
   Widget mainResultTitle(){
     double titleFontSize = kIsWeb ? 70 : 30;
-    resultTitle = "Your Score: ${finishedCardCorrectly.length*500}";
+    score = finishedCardCorrectly.length*500;
+    updateScoreToDatabase(score);
+    resultTitle = "Your Score: $score";
     if (finishedCardCorrectly.length == finishedCard.length){
       resultTitleColor = [
         Colors.purple,
@@ -384,6 +373,27 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     }
   }
 
+
+
+  void updateScoreToDatabase(int score) {
+    int index = widget.topic.participant!.indexWhere(
+            (p) => p.userID==auth.currentUser?.uid
+    );
+    if ( widget.topic.participant![index].fillWordResult == null
+        ||widget.topic.participant![index].fillWordResult! < score){
+      print('update score');
+      Participant toUpdateParticipant = Participant(
+          auth.currentUser?.uid,
+          null,
+          score
+      );
+      dbRef.child("Topic/${widget.topic.id}/participant/$index")
+          .update(toUpdateParticipant.toMap())
+          .then((value) {});
+    }
+    print('not update score');
+  }
+
   //||===========================||
   //||    upper page context     ||
   //||===========================||
@@ -427,15 +437,46 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
             ):
             const SizedBox.shrink(),
 
-            //text field accept user input
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: isAnswered(currentIndex)?
-                resultWidget(currentIndex) : textFieldWidget(word),
-              ),
+            Column(
+              children: [
+                isAnswered(currentIndex)?
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Result: ",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: kIsWeb? 22 : 17,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    Text(
+                      wordList[currentIndex].vietnamese as String,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: kIsWeb? 22 : 17,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ],
+                ):
+                SizedBox.shrink(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: isAnswered(currentIndex)?
+                    resultWidget(currentIndex) : textFieldWidget(word),
+                  ),
+                ),
+              ],
             ),
+
+
+            //text field accept user input
+
 
             //move to next button in web
             kIsWeb? IconButton(
@@ -534,7 +575,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
   //||===========================||
   //||         result page       ||
   //||===========================||
-  Widget ResultPage(){
+  Widget resultPage(){
     return SizedBox(
       width: mainPageWidth,
       height: mainPageHeight,
@@ -866,8 +907,10 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 1000),
-          child: isQuizFinished? ResultPage() : quizPage(),
+          child: isQuizFinished? resultPage() : quizPage(),
         )
     );
   }
+
+
 }
