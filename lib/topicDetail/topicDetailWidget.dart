@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../objects/folder.dart';
 import '../objects/topic.dart';
 import '../objects/word.dart';
@@ -26,6 +27,7 @@ class _TopicDetailState extends State<TopicDetail> {
       TextEditingController();
   final _titleKey = GlobalKey<FormFieldState>();
   List<FocusNode> focusNodes = [];
+  static FlutterTts flutterTts = FlutterTts();
 
   // thay doi list word mới, participant khong thay doi
   List<Word> words = [];
@@ -45,6 +47,12 @@ class _TopicDetailState extends State<TopicDetail> {
     }
     _topicTitleEditingController.dispose();
     super.dispose();
+  }
+
+  Future _speak(String inputText, String language) async{
+    flutterTts.setLanguage(language);
+    flutterTts.setVolume(1);
+    await flutterTts.speak(inputText);
   }
 
   @override
@@ -223,7 +231,9 @@ class _TopicDetailState extends State<TopicDetail> {
                   ),
                 ),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _speak(word.english as String,'en-US');
+                    },
                     icon: Icon(FluentIcons.speaker_2_16_filled)),
                 IconButton(
                     onPressed: () {},

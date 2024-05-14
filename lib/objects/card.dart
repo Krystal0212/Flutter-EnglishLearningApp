@@ -59,8 +59,6 @@ class MyFlippingCard extends StatelessWidget {
 
   static FlutterTts flutterTts = FlutterTts();
 
-
-
   Future _speak(String inputText, String language) async{
     flutterTts.setLanguage(language);
     flutterTts.setVolume(1);
