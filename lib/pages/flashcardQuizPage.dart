@@ -156,33 +156,54 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
                 speak + wait => flip => speak + wait => move then continue
                */
 
-              while (_currentIndex < wordList.length - 1 && isAutoFlashcard) {
+              while (_currentIndex < wordList.length && isAutoFlashcard) {
+
                 if (isAutoFlashcard) {
-                  cardDecks['card$_currentIndex']!.speakEng();
-                  await Future.delayed(Duration(milliseconds: 2500));
-                  if (isAutoFlashcard) {
-                    cardDecks['card$_currentIndex']!.flipCard();
-                    await Future.delayed(Duration(milliseconds: 2500));
-                    if (isAutoFlashcard) {
-                      cardDecks['card$_currentIndex']!.speakVie();
-                      await Future.delayed(Duration(milliseconds: 2500));
-                      if (isAutoFlashcard) {
-                        _controller.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut);
-                        await Future.delayed(Duration(milliseconds: 2500));
-                      } else {
-                        break;
-                      }
-                    } else {
-                      break;
-                    }
-                  } else {
-                    break;
+                  if (cardDecks['card$_currentIndex']!.flippingCardController.state!.isFront){
+                    cardDecks['card$_currentIndex']!.speakEng();
+                  }
+                  else {
+                    cardDecks['card$_currentIndex']!.speakVie();
                   }
                 } else {
                   break;
                 }
+
+
+                await Future.delayed(Duration(milliseconds: 2500));
+                if (isAutoFlashcard) {
+                  cardDecks['card$_currentIndex']!.flipCard();
+                } else {
+                  break;
+                }
+
+                await Future.delayed(Duration(milliseconds: 2500));
+                if (isAutoFlashcard) {
+                  if (!cardDecks['card$_currentIndex']!.flippingCardController.state!.isFrontStart){
+                    cardDecks['card$_currentIndex']!.speakVie();
+                  } else {
+                    cardDecks['card$_currentIndex']!.speakEng();
+                  }
+                } else {
+                  break;
+                }
+
+                await Future.delayed(Duration(milliseconds: 2500));
+                if (isAutoFlashcard) {
+                  if (_currentIndex == wordList.length - 1) {
+                    setState(() {
+                      isAutoFlashcard = false;
+                    });
+                    break;
+                  }
+                  _controller.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut);
+                  await Future.delayed(Duration(milliseconds: 2500));
+                } else {
+                  break;
+                }
+
               }
             },
             shape: const CircleBorder(),
