@@ -61,7 +61,8 @@ class MyFlippingCard extends StatelessWidget {
 
 
 
-  Future _speak(String inputText) async{
+  Future _speak(String inputText, String language) async{
+    flutterTts.setLanguage(language);
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
   }
@@ -71,18 +72,18 @@ class MyFlippingCard extends StatelessWidget {
   }
 
   void speakEng(){
-    _speak(word.english as String);
+    _speak(word.english as String, 'en-US');
   }
 
   void speakVie(){
-    _speak(word.vietnamese as String);
+    _speak(word.vietnamese as String, 'vi-VN');
   }
 
 
   //  ----------------------------------------------------- //
   //                       card design                      //
   //  ----------------------------------------------------- //
-  Widget cardContext(String word, String? description, String image) {
+  Widget cardContext(String word, String? description, String image, {String language = 'en-US'}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -148,7 +149,7 @@ class MyFlippingCard extends StatelessWidget {
                       IconButton(
                           iconSize: 40,
                           onPressed: () {
-                            _speak(word);
+                            _speak(word,language);
                             //_stop();
                           },
                           icon: const Icon(Icons.volume_down)),
@@ -219,7 +220,7 @@ class MyFlippingCard extends StatelessWidget {
                 ),
                 width: cardWidth,
                 height: cardHeight,
-                child: cardContext(word.vietnamese as String,word.description as String,'assets/images/stelle2.png'),
+                child: cardContext(word.vietnamese as String,word.description as String,'assets/images/stelle2.png', language: 'vi-VN'),
               ),
             )
         );
@@ -271,7 +272,7 @@ class MyNormalCard extends StatelessWidget {
   //  ----------------------------------------------------- //
   //                       card design                      //
   //  ----------------------------------------------------- //
-  Widget cardContext(String image, String? description, String word, {String? result = ''}) {
+  Widget cardContext(String image, String? description, String word) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -332,31 +333,6 @@ class MyNormalCard extends StatelessWidget {
                             fontWeight: FontWeight.bold
                         ),
                       ),
-                      result.toString().isNotEmpty?
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Result: ",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold
-                            ),
-                          ),
-                          Text(
-                            result!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                        ],
-                      )
-                          :SizedBox.shrink(),
-
                       //Speaking button
                       /*
                       IconButton(
@@ -419,8 +395,7 @@ class MyNormalCard extends StatelessWidget {
             cardContext(
                 img1,
                 word.description as String,
-                word.english as String,
-                result: word.vietnamese as String):
+                word.english as String):
             cardContext(
                 img2,
                 word.description as String,

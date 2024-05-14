@@ -1,17 +1,15 @@
+import 'package:Fluffy/pages/flashcardQuizPage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:intl/intl.dart';
 import '../objects/folder.dart';
-import '../objects/participant.dart';
 import '../objects/topic.dart';
 import '../objects/word.dart';
 import '../pages/fillWordQuizPage.dart';
-import '../pages/flashcardQuizPage.dart';
+
 
 class TopicDetail extends StatefulWidget {
   Topic topic;
@@ -143,7 +141,15 @@ class _TopicDetailState extends State<TopicDetail> {
                     child: ListTile(
                       leading: Icon(FluentIcons.copy_16_regular),
                       title: Text("Flashcard"),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context)=>
+                                    FlashcardQuizPage(topic: widget.topic)
+                            )
+                        );
+                      },
                     ),
                   ),
                   Card(
@@ -163,7 +169,15 @@ class _TopicDetailState extends State<TopicDetail> {
                     child: ListTile(
                       leading: Icon(FluentIcons.pen_16_regular),
                       title: Text("Fill words"),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context)=>
+                                    FillWordQuizPage(topic: widget.topic)
+                            )
+                        );
+                      },
                     ),
                   ),
                   Padding(
