@@ -4,6 +4,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Fluffy/library/setWidget.dart';
 
+import '../library/folderWidget.dart';
+
 class Library extends StatefulWidget {
   const Library({super.key});
 
@@ -64,7 +66,7 @@ class _LibraryState extends State<Library>
         body: TabBarView(controller: _tabController, children: [
           Set(),
           Public(),
-          Icon(Icons.directions_bike),
+          FolderTab(),
         ]),
       ),
     );
