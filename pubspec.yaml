@@ -49,6 +49,8 @@ dependencies:
   fluentui_system_icons: ^1.1.238
   flutter_flip_card: any
   flutter_tts: ^3.8.5
+  fl_chart: any
+  flutter_gradient_animation_text: any
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../objects/topic.dart';
 import '../objects/word.dart';
+import '../pages/fillWordQuizPage.dart';
 import '../pages/flashcardQuizPage.dart';
 
 class TopicDetail extends StatefulWidget {
@@ -106,7 +107,13 @@ class _TopicDetailState extends State<TopicDetail> {
           child: ListTile(
             leading: Icon(FluentIcons.pen_16_regular),
             title: Text("Fill words"),
-            onTap: () {},
+            onTap: () {Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context)=>
+                        FillWordQuizPage(topic: widget.topic)
+                )
+            );},
           ),
         ),
         Padding(

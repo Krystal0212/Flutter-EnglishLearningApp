@@ -1,13 +1,9 @@
 import 'dart:math';
-
-
 import 'package:Fluffy/objects/word.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/card.dart';
 import 'package:flutter_flip_card/flutter_flip_card.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-
 import '../objects/topic.dart';
 
 
