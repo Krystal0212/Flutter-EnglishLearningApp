@@ -35,8 +35,10 @@ class _FolderTabState extends State<FolderTab>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      backgroundColor: CupertinoColors.white,
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
+        forceMaterialTransparency: true,
         automaticallyImplyLeading: false,
         title: Center(
           child: Text("My folder"),
@@ -201,8 +203,8 @@ class _FolderTabState extends State<FolderTab>
   void saveFolder() {
     String? id = dbRef.child("Folder").push().key;
     String name = _folderNameEditingController.text;
-    String? owner = auth.currentUser?.displayName;
-    Folder toAddFolder = Folder(name, owner, id, null);
+    String? ownerUid = auth.currentUser?.uid;
+    Folder toAddFolder = Folder(name, ownerUid, id, null);
     dbRef.child("Folder/$id").set(toAddFolder.toMap()).then((value) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.blue,
@@ -222,7 +224,7 @@ class _FolderTabState extends State<FolderTab>
     dbRef.child('Folder').onChildAdded.listen((data) {
       Folder folder =
           Folder.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
-      if (folder.owner == auth.currentUser?.displayName) {
+      if (folder.ownerUid == auth.currentUser?.uid) {
         setState(() {
           folders.insert(0, folder);
         });

@@ -38,6 +38,7 @@ class _FolderDetailState extends State<FolderDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CupertinoColors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue[50],
         automaticallyImplyLeading: true,
@@ -205,6 +206,16 @@ class _FolderDetailState extends State<FolderDetail> {
         topics.insert(index, changedTopic);
       });
     });
+
+    // listen to deleted topic event in Topic node
+    dbRef.child('Topic').onChildRemoved.listen((data) {
+      Topic deletedTopic =
+          Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
+      int index = topics.indexWhere((element) => element.id == deletedTopic.id);
+      setState(() {
+        topics.removeAt(index);
+      });
+    });
   }
 
   Widget topicBlock(Topic topic) {
@@ -280,6 +291,7 @@ class _FolderDetailState extends State<FolderDetail> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: CupertinoColors.white,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -463,6 +475,7 @@ class _FolderDetailState extends State<FolderDetail> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: CupertinoColors.white,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),

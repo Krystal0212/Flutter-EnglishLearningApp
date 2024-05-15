@@ -59,7 +59,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     for (var focusNode in focusNodes) {
       focusNode.dispose();
     }
-
+    focusForTitle.dispose();
     super.dispose();
   }
 
@@ -67,8 +67,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      backgroundColor: CupertinoColors.white,
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
+        forceMaterialTransparency: true,
         automaticallyImplyLeading: false,
         title: Center(
           child: Text("My study set"),
@@ -367,14 +369,33 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                               height: 16,
                             ),
                             Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Text(
-                                  "(Swipe to delete a word)",
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black.withOpacity(0.5),
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "(Swipe to delete a word)",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black.withOpacity(0.5),
+                                      ),
+                                    ),
                                   ),
-                                )),
+                                  Expanded(child: SizedBox()),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: IconButton(
+                                      onPressed: () {},
+                                      icon: Icon(
+                                        FluentIcons.arrow_upload_16_regular,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             ...termsWidgets,
                             SizedBox(
                               height: 12,

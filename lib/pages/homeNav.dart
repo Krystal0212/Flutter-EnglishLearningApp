@@ -1,8 +1,15 @@
 import 'package:Fluffy/objects/user.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/pages/profile.dart';
 import 'homeWidget.dart';
 import 'libraryWidget.dart';
+import 'package:motion_tab_bar/MotionBadgeWidget.dart';
+import 'package:motion_tab_bar/MotionTabBar.dart';
+import 'package:motion_tab_bar/MotionTabBarController.dart';
+import 'package:motion_tab_bar/MotionTabItem.dart';
+import 'package:motion_tab_bar/helpers/HalfClipper.dart';
+import 'package:motion_tab_bar/helpers/HalfPainter.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.userID});
@@ -57,30 +64,35 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CupertinoColors.white,
       body: user == null
           ? Center(
-          child: CircularProgressIndicator(
-            color: Colors.blue,
-          ))
+              child: CircularProgressIndicator(
+              color: Colors.blue,
+            ))
           : PageView(
-        controller: _pageController,
-        physics: NeverScrollableScrollPhysics(),
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        //disable zoom
-        items: <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.topic), label: 'Library'),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        currentIndex: selectedIndex,
-        selectedItemColor: Colors.lightBlue,
-        unselectedItemColor: Colors.grey,
-        onTap: onItemTapped,
+              controller: _pageController,
+              physics: NeverScrollableScrollPhysics(),
+              children: _pages,
+            ),
+      bottomNavigationBar: MotionTabBar(
+        initialSelectedTab: "Home",
+        labels: const ["Home", "Library", "Profile"],
+        icons: const [Icons.home, Icons.library_books, Icons.person],
+        tabSize: 50,
+        tabBarHeight: 55,
+        textStyle: const TextStyle(
+          fontSize: 12,
+          color: Colors.blue,
+          fontWeight: FontWeight.w500,
+        ),
+        tabIconColor: Colors.blue[400],
+        tabIconSize: 28.0,
+        tabIconSelectedSize: 26.0,
+        tabSelectedColor: Colors.blue[400],
+        tabIconSelectedColor: Colors.white,
+        tabBarColor: Colors.white70,
+        onTabItemSelected: onItemTapped,
       ),
     );
   }

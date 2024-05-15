@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/painting.dart';
+import 'package:intl/intl.dart';
 
 import '../objects/participant.dart';
 import '../objects/userActivity.dart';
@@ -41,13 +42,14 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      backgroundColor: CupertinoColors.white,
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         forceMaterialTransparency: true,
         automaticallyImplyLeading: false,
         title: Padding(
-          padding: const EdgeInsets.only(top: 15.0, bottom: 15),
+          padding: const EdgeInsets.only(top: 18.0, bottom: 15),
           child: Center(
             child: Text("Discover new topics everyday"),
           ),
@@ -59,6 +61,11 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
             child: Container(
               padding: EdgeInsets.only(bottom: 6, top: 4, right: 12, left: 12),
               child: TextField(
+                onTapOutside: (event) {
+                  print('onTapOutside');
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                enableInteractiveSelection: false,
                 onChanged: (value) => filterTopic(value),
                 cursorColor: Colors.blue,
                 decoration: const InputDecoration(
@@ -81,11 +88,53 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
           ),
         ),
       ),
-      body: !foundTopics.isEmpty
+      body: foundTopics.isNotEmpty
           ? ListView.builder(
               itemBuilder: (BuildContext context, int index) {
-                Topic topic = foundTopics[index];
-                return topicBlock(topic);
+                // the first index should have a header
+                // otherwise checking the diff between index and index - 1
+                // to create a header or not
+                bool shouldShowHeader = index == 0 ||
+                    parseDate(foundTopics[index].createDate!)
+                            .difference(
+                                parseDate(foundTopics[index - 1].createDate!))
+                            .inDays !=
+                        0;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (shouldShowHeader)
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(20),
+                                bottomRight: Radius.circular(20),
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20)),
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                  top: 8.0,
+                                  bottom: 8.0,
+                                  right: 15.0,
+                                  left: 15.0),
+                              color: Colors.blue[300],
+                              child: Text(
+                                DateFormat('MMM dd, yyyy').format(
+                                    parseDate(foundTopics[index].createDate!)),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    topicBlock(foundTopics[index])
+                  ],
+                );
               },
               itemCount: foundTopics.length,
             )
@@ -93,6 +142,13 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
               child: Text("No topic currently"),
             ),
     );
+  }
+
+  DateTime parseDate(String dateString) {
+    final parts = dateString.split('/');
+    // to year/month/day order
+    return DateTime(
+        int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
   }
 
   Widget topicBlock(Topic topic) {
@@ -158,12 +214,14 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
       Topic changedTopic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       int index = topics.indexWhere((element) => element.id == changedTopic.id);
+      int index_1 =
+          foundTopics.indexWhere((element) => element.id == changedTopic.id);
       setState(() {
         topics.removeAt(index);
         topics.insert(index, changedTopic);
         // also update this list
-        foundTopics.removeAt(index);
-        foundTopics.insert(index, changedTopic);
+        foundTopics.removeAt(index_1);
+        foundTopics.insert(index_1, changedTopic);
       });
     });
     // listen to deleted topic event in Topic node
@@ -171,9 +229,11 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
       Topic deletedTopic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       int index = topics.indexWhere((element) => element.id == deletedTopic.id);
+      int index_1 =
+          foundTopics.indexWhere((element) => element.id == deletedTopic.id);
       setState(() {
         topics.removeAt(index);
-        foundTopics.removeAt(index);
+        foundTopics.removeAt(index_1);
       });
     });
   }
@@ -216,6 +276,7 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
         context: context,
         builder: (context) {
           return AlertDialog(
+            backgroundColor: CupertinoColors.white,
             surfaceTintColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),

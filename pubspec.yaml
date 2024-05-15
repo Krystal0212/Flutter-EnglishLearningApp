@@ -51,6 +51,9 @@ dependencies:
   flutter_tts: ^3.8.5
   fl_chart: any
   flutter_gradient_animation_text: any
+  motion_tab_bar: ^2.0.4
+  file_picker: ^8.0.3
+  csv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

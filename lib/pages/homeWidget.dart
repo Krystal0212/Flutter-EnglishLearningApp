@@ -1,8 +1,7 @@
-import 'dart:ffi';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../objects/topic.dart';
@@ -25,21 +24,24 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
 
   UserActivity? userActivity;
   Topic? recentAccessTopic;
-  Timer? _timer;
+
+  // Timer? _timer;
 
   @override
   void initState() {
-    updateTimeStamp();
+    syncUserActivity();
     // func to update topic every x seconds
-    _timer = Timer.periodic(Duration(seconds: 35), (timer) {
-      updateTimeStamp();
-    });
+    // _timer = Timer.periodic(Duration(minutes: 1), (timer) {
+    //   if (mounted) {
+    //     setState(() {});
+    //   }
+    // });
     super.initState();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    // _timer?.cancel();
     super.dispose();
   }
 
@@ -47,12 +49,13 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+        backgroundColor: CupertinoColors.white,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text("Dashboard"),
           backgroundColor: Colors.blue[50],
         ),
-        body: userActivity != null
+        body: userActivity != null && recentAccessTopic != null
             ? Column(
                 children: [
                   CachedNetworkImage(
@@ -72,10 +75,21 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                       "access since: ${getTimeDifference(userActivity?.timestamp as String)}"),
                 ],
               )
-            : Container());
+            : Column(
+                children: const [
+                  CircularProgressIndicator(
+                    color: Colors.blue,
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Text("Getting data..."),
+                ],
+              ));
   }
 
-  void updateTimeStamp() async {
+  void syncUserActivity() async {
+    // get data first time for the UI to show
     DataSnapshot snapshot =
         await dbRef.child('UserActivity/${auth.currentUser?.uid}').get();
     if (snapshot.exists) {
@@ -96,6 +110,31 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         }
       });
     }
+
+    // listen event to user's activity
+    dbRef.child('UserActivity/${auth.currentUser?.uid}').onValue.listen((data) {
+      if (data.snapshot.value != null) {
+        UserActivity changedUserActivity =
+            UserActivity.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
+        userActivity = changedUserActivity;
+        userActivity?.topics?.forEach((topicId, exists) async {
+          if (exists) {
+            DatabaseReference topicRef =
+                FirebaseDatabase.instance.ref('Topic/$topicId');
+            DataSnapshot snapshot = await topicRef.get();
+            if (snapshot.exists) {
+              Topic topic =
+                  Topic.fromJson(snapshot.value as Map<dynamic, dynamic>);
+              setState(() {
+                recentAccessTopic = topic;
+              });
+            }
+          }
+        });
+      } else {
+        print('No data available.');
+      }
+    });
   }
 
   String getTimeDifference(String input) {

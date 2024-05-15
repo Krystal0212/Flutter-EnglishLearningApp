@@ -1,15 +1,15 @@
 class Folder {
   String? name;
-  String? owner;
+  String? ownerUid;
   String? id;
   Map<String, bool>? topics;
 
-  Folder(this.name, this.owner, this.id, this.topics);
+  Folder(this.name, this.ownerUid, this.id, this.topics);
 
   Map<String, dynamic> toMap() {
     return {
       'name': name,
-      'owner': owner,
+      'ownerUid': ownerUid,
       'id': id,
       'topics': topics,
     };
@@ -17,7 +17,7 @@ class Folder {
 
   Folder.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
-    owner = json['owner'];
+    ownerUid = json['ownerUid'];
     id = json['id'];
     if (json['topics'] != null) {
       topics = Map<String, bool>.from(json['topics']);

@@ -10,6 +10,8 @@ import '../objects/folder.dart';
 import '../objects/topic.dart';
 import '../objects/word.dart';
 import '../pages/fillWordQuizPage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:csv/csv.dart';
 
 class TopicDetail extends StatefulWidget {
   Topic topic;
@@ -49,7 +51,7 @@ class _TopicDetailState extends State<TopicDetail> {
     super.dispose();
   }
 
-  Future _speak(String inputText, String language) async{
+  Future _speak(String inputText, String language) async {
     flutterTts.setLanguage(language);
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
@@ -58,7 +60,10 @@ class _TopicDetailState extends State<TopicDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: CupertinoColors.white,
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
+        forceMaterialTransparency: true,
         automaticallyImplyLeading: true,
         actions: <Widget>[
           Padding(
@@ -232,7 +237,7 @@ class _TopicDetailState extends State<TopicDetail> {
                 ),
                 IconButton(
                     onPressed: () {
-                      _speak(word.english as String,'en-US');
+                      _speak(word.english as String, 'en-US');
                     },
                     icon: Icon(FluentIcons.speaker_2_16_filled)),
                 IconButton(
@@ -499,14 +504,33 @@ class _TopicDetailState extends State<TopicDetail> {
                               height: 16,
                             ),
                             Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Text(
-                                  "(Swipe to delete a word)",
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black.withOpacity(0.5),
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "(Swipe to delete a word)",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black.withOpacity(0.5),
+                                      ),
+                                    ),
                                   ),
-                                )),
+                                  Expanded(child: SizedBox()),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: IconButton(
+                                      onPressed: importWords,
+                                      icon: Icon(
+                                        FluentIcons.arrow_upload_16_regular,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             ...termsWidgets,
                             SizedBox(
                               height: 12,
@@ -657,6 +681,24 @@ class _TopicDetailState extends State<TopicDetail> {
     );
   }
 
+  Future<void> importWords() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      final fileBytes = result.files.first.bytes;
+      final csvString = String.fromCharCodes(fileBytes!);
+      List<List<dynamic>> rows = const CsvToListConverter().convert(csvString);
+
+      List<Word> newWords = rows.skip(1).map((row) {
+        return Word(row[0], row[1], row.length > 2 ? row[2] : "");
+      }).toList();
+
+      setState(() {
+        words.addAll(newWords);
+      });
+    }
+  }
+
   bool validateCreateTopic() {
     if (_titleKey.currentState!.validate()) {
       return true;
@@ -754,6 +796,7 @@ class _TopicDetailState extends State<TopicDetail> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: CupertinoColors.white,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -823,13 +866,36 @@ class _TopicDetailState extends State<TopicDetail> {
 
   void deleteTopic() {
     dbRef.child('Topic/${widget.topic.id}').remove().then((value) {
-      Navigator.of(context).pop();
+      // remove this topic in every folder
+      removeTopicIdFromFolders(widget.topic.id);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.redAccent,
           content: Text(
             "Topic deleted",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           )));
+      Navigator.of(context).pop();
+    });
+  }
+
+  void removeTopicIdFromFolders(String? topicId) {
+    dbRef.child('Folder').once().then((DatabaseEvent event) {
+      if (event.snapshot.exists) {
+        Map<dynamic, dynamic> folders =
+            event.snapshot.value as Map<dynamic, dynamic>? ?? {};
+        folders.forEach((key, value) {
+          if (value is Map<dynamic, dynamic> && value.containsKey('topics')) {
+            Map<dynamic, dynamic> topics =
+                value['topics'] as Map<dynamic, dynamic>;
+            if (topics.containsKey(topicId)) {
+              topics.remove(topicId);
+              dbRef.child('Folder/$key/topics').set(topics);
+            }
+          }
+        });
+      }
+    }).catchError((error) {
+      print("Error fetching folders: $error");
     });
   }
 
@@ -885,7 +951,7 @@ class _TopicDetailState extends State<TopicDetail> {
     dbRef.child('Folder').onChildAdded.listen((data) {
       Folder folder =
           Folder.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
-      if (folder.owner == auth.currentUser?.displayName) {
+      if (folder.ownerUid == auth.currentUser?.uid) {
         setState(() {
           folders.insert(0, folder);
         });
@@ -941,6 +1007,7 @@ class _TopicDetailState extends State<TopicDetail> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: CupertinoColors.white,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
