@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:Fluffy/objects/participant.dart';
+import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -50,20 +51,26 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
 
   final TextEditingController _textResultController = TextEditingController();
   late PageController _pageController;
-
+  late ConfettiController _confettiControllerLeft;
+  late ConfettiController _confettiControllerRight;
 
   @override
   void initState(){
+    initConfetti();
     initCardsAnimation();
     initWordList();
     super.initState();
-
   }
 
   @override
   void dispose(){
     returnDefaultState();
     super.dispose();
+  }
+
+  void initConfetti(){
+    _confettiControllerLeft = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiControllerRight = ConfettiController(duration: const Duration(seconds: 2));
   }
 
   void returnDefaultState(){
@@ -124,6 +131,14 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     return wordList.length == finishedCard.length;
   }
 
+  void finishedQuizAndShowConfetti(){
+    isQuizFinished = true;
+    if (finishedCardCorrectly.length>wordList.length*0.5){
+      _confettiControllerLeft.play();
+      _confettiControllerRight.play();
+    }
+  }
+
   void submitCardButton(Word word) async{
     String result = _textResultController.text.trim().toString();
 
@@ -149,7 +164,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
 
       if (isAllAnswered()){
         setState(() {
-          isQuizFinished = true;
+          finishedQuizAndShowConfetti();
         });
       }
       else if (isAnswered(currentIndex)){
@@ -168,7 +183,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       await Future.delayed(const Duration(milliseconds: 4000));
       if (isAllAnswered()){
         setState(() {
-          isQuizFinished = true;
+          finishedQuizAndShowConfetti();
         });
       }
       else if (isAnswered(currentIndex)){
@@ -509,14 +524,14 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                   {
                     //await Future.delayed(const Duration(milliseconds: 4000));
                     setState(() {});
-                    isQuizFinished = true;
+                    finishedQuizAndShowConfetti();
                   }
                   else {
                     setSkipToUnanswered();
                     setState(() {});
                     await Future.delayed(const Duration(milliseconds: 4000));
                     setState(() {});
-                    isQuizFinished = true;
+                    finishedQuizAndShowConfetti();
                   }
                 }
               },
@@ -600,6 +615,56 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Stack(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 10,left: 10),
+                  alignment: Alignment.topLeft,
+                  child: RepaintBoundary(
+                    child: ConfettiWidget(
+                      confettiController: _confettiControllerLeft,
+                      blastDirection: pi / 6, // 45 degrees
+                      emissionFrequency: 0.2, // Adjusted emission frequency
+                      numberOfParticles: 5, // Increased number of particles
+                      maxBlastForce: 65, // Increased blast force
+                      minBlastForce: 8, // Increased minimum blast force
+                      gravity: 0.01, // Adjusted gravity
+                      colors: const [
+                        Colors.red,
+                        Colors.blue,
+                        Colors.green,
+                        Colors.yellow,
+                        Colors.purple, // Added more colors
+                        Colors.orange
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 10,right: 10),
+                  alignment: Alignment.topRight,
+                  child: RepaintBoundary(
+                    child: ConfettiWidget(
+                      confettiController: _confettiControllerRight,
+                      blastDirection: 5 * pi / 6, // 135 degrees
+                      emissionFrequency: 0.2, // Adjusted emission frequency
+                      numberOfParticles: 5, // Increased number of particles
+                      maxBlastForce: 65, // Increased blast force
+                      minBlastForce: 8, // Increased minimum blast force
+                      gravity: 0.01, // Adjusted gravity
+                      colors: const [
+                        Colors.red,
+                        Colors.blue,
+                        Colors.green,
+                        Colors.yellow,
+                        Colors.purple, // Added more colors
+                        Colors.orange
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             //result title
             Container(
               child: mainResultTitle(),
@@ -887,14 +952,14 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                   {
                     //await Future.delayed(const Duration(milliseconds: 4000));
                     setState(() {});
-                    isQuizFinished = true;
+                    finishedQuizAndShowConfetti();
                   }
                   else {
                     setSkipToUnanswered();
                     setState(() {});
                     await Future.delayed(const Duration(milliseconds: 4000));
                     setState(() {});
-                    isQuizFinished = true;
+                    finishedQuizAndShowConfetti();
                   }
                 }
               },
