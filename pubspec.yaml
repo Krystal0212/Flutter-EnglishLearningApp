@@ -54,6 +54,7 @@ dependencies:
   motion_tab_bar: ^2.0.4
   file_picker: ^8.0.3
   csv: ^6.0.0
+  confetti: ^0.7.0
 
 dev_dependencies:
   flutter_test:

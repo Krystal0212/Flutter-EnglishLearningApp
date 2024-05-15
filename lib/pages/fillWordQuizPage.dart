@@ -13,8 +13,14 @@ import '../objects/word.dart';
 
 
 class FillWordQuizPage extends StatefulWidget {
-  const FillWordQuizPage({super.key, required this.topic});
+  const FillWordQuizPage({super.key,
+    required this.topic,
+    required this.isShuffle,
+    required this.isChangeLanguage});
+
   final Topic topic;
+  final bool isShuffle;
+  final bool isChangeLanguage;
 
   @override
   State<FillWordQuizPage> createState() => _FillWordQuizPageState();
@@ -90,7 +96,9 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
 
   void initWordList() {
     wordList = widget.topic.word as List<Word>;
-    wordList.shuffle(Random());
+    if (widget.isShuffle){
+      wordList.shuffle(Random());
+    }
   }
 
   void initCardsAnimation() {
@@ -406,8 +414,14 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 800),
           child: isAnswered(currentIndex)?
-          MyCard(word).myNormalCard(isResultShown: isAnswered(currentIndex)):
-          MyCard(word).myNormalCard(isResultShown: isAnswered(currentIndex)),
+          MyCard(word).myNormalCard(
+            isResultShown: isAnswered(currentIndex),
+            isChangeLanguage: widget.isChangeLanguage
+          ):
+          MyCard(word).myNormalCard(
+            isResultShown: isAnswered(currentIndex),
+            isChangeLanguage: widget.isChangeLanguage
+          ),
         )
     );
   }
@@ -911,6 +925,4 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         )
     );
   }
-
-
 }

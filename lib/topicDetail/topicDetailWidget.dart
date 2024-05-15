@@ -1,4 +1,5 @@
 import 'package:Fluffy/pages/flashcardQuizPage.dart';
+import 'package:Fluffy/pages/multipleChoiceQuizPage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -167,7 +168,9 @@ class _TopicDetailState extends State<TopicDetail> {
                     child: ListTile(
                       leading: Icon(Icons.quiz_outlined),
                       title: Text("Multiple choices"),
-                      onTap: () {},
+                      onTap: () {
+                        showSelectionDialog(context, isMultipleQuiz: true);
+                      },
                     ),
                   ),
                   Card(
@@ -178,11 +181,7 @@ class _TopicDetailState extends State<TopicDetail> {
                       leading: Icon(FluentIcons.pen_16_regular),
                       title: Text("Fill words"),
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    FillWordQuizPage(topic: widget.topic)));
+                        showSelectionDialog(context, isMultipleQuiz: false);
                       },
                     ),
                   ),
@@ -214,6 +213,81 @@ class _TopicDetailState extends State<TopicDetail> {
           ),
         ),
       ),
+    );
+  }
+
+  void showSelectionDialog(BuildContext context, {bool? isMultipleQuiz}) {
+    // Initial states for options
+    bool language = false;
+    bool shuffle = false;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Dialog(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: Text('Language'),
+                    subtitle: Text('(default: English)'),
+                    trailing: Switch(
+                      value: language,
+                      onChanged: (bool value) {
+                        setState(() {
+                          language = value;
+                        });
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: Text('Shuffle'),
+                    subtitle: Text('(default: Off)'),
+                    trailing: Switch(
+                      value: shuffle,
+                      onChanged: (bool value) {
+                        setState(() {
+                          shuffle = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: (){
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            if (isMultipleQuiz!){
+                              return MultipleChoiceQuizPage(
+                                  topic: widget.topic,
+                                  isChangeLanguage: language,
+                                  isShuffle: shuffle
+                              );
+                            }
+                            else {
+                              return FillWordQuizPage(
+                                  topic: widget.topic,
+                                  isChangeLanguage: language,
+                                  isShuffle: shuffle
+                              );
+                            }
+                          }
+                        )
+                      );
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

@@ -64,7 +64,7 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
 
   void initWordList() {
     wordList = widget.topic.word as List<Word>;
-    wordList.shuffle(Random());
+    //wordList.shuffle(Random());
   }
 
   void initCardsAnimation() {
