@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:Fluffy/objects/participant.dart';
 import 'package:Fluffy/topicDetail/topicDetailWidget.dart';
+import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +42,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
   bool isLoading = true;
   bool isAccessible = false;
   FocusNode focusForTitle = FocusNode();
+  List<TextEditingController> termControllers = [];
+  List<TextEditingController> definitionControllers = [];
+  List<TextEditingController> descriptionControllers = [];
+  List<Widget> termsWidgets = [];
 
   @override
   void initState() {
@@ -58,6 +65,15 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     _topicTitleEditingController.dispose();
     for (var focusNode in focusNodes) {
       focusNode.dispose();
+    }
+    for (var term in termControllers) {
+      term.dispose();
+    }
+    for (var def in definitionControllers) {
+      def.dispose();
+    }
+    for (var des in descriptionControllers) {
+      des.dispose();
     }
     focusForTitle.dispose();
     super.dispose();
@@ -227,11 +243,11 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     showDialog(
         context: context,
         builder: (context) {
-          List<TextEditingController> termControllers = [];
-          List<TextEditingController> definitionControllers = [];
-          List<TextEditingController> descriptionControllers = [];
-
-          List<Widget> termsWidgets = [];
+          termControllers.clear();
+          definitionControllers.clear();
+          descriptionControllers.clear();
+          focusNodes.clear();
+          termsWidgets.clear();
           for (int i = 0; i < 4; i++) {
             FocusNode newFocusNode = FocusNode();
             TextEditingController newTermController = TextEditingController();
@@ -386,7 +402,9 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                                   Align(
                                     alignment: Alignment.centerRight,
                                     child: IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        importWords(setState);
+                                      },
                                       icon: Icon(
                                         FluentIcons.arrow_upload_16_regular,
                                         color: Colors.blueAccent,
@@ -497,7 +515,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
         onDelete();
       },
       background: Container(
-        color: Colors.red.withOpacity(0.75),
+        color: Colors.red.withOpacity(1),
         alignment: Alignment.center,
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Image.asset(height: 60, "lib/icon/delete.png"),
@@ -554,6 +572,53 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  Future<void> importWords(StateSetter setStateDialog) async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(withData: true);
+
+    if (result != null && result.files.single.bytes != null) {
+      final fileBytes = result.files.first.bytes;
+      final csvString = utf8.decode(fileBytes!);
+      List<List<dynamic>> rows = const CsvToListConverter().convert(csvString);
+      showAlertDialog("Added ${rows.length - 1} words below", Colors.green);
+      for (var row in rows.skip(1)) {
+        FocusNode newFocusNode = FocusNode();
+        TextEditingController newTermController =
+            TextEditingController(text: row[0]);
+        TextEditingController newDefinitionController =
+            TextEditingController(text: row[1]);
+        TextEditingController newDescriptionController =
+            TextEditingController(text: row.length > 2 ? row[2] : "");
+
+        // Function to handle deletion
+        void onDelete() {
+          int index = termControllers.indexOf(newTermController);
+          if (index != -1) {
+            termControllers.removeAt(index);
+            definitionControllers.removeAt(index);
+            descriptionControllers.removeAt(index);
+            termsWidgets.removeAt(index);
+            focusNodes.removeAt(index);
+            setStateDialog(() {});
+          }
+        }
+
+        setStateDialog(() {
+          termsWidgets.add(textFieldForTerm(newFocusNode, newTermController,
+              newDefinitionController, newDescriptionController, onDelete));
+          // add term controller for word
+          termControllers.add(newTermController);
+          // add definition controller for word
+          definitionControllers.add(newDefinitionController);
+          // add des controller for word
+          descriptionControllers.add(newDescriptionController);
+          // add focus node for word
+          focusNodes.add(newFocusNode);
+        });
+      }
+    }
+  }
+
   void saveTopic(
       List<TextEditingController> termControllers,
       List<TextEditingController> definitionControllers,
@@ -600,7 +665,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
         _topicTitleEditingController.clear();
       });
     } else {
-      showAlertDialog();
+      showAlertDialog("Please fill at least 4 words", Colors.red);
     }
   }
 
@@ -612,7 +677,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void showAlertDialog() {
+  void showAlertDialog(String notification, Color color) {
     showDialog(
       context: context,
       builder: (context) {
@@ -620,17 +685,27 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: color,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Center(
-                child: Icon(Icons.warning_amber),
+                child: color == Colors.red
+                    ? Icon(
+                        size: 36,
+                        Icons.warning_amber,
+                        color: Colors.amberAccent,
+                      )
+                    : Icon(
+                        size: 36,
+                        Icons.check,
+                        color: CupertinoColors.white,
+                      ),
               ),
               SizedBox(
                 height: 12,
               ),
-              Text("Please fill at least 4 words",
+              Text(notification,
                   style: TextStyle(color: Colors.white, fontSize: 20)),
             ],
           ),

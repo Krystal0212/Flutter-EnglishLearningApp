@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:Fluffy/pages/flashcardQuizPage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +15,8 @@ import '../objects/word.dart';
 import '../pages/fillWordQuizPage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:csv/csv.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 class TopicDetail extends StatefulWidget {
   Topic topic;
@@ -35,6 +40,10 @@ class _TopicDetailState extends State<TopicDetail> {
   List<Word> words = [];
   FocusNode focusForTitle = FocusNode();
   List<Folder> folders = [];
+  List<TextEditingController> termControllers = [];
+  List<TextEditingController> definitionControllers = [];
+  List<TextEditingController> descriptionControllers = [];
+  List<Widget> termsWidgets = [];
 
   @override
   void initState() {
@@ -46,6 +55,15 @@ class _TopicDetailState extends State<TopicDetail> {
   void dispose() {
     for (var focusNode in focusNodes) {
       focusNode.dispose();
+    }
+    for (var term in termControllers) {
+      term.dispose();
+    }
+    for (var def in definitionControllers) {
+      def.dispose();
+    }
+    for (var des in descriptionControllers) {
+      des.dispose();
     }
     _topicTitleEditingController.dispose();
     super.dispose();
@@ -66,13 +84,23 @@ class _TopicDetailState extends State<TopicDetail> {
         forceMaterialTransparency: true,
         automaticallyImplyLeading: true,
         actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              exportWords(widget.topic.word);
+            },
+            icon: Icon(
+              FluentIcons.arrow_download_48_regular,
+              size: 30,
+            ),
+            color: Colors.green,
+          ),
           Padding(
             padding: EdgeInsets.all(8),
             child: InkWell(
               onTap: () {},
               child: Image.asset(
                 'lib/icon/trophy.png',
-                height: 25,
+                height: 23,
               ),
             ),
           ),
@@ -80,7 +108,10 @@ class _TopicDetailState extends State<TopicDetail> {
               onPressed: () {
                 showBottomSheetMenu();
               },
-              icon: Icon(FluentIcons.settings_32_filled))
+              icon: Icon(
+                FluentIcons.settings_48_filled,
+                size: 27,
+              ))
         ],
       ),
       body: SingleChildScrollView(
@@ -376,18 +407,19 @@ class _TopicDetailState extends State<TopicDetail> {
         context: context,
         builder: (context) {
           _topicTitleEditingController.text = widget.topic.title!;
-          List<TextEditingController> termControllers = [];
-          List<TextEditingController> definitionControllers = [];
-          List<TextEditingController> descriptionControllers = [];
-
-          List<Widget> termsWidgets = [];
+          termControllers.clear();
+          definitionControllers.clear();
+          descriptionControllers.clear();
+          focusNodes.clear();
+          termsWidgets.clear();
           for (int i = 0; i < widget.topic.word!.length; i++) {
             FocusNode newFocusNode = FocusNode();
-            TextEditingController newTermController = TextEditingController();
+            TextEditingController newTermController =
+                TextEditingController(text: widget.topic.word![i].english);
             TextEditingController newDefinitionController =
-                TextEditingController();
+                TextEditingController(text: widget.topic.word![i].vietnamese);
             TextEditingController newDescriptionController =
-                TextEditingController();
+                TextEditingController(text: widget.topic.word![i].description);
             // Function to handle deletion
             void onDelete() {
               int index = termControllers.indexOf(newTermController);
@@ -411,12 +443,6 @@ class _TopicDetailState extends State<TopicDetail> {
             descriptionControllers.add(newDescriptionController);
             // add focus node for word
             focusNodes.add(newFocusNode);
-            // set text for each termsWidget
-            termControllers[i].text = widget.topic.word![i].english as String;
-            definitionControllers[i].text =
-                widget.topic.word![i].vietnamese as String;
-            descriptionControllers[i].text =
-                widget.topic.word![i].description as String;
           }
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -521,7 +547,9 @@ class _TopicDetailState extends State<TopicDetail> {
                                   Align(
                                     alignment: Alignment.centerRight,
                                     child: IconButton(
-                                      onPressed: importWords,
+                                      onPressed: () {
+                                        importWords(setState);
+                                      },
                                       icon: Icon(
                                         FluentIcons.arrow_upload_16_regular,
                                         color: Colors.blueAccent,
@@ -681,21 +709,82 @@ class _TopicDetailState extends State<TopicDetail> {
     );
   }
 
-  Future<void> importWords() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+  Future<void> exportWords(List<Word>? words) async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
 
-    if (result != null) {
+    List<List<dynamic>> rows = [];
+    rows.add(["english", "vietnamese", "description"]);
+    for (Word word in words!) {
+      List<dynamic> row = [];
+      row.add(word.english);
+      row.add(word.vietnamese);
+      row.add(word.description);
+      rows.add(row);
+    }
+
+    String csv = const ListToCsvConverter().convert(rows);
+
+    final directory = await getExternalStorageDirectory();
+    final path = "${directory?.path}/${widget.topic.title}.csv";
+    final File file = File(path);
+
+    await file.writeAsBytes(utf8.encode('\uFEFF$csv'));
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(
+          "CSV File saved to $path",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        )));
+  }
+
+  Future<void> importWords(StateSetter setStateDialog) async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(withData: true);
+
+    if (result != null && result.files.single.bytes != null) {
       final fileBytes = result.files.first.bytes;
-      final csvString = String.fromCharCodes(fileBytes!);
+      final csvString = utf8.decode(fileBytes!);
       List<List<dynamic>> rows = const CsvToListConverter().convert(csvString);
+      showAlertDialog("Added ${rows.length - 1} words below", Colors.green);
+      for (var row in rows.skip(1)) {
+        FocusNode newFocusNode = FocusNode();
+        TextEditingController newTermController =
+            TextEditingController(text: row[0]);
+        TextEditingController newDefinitionController =
+            TextEditingController(text: row[1]);
+        TextEditingController newDescriptionController =
+            TextEditingController(text: row.length > 2 ? row[2] : "");
 
-      List<Word> newWords = rows.skip(1).map((row) {
-        return Word(row[0], row[1], row.length > 2 ? row[2] : "");
-      }).toList();
+        // Function to handle deletion
+        void onDelete() {
+          int index = termControllers.indexOf(newTermController);
+          if (index != -1) {
+            termControllers.removeAt(index);
+            definitionControllers.removeAt(index);
+            descriptionControllers.removeAt(index);
+            termsWidgets.removeAt(index);
+            focusNodes.removeAt(index);
+            setStateDialog(() {});
+          }
+        }
 
-      setState(() {
-        words.addAll(newWords);
-      });
+        setStateDialog(() {
+          termsWidgets.add(textFieldForTerm(newFocusNode, newTermController,
+              newDefinitionController, newDescriptionController, onDelete));
+          // add term controller for word
+          termControllers.add(newTermController);
+          // add definition controller for word
+          definitionControllers.add(newDefinitionController);
+          // add des controller for word
+          descriptionControllers.add(newDescriptionController);
+          // add focus node for word
+          focusNodes.add(newFocusNode);
+        });
+      }
     }
   }
 
@@ -746,11 +835,11 @@ class _TopicDetailState extends State<TopicDetail> {
         Navigator.of(context).pop();
       });
     } else {
-      showAlertDialog();
+      showAlertDialog("Please fill at least 4 words", Colors.red);
     }
   }
 
-  void showAlertDialog() {
+  void showAlertDialog(String notification, Color color) {
     showDialog(
       context: context,
       builder: (context) {
@@ -758,17 +847,27 @@ class _TopicDetailState extends State<TopicDetail> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: color,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Center(
-                child: Icon(Icons.warning_amber),
+                child: color == Colors.red
+                    ? Icon(
+                        size: 36,
+                        Icons.warning_amber,
+                        color: Colors.amberAccent,
+                      )
+                    : Icon(
+                        size: 36,
+                        Icons.check,
+                        color: CupertinoColors.white,
+                      ),
               ),
               SizedBox(
                 height: 12,
               ),
-              Text("Please fill at least 4 words",
+              Text(notification,
                   style: TextStyle(color: Colors.white, fontSize: 20)),
             ],
           ),
