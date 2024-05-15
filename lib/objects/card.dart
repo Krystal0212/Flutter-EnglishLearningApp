@@ -410,7 +410,7 @@ class MyNormalCard extends StatelessWidget {
                 img2,
                 word.description as String,
                 isChangeLanguage ?
-                  word.english as String : word.vietnamese as String
+                  word.vietnamese as String : word.english as String
             ),
           );
         }

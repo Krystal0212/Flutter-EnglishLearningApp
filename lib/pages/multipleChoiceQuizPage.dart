@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +10,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gradient_animation_text/flutter_gradient_animation_text.dart';
 
+import '../objects/participant.dart';
 import '../objects/topic.dart';
 import '../objects/word.dart';
 
@@ -27,6 +30,9 @@ class MultipleChoiceQuizPage extends StatefulWidget {
 
 class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
 
+  DatabaseReference dbRef = FirebaseDatabase.instance.ref();
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   late ConfettiController _confettiControllerLeft;
   late ConfettiController _confettiControllerRight;
 
@@ -45,6 +51,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   static String resultTitle = '';
   static dynamic resultTitleColor = Colors.black;
   static bool isProcessingNotification = false;
+  static int score = 0;
 
 
   @override
@@ -58,7 +65,24 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     initConfetti();
   }
 
-
+  void updateScoreToDatabase(int score) {
+    int index = widget.topic.participant!.indexWhere(
+            (p) => p.userID==auth.currentUser?.uid
+    );
+    if ( widget.topic.participant![index].multipleChoicesResult == null
+        ||widget.topic.participant![index].multipleChoicesResult! < score){
+      print('update score');
+      Participant toUpdateParticipant = Participant(
+          auth.currentUser?.uid,
+          score,
+          widget.topic.participant![index].fillWordResult
+      );
+      dbRef.child("Topic/${widget.topic.id}/participant/$index")
+          .update(toUpdateParticipant.toMap())
+          .then((value) {});
+    }
+    print('not update score');
+  }
 
   @override
   void dispose() {
@@ -76,6 +100,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     isShownOnce = false;
     resultTitle = '';
     resultTitleColor = Colors.black;
+    score = 0;
   }
 
   void initConfetti(){
@@ -152,7 +177,6 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
 
   static bool isFinished(){
     if (userSelection.length == wordList.length){
-
       return true;
     }
     return false;
@@ -624,6 +648,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   }
 
   void showResultDialog() {
+    score = finishedQuestCorrectly.length*500;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -691,6 +716,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         _confettiControllerLeft.play();
         _confettiControllerRight.play();
       }
+      updateScoreToDatabase(score);
     }
     if (!isShownOnce) isShownOnce=true;
     setState(() {});

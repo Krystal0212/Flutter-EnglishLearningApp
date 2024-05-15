@@ -189,7 +189,9 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
   }
 
   bool isAnsweredCorrectly(Word word){
-    if (_textResultController.text.toLowerCase().trim() == word.vietnamese!.toLowerCase().toString()){
+    String answer = widget.isChangeLanguage?word.english!.toLowerCase().toString()
+        : word.vietnamese!.toLowerCase().toString();
+    if (_textResultController.text.toLowerCase().trim() == answer){
       finishedCardCorrectly.add(currentIndex);
       return true;
     }
@@ -392,7 +394,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       print('update score');
       Participant toUpdateParticipant = Participant(
           auth.currentUser?.uid,
-          null,
+          widget.topic.participant![index].multipleChoicesResult??0,
           score
       );
       dbRef.child("Topic/${widget.topic.id}/participant/$index")
@@ -451,6 +453,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
             ):
             const SizedBox.shrink(),
 
+
+            //text field accept user input
             Column(
               children: [
                 isAnswered(currentIndex)?
@@ -466,7 +470,9 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                       ),
                     ),
                     Text(
-                      wordList[currentIndex].vietnamese as String,
+                      widget.isChangeLanguage ?
+                      wordList[currentIndex].english as String
+                      :wordList[currentIndex].vietnamese as String,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                           color: Colors.red,
@@ -487,9 +493,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                 ),
               ],
             ),
-
-
-            //text field accept user input
 
 
             //move to next button in web
