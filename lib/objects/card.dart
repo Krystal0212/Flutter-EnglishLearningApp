@@ -21,10 +21,12 @@ class MyCard {
 
   MyNormalCard myNormalCard({
     required bool isResultShown,
+    required bool isChangeLanguage
   }) {
     return MyNormalCard(
         word: word,
-        isResultShown: isResultShown
+        isResultShown: isResultShown,
+        isChangeLanguage: isChangeLanguage,
     );
   }
 }
@@ -239,12 +241,14 @@ class MyFlippingCard extends StatelessWidget {
 class MyNormalCard extends StatelessWidget {
   final Word word;
   final bool isResultShown;
+  final bool isChangeLanguage;
   //final String image;
 
   const MyNormalCard({
     super.key,
     required this.word,
-    required this.isResultShown
+    required this.isResultShown,
+    required this.isChangeLanguage
     //required this.image,
   });
 
@@ -399,11 +403,15 @@ class MyNormalCard extends StatelessWidget {
             cardContext(
                 img1,
                 word.description as String,
-                word.english as String):
+                isChangeLanguage ?
+                  word.vietnamese as String : word.english as String
+            ):
             cardContext(
                 img2,
                 word.description as String,
-                word.english as String),
+                isChangeLanguage ?
+                  word.vietnamese as String : word.english as String
+            ),
           );
         }
     );
