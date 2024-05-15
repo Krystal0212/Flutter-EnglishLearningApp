@@ -188,37 +188,43 @@ class MyFlippingCard extends StatelessWidget {
             controller: flippingCardController,
             enableController: true,
 
-            frontWidget: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: frontCardColor,
-                  borderRadius: const BorderRadius.all(Radius.circular(cardBorderRadius)),
-                  border: Border.all(
-                      width: 3,
-                      style: BorderStyle.solid,
-                      color: Colors.black
+            frontWidget: GestureDetector(
+              onTap:() => flippingCardController.flipcard(),
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: frontCardColor,
+                    borderRadius: const BorderRadius.all(Radius.circular(cardBorderRadius)),
+                    border: Border.all(
+                        width: 3,
+                        style: BorderStyle.solid,
+                        color: Colors.black
+                    ),
                   ),
+                  width: cardWidth,
+                  height: cardHeight,
+                  child: cardContext(word.english as String,word.description as String,'assets/images/stelle.png'),
                 ),
-                width: cardWidth,
-                height: cardHeight,
-                child: cardContext(word.english as String,word.description as String,'assets/images/stelle.png'),
               ),
             ),
-            backWidget: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: backCardColor,
-                  borderRadius: const BorderRadius.all(Radius.circular(cardBorderRadius)),
-                  border: Border.all(
-                      width: 3,
-                      style: BorderStyle.solid,
-                      color: Colors.black
+            backWidget: GestureDetector(
+              onTap: ()=> flippingCardController.flipcard(),
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: backCardColor,
+                    borderRadius: const BorderRadius.all(Radius.circular(cardBorderRadius)),
+                    border: Border.all(
+                        width: 3,
+                        style: BorderStyle.solid,
+                        color: Colors.black
 
+                    ),
                   ),
+                  width: cardWidth,
+                  height: cardHeight,
+                  child: cardContext(word.vietnamese as String,word.description as String,'assets/images/stelle2.png', language: 'vi-VN'),
                 ),
-                width: cardWidth,
-                height: cardHeight,
-                child: cardContext(word.vietnamese as String,word.description as String,'assets/images/stelle2.png', language: 'vi-VN'),
               ),
             )
         );
