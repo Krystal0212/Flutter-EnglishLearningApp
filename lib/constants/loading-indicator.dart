@@ -2,23 +2,29 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class LoadingIndicator extends StatefulWidget {
+  LoadingIndicator({super.key, this.title});
+
+  final String? title;
+
   @override
   State<LoadingIndicator> createState() => LoadingTextAnimationState();
 }
 
 class LoadingTextAnimationState extends State<LoadingIndicator>{
 
-  String loadingText = "Loading";
+  late String loadingText;
   int dotCount = 0;
   late Timer timer;
 
   @override
   void initState() {
     super.initState();
+    String receivedText = widget.title ?? "Loading";
+    loadingText = receivedText;
     timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {
         dotCount = (dotCount + 1) % 4; // Cycle through 0 to 3
-        loadingText = "Loading" + "." * dotCount; // Concatenate dots based on count
+        loadingText = receivedText + "." * dotCount; // Concatenate dots based on count
       });
     });
   }
@@ -33,18 +39,10 @@ class LoadingTextAnimationState extends State<LoadingIndicator>{
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 220, // Adjust the width as needed to fit the text
+        width: 260, // Adjust the width as needed to fit the text
         decoration: BoxDecoration(
           color: Colors.white, // Background color
           borderRadius: BorderRadius.circular(20), // Rounded rectangle
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5), // Shadow color with opacity
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3), // Changes position of shadow
-            ),
-          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min, // Aligns the Column's children to the center

@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'package:Fluffy/constants/loading-indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -91,17 +91,9 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                       style: TextStyle(color: Colors.black)),
                 ],
               )
-            : Column(
-                children: const [
-                  CircularProgressIndicator(
-                    color: Colors.blue,
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  Text("Getting data..."),
-                ],
-              ));
+            :
+                  Center(child: LoadingIndicator(title: "Getting data")),
+    );
   }
 
   void syncUserActivity() async {
