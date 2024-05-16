@@ -733,7 +733,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                 color: Colors.green[400],
                                 title: "Correct",
                                 titleStyle:
-                                    const TextStyle(color: Colors.white)),
+                                    const TextStyle(color: CupertinoColors.white)),
 
                             //Wrong answer
                             PieChartSectionData(
@@ -741,7 +741,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                 color: Colors.red[400],
                                 title: "Wrong",
                                 titleStyle:
-                                    const TextStyle(color: Colors.white)),
+                                    const TextStyle(color: CupertinoColors.white)),
 
                             //Skipped answer
                             PieChartSectionData(
@@ -749,7 +749,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                 color: Colors.grey[700],
                                 title: "Skip",
                                 titleStyle:
-                                    const TextStyle(color: Colors.white))
+                                    const TextStyle(color: CupertinoColors.white))
                           ]),
                         ),
                       )
@@ -788,7 +788,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                     color: Colors.green[400],
                                     title: "Correct",
                                     titleStyle:
-                                        const TextStyle(color: Colors.white)),
+                                        const TextStyle(color: CupertinoColors.white)),
 
                                 //Wrong answer
                                 PieChartSectionData(
@@ -797,7 +797,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                     color: Colors.red[400],
                                     title: "Wrong",
                                     titleStyle:
-                                        const TextStyle(color: Colors.white)),
+                                        const TextStyle(color: CupertinoColors.white)),
 
                                 //Skipped answer
                                 PieChartSectionData(
@@ -805,7 +805,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                     color: Colors.grey[700],
                                     title: "Skip",
                                     titleStyle:
-                                        const TextStyle(color: Colors.white))
+                                        const TextStyle(color: CupertinoColors.white))
                               ]),
                             ),
                           )

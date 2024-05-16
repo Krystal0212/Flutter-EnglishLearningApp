@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:Fluffy/objects/word.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/card.dart';
@@ -314,7 +315,7 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
           centerTitle: true,
           title: Text(
             'Flashcard',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: CupertinoColors.white, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.blueAccent,
         ),

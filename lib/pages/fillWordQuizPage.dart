@@ -373,7 +373,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
             },
             icon: const Icon(
               Icons.subdirectory_arrow_left,
-              color: Colors.white70,
+              color: CupertinoColors.white,
             ),
             iconSize: mainIconSize,
           ),
@@ -399,7 +399,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         child: Text(
           userInputResult[currentIndex] ?? "Not Answered",
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: CupertinoColors.white),
         ),
       ),
     );
@@ -752,7 +752,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                               title: kIsWeb
                                   ? "Correct"
                                   : "Correct: ${finishedCardCorrectly.length}",
-                              titleStyle: const TextStyle(color: Colors.white),
+                              titleStyle: const TextStyle(color: CupertinoColors.white),
                             ),
 
                             //Wrong answer
@@ -762,7 +762,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                               title: kIsWeb
                                   ? "Wrong"
                                   : "Wrong: ${finishedCardWrongly.length}",
-                              titleStyle: const TextStyle(color: Colors.white),
+                              titleStyle: const TextStyle(color: CupertinoColors.white),
                             ),
 
                             //Skipped answer
@@ -772,7 +772,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                               title: kIsWeb
                                   ? "Skip"
                                   : "Skip: ${skippedCard.length}",
-                              titleStyle: const TextStyle(color: Colors.white),
+                              titleStyle: const TextStyle(color: CupertinoColors.white),
                             )
                           ]),
                         ),
@@ -1040,7 +1040,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                     child: Text(
                       actionText,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: CupertinoColors.white,
                       ),
                     ),
                   )
@@ -1051,7 +1051,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
           title: const Text('Fill word quiz'),
           backgroundColor: Colors.blueAccent,
           titleTextStyle: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25),
+              color: CupertinoColors.white, fontWeight: FontWeight.bold, fontSize: 25),
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 1000),
