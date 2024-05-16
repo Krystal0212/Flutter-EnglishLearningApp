@@ -34,7 +34,6 @@ class MyCard {
 class MyFlippingCard extends StatelessWidget {
   final dynamic word;
   final GestureFlipCardController flippingCardController;
-
   //final String image;
 
   const MyFlippingCard(
@@ -129,9 +128,7 @@ class MyFlippingCard extends StatelessWidget {
                         word,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
+                            fontSize: 30, fontWeight: FontWeight.bold),
                       ),
 
                       //Speaking button
@@ -141,10 +138,7 @@ class MyFlippingCard extends StatelessWidget {
                             _speak(word, language);
                             //_stop();
                           },
-                          icon: const Icon(
-                            Icons.volume_down,
-                            color: Colors.black,
-                          )),
+                          icon: const Icon(Icons.volume_down)),
                     ],
                   )),
 
@@ -154,7 +148,9 @@ class MyFlippingCard extends StatelessWidget {
                 child: Text(
                   description ?? "No description",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15, color: Colors.black),
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
                 ),
               )
             ],
@@ -231,7 +227,6 @@ class MyNormalCard extends StatelessWidget {
   final Word word;
   final bool isResultShown;
   final bool isChangeLanguage;
-
   //final String image;
 
   const MyNormalCard(
@@ -389,3 +384,133 @@ class MyNormalCard extends StatelessWidget {
     });
   }
 }
+
+  MyNormalCard myNormalCard(
+      {required bool isResultShown, required bool isChangeLanguage}) {
+      word: word,
+      isResultShown: isResultShown,
+      isChangeLanguage: isChangeLanguage,
+
+  const MyFlippingCard(
+      {super.key, required this.word, required this.flippingCardController
+      //required this.image,
+      });
+  static late double cardWidth, cardHeight, cardImgRadius;
+  static const double cardBorderRadius = 15, cardContextBorderRadius = 10;
+  Future _speak(String inputText, String language) async {
+  void flipCard() {
+  void speakEng() {
+  void speakVie() {
+  Widget cardContext(String word, String? description, String image,
+      {String language = 'en-US'}) {
+        Expanded(child: Center(
+          child: LayoutBuilder(builder: (context, constraints) {
+            cardImgRadius = kIsWeb
+                ? constraints.maxWidth * 0.3
+                : constraints.maxWidth * 0.5;
+            return Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.all(20),
+              width: cardImgRadius * 1.1,
+              height: cardImgRadius * 1.1,
+              decoration: BoxDecoration(
+                  color: imgAreaColor,
+                  borderRadius: BorderRadius.circular(cardImgRadius)),
+              child: Image.asset(
+                image,
+                width: cardImgRadius,
+                height: cardImgRadius,
+              ),
+            );
+          }),
+        )),
+                width: 3, style: BorderStyle.solid, color: cardBorderColor),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                            _speak(word, language);
+                          icon: const Icon(
+                            Icons.volume_down,
+                            color: Colors.black,
+                          )),
+                  )),
+                  description ?? "No description",
+                  style: const TextStyle(fontSize: 15, color: Colors.black),
+      builder: (context, constraints) {
+        cardWidth = constraints.maxWidth * 0.9;
+              onTap: () => flippingCardController.flipcard(),
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(cardBorderRadius)),
+                        color: Colors.black),
+                  child: cardContext(word.english as String,
+                      word.description as String, 'assets/images/stelle.png'),
+              onTap: () => flippingCardController.flipcard(),
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(cardBorderRadius)),
+                        color: Colors.black),
+                  child: cardContext(word.vietnamese as String,
+                      word.description as String, 'assets/images/stelle2.png',
+                      language: 'vi-VN'),
+            ));
+
+  const MyNormalCard(
+      {super.key,
+      required this.word,
+      required this.isResultShown,
+      required this.isChangeLanguage
+      //required this.image,
+      });
+  static late double cardWidth, cardHeight, cardImgRadius;
+  static const double cardBorderRadius = 15, cardContextBorderRadius = 10;
+      img2 = 'assets/images/stelle2.png';
+  Future _speak(String inputText) async {
+        Expanded(child: Center(
+          child: LayoutBuilder(builder: (context, constraints) {
+            cardImgRadius = kIsWeb
+                ? constraints.maxWidth * 0.4
+                : constraints.maxWidth * 0.45;
+            return Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.all(20),
+              width: cardImgRadius * 1.1,
+              height: cardImgRadius * 1.1,
+              decoration: BoxDecoration(
+                  color: imgAreaColor,
+                  borderRadius: BorderRadius.circular(cardImgRadius)),
+              child: Image.asset(
+                image,
+                width: cardImgRadius,
+                height: cardImgRadius,
+              ),
+            );
+          }),
+        )),
+                width: 3, style: BorderStyle.solid, color: cardBorderColor),
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                  )),
+                  description ?? "No description",
+    return LayoutBuilder(builder: (context, constraints) {
+      cardWidth = constraints.maxWidth;
+      cardHeight = constraints.maxHeight;
+      return Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage(cardBackground), fit: BoxFit.fill),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(cardBorderRadius)),
+          border: Border.all(
+              width: 3, style: BorderStyle.solid, color: Colors.black),
+        ),
+        width: cardWidth,
+        height: cardHeight,
+        child: isResultShown
+            ? cardContext(
+                isChangeLanguage ?
+                  word.english as String : word.vietnamese as String
+            ):
+            cardContext(
+                isChangeLanguage ?
+                  word.english as String : word.vietnamese as String
+            ),
+          );
+        }
+    );
