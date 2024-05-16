@@ -56,7 +56,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   @override
   void initState() {
     _pageController = PageController(viewportFraction: 1);
-    wordList = widget.topic.word as List<Word>;
+    wordList = List.from(widget.topic.word as List<Word>);
     initWordSufficient();
     super.initState();
     initConfetti();
