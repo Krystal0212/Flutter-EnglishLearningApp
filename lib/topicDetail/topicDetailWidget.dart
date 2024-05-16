@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:Fluffy/pages/flashcardQuizPage.dart';
@@ -119,11 +120,8 @@ class _TopicDetailState extends State<TopicDetail> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TopicAchievementPage(
-                            topic: widget.topic
-                        )
-                    )
-                );
+                        builder: (context) =>
+                            TopicAchievementPage(topic: widget.topic)));
               },
               child: Image.asset(
                 'lib/icon/trophy.png',
@@ -379,17 +377,16 @@ class _TopicDetailState extends State<TopicDetail> {
                       inactiveTrackColor: Colors.white,
                       value: marked,
                       onChanged: (bool incomingValue) {
-                        setState(() {
-                          if (incomingValue && markedWords.length >= 4) {
+                        if (markedWords.length >= 4) {
+                          setState(() {
                             marked = incomingValue;
-                          } else if (incomingValue && markedWords.length < 4) {
-                            showAlertDialog(
-                                "Please mark at least 4 words to enable this",
-                                Colors.red);
-                          } else {
-                            marked = incomingValue;
-                          }
-                        });
+                          });
+                        } else {
+                          showAlertDialog(
+                              "You need to mark at least 4 words to use this option",
+                              Colors.red);
+                        }
+                        log('${markedWords.length}');
                       },
                     ),
                   ),
@@ -399,34 +396,28 @@ class _TopicDetailState extends State<TopicDetail> {
                       Navigator.pop(context);
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
+                        Topic selectedTopic = widget.topic;
+                        if (marked) {
+                          selectedTopic = Topic(
+                              widget.topic.access,
+                              widget.topic.createDate,
+                              widget.topic.id,
+                              widget.topic.title,
+                              widget.topic.owner,
+                              widget.topic.ownerAvtUrl,
+                              widget.topic.participant,
+                              markedWords);
+                        }
                         if (isMultipleQuiz!) {
-                          if (marked) {
-                            Topic topicWithMarkedWords = widget.topic;
-                            topicWithMarkedWords.word = markedWords;
-                            return MultipleChoiceQuizPage(
-                                topic: topicWithMarkedWords,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          } else {
-                            return MultipleChoiceQuizPage(
-                                topic: widget.topic,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          }
+                          return MultipleChoiceQuizPage(
+                              topic: selectedTopic,
+                              isChangeLanguage: language,
+                              isShuffle: shuffle);
                         } else {
-                          if (marked) {
-                            Topic topicWithMarkedWords = widget.topic;
-                            topicWithMarkedWords.word = markedWords;
-                            return FillWordQuizPage(
-                                topic: topicWithMarkedWords,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          } else {
-                            return FillWordQuizPage(
-                                topic: widget.topic,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          }
+                          return FillWordQuizPage(
+                              topic: selectedTopic,
+                              isChangeLanguage: language,
+                              isShuffle: shuffle);
                         }
                       }));
                     },
@@ -480,9 +471,11 @@ class _TopicDetailState extends State<TopicDetail> {
                     onPressed: () {
                       setState(() {
                         selected[index] = !selected[index];
-                        selected[index]
-                            ? markedWords.add(word)
-                            : markedWords.removeWhere((w) => w == word);
+                        if (selected[index]) {
+                          markedWords.add(word);
+                        } else {
+                          markedWords.remove(word);
+                        }
                       });
                     },
                     icon: selected.elementAt(index)
