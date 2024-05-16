@@ -157,18 +157,18 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
                */
 
               while (_currentIndex < wordList.length && isAutoFlashcard) {
-
                 if (isAutoFlashcard) {
-                  if (cardDecks['card$_currentIndex']!.flippingCardController.state!.isFront){
+                  if (cardDecks['card$_currentIndex']!
+                      .flippingCardController
+                      .state!
+                      .isFront) {
                     cardDecks['card$_currentIndex']!.speakEng();
-                  }
-                  else {
+                  } else {
                     cardDecks['card$_currentIndex']!.speakVie();
                   }
                 } else {
                   break;
                 }
-
 
                 await Future.delayed(Duration(milliseconds: 2500));
                 if (isAutoFlashcard) {
@@ -179,7 +179,10 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
 
                 await Future.delayed(Duration(milliseconds: 2500));
                 if (isAutoFlashcard) {
-                  if (!cardDecks['card$_currentIndex']!.flippingCardController.state!.isFrontStart){
+                  if (!cardDecks['card$_currentIndex']!
+                      .flippingCardController
+                      .state!
+                      .isFrontStart) {
                     cardDecks['card$_currentIndex']!.speakVie();
                   } else {
                     cardDecks['card$_currentIndex']!.speakEng();
@@ -203,7 +206,6 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
                 } else {
                   break;
                 }
-
               }
             },
             shape: const CircleBorder(),
@@ -299,7 +301,10 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            ),
             onPressed: () {
               returnDefaultState();
               Navigator.pop(context);
@@ -307,13 +312,11 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
           ),
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: Text('Topic: ${widget.topic.title ?? "Not found"}'),
-          backgroundColor: appbarColor,
-          titleTextStyle: TextStyle(
-            color: appbarTextColor,
-            fontWeight: FontWeight.bold,
-            fontSize: appbarTextSize,
+          title: Text(
+            'Flashcard',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
+          backgroundColor: Colors.blueAccent,
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.end,

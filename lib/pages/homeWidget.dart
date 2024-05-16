@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../objects/topic.dart';
@@ -55,27 +56,39 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         backgroundColor: CupertinoColors.white,
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text("Dashboard"),
+          title: Text(
+            "Dashboard",
+            style: TextStyle(color: Colors.black),
+          ),
           backgroundColor: Colors.blue[50],
         ),
         body: userActivity != null && recentAccessTopic != null
             ? Column(
                 children: [
-                  CachedNetworkImage(
-                      height: 36,
-                      imageUrl: recentAccessTopic!.ownerAvtUrl as String),
+                  kIsWeb
+                      ? Image.network(
+                          recentAccessTopic!.ownerAvtUrl as String,
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.cover,
+                        )
+                      : CachedNetworkImage(
+                          height: 36,
+                          imageUrl: recentAccessTopic!.ownerAvtUrl as String),
                   Row(
                     children: [
-                      Text(
-                          "Topic title: ${recentAccessTopic?.title as String}"),
+                      Text("Topic title: ${recentAccessTopic?.title as String}",
+                          style: TextStyle(color: Colors.black)),
                       SizedBox(
                         width: 20,
                       ),
-                      Text("by ${recentAccessTopic?.owner}")
+                      Text("by ${recentAccessTopic?.owner}",
+                          style: TextStyle(color: Colors.black))
                     ],
                   ),
                   Text(
-                      "access since: ${getTimeDifference(userActivity?.timestamp as String)}"),
+                      "access since: ${getTimeDifference(userActivity?.timestamp as String)}",
+                      style: TextStyle(color: Colors.black)),
                 ],
               )
             : Column(

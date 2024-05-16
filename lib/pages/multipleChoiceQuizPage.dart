@@ -15,10 +15,11 @@ import '../objects/topic.dart';
 import '../objects/word.dart';
 
 class MultipleChoiceQuizPage extends StatefulWidget {
-  const MultipleChoiceQuizPage({super.key,
-    required this.topic,
-    required this.isShuffle,
-    required this.isChangeLanguage});
+  const MultipleChoiceQuizPage(
+      {super.key,
+      required this.topic,
+      required this.isShuffle,
+      required this.isChangeLanguage});
 
   final Topic topic;
   final bool isShuffle;
@@ -29,7 +30,6 @@ class MultipleChoiceQuizPage extends StatefulWidget {
 }
 
 class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
-
   DatabaseReference dbRef = FirebaseDatabase.instance.ref();
   final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -37,10 +37,10 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   late ConfettiController _confettiControllerRight;
 
   late final PageController _pageController;
-  static late double  mainPageWidth, mainPageHeight;
+  static late double mainPageWidth, mainPageHeight;
   static late List<Word> wordList;
 
-  static Map<int,String> userSelection = {};
+  static Map<int, String> userSelection = {};
   static List<int> finishedQuestCorrectly = [];
   static List<int> finishedQuestWrongly = [];
   static List<int> skippedQuest = [];
@@ -53,12 +53,9 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   static bool isProcessingNotification = false;
   static int score = 0;
 
-
   @override
-  void initState(){
-    _pageController = PageController(
-        viewportFraction: 1
-    );
+  void initState() {
+    _pageController = PageController(viewportFraction: 1);
     wordList = widget.topic.word as List<Word>;
     initWordSufficient();
     super.initState();
@@ -66,18 +63,15 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   }
 
   void updateScoreToDatabase(int score) {
-    int index = widget.topic.participant!.indexWhere(
-            (p) => p.userID==auth.currentUser?.uid
-    );
-    if ( widget.topic.participant![index].multipleChoicesResult == null
-        ||widget.topic.participant![index].multipleChoicesResult! < score){
+    int index = widget.topic.participant!
+        .indexWhere((p) => p.userID == auth.currentUser?.uid);
+    if (widget.topic.participant![index].multipleChoicesResult == null ||
+        widget.topic.participant![index].multipleChoicesResult! < score) {
       print('update score');
-      Participant toUpdateParticipant = Participant(
-          auth.currentUser?.uid,
-          score,
-          widget.topic.participant![index].fillWordResult
-      );
-      dbRef.child("Topic/${widget.topic.id}/participant/$index")
+      Participant toUpdateParticipant = Participant(auth.currentUser?.uid,
+          score, widget.topic.participant![index].fillWordResult);
+      dbRef
+          .child("Topic/${widget.topic.id}/participant/$index")
           .update(toUpdateParticipant.toMap())
           .then((value) {});
     }
@@ -90,7 +84,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     super.dispose();
   }
 
-  void clearCache(){
+  void clearCache() {
     userSelection = {};
     finishedQuestCorrectly = [];
     finishedQuestWrongly = [];
@@ -103,26 +97,27 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     score = 0;
   }
 
-  void initConfetti(){
-    _confettiControllerLeft = ConfettiController(duration: const Duration(seconds: 3));
-    _confettiControllerRight = ConfettiController(duration: const Duration(seconds: 3));
+  void initConfetti() {
+    _confettiControllerLeft =
+        ConfettiController(duration: const Duration(seconds: 3));
+    _confettiControllerRight =
+        ConfettiController(duration: const Duration(seconds: 3));
   }
 
   //check if enough word to show in result
-  void initWordSufficient(){
-    if (wordList.length<4){
+  void initWordSufficient() {
+    if (wordList.length < 4) {
       dispose();
       Navigator.pop(context);
-    }
-    else {
-      if (widget.isShuffle){
+    } else {
+      if (widget.isShuffle) {
         wordList.shuffle(Random());
       }
       generateMultipleChoiceQuestions();
     }
   }
 
-  Map<String, dynamic> shuffleAnswer(int index){
+  Map<String, dynamic> shuffleAnswer(int index) {
     List<Word> listOfWord = List.from(wordList);
     List<String> answerList;
     Map<String, dynamic> mainQuestion;
@@ -131,7 +126,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     listOfWord.removeAt(index);
     listOfWord.shuffle(Random());
 
-    if (widget.isChangeLanguage){
+    if (widget.isChangeLanguage) {
       answerList = [
         wordList[index].vietnamese as String,
         listOfWord[0].vietnamese as String,
@@ -142,12 +137,11 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
       answerList.shuffle(Random());
 
       mainQuestion = {
-        "question":wordList[index].english as String,
-        "result":wordList[index].vietnamese as String,
-        "answer":answerList
+        "question": wordList[index].english as String,
+        "result": wordList[index].vietnamese as String,
+        "answer": answerList
       };
-    }
-    else {
+    } else {
       answerList = [
         wordList[index].english as String,
         listOfWord[0].english as String,
@@ -158,32 +152,30 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
       answerList.shuffle(Random());
 
       mainQuestion = {
-        "question":wordList[index].vietnamese as String,
-        "result":wordList[index].english as String,
-        "answer":answerList
+        "question": wordList[index].vietnamese as String,
+        "result": wordList[index].english as String,
+        "answer": answerList
       };
     }
-
-
 
     return mainQuestion;
   }
 
-  void generateMultipleChoiceQuestions(){
-    for (int i = 0; i < wordList.length; i++){
+  void generateMultipleChoiceQuestions() {
+    for (int i = 0; i < wordList.length; i++) {
       questList.add(shuffleAnswer(i));
     }
   }
 
-  static bool isFinished(){
-    if (userSelection.length == wordList.length){
+  static bool isFinished() {
+    if (userSelection.length == wordList.length) {
       return true;
     }
     return false;
   }
 
-  Widget mainResultTitle(){
-    if (finishedQuestCorrectly.length == userSelection.length){
+  Widget mainResultTitle() {
+    if (finishedQuestCorrectly.length == userSelection.length) {
       resultTitle = "Excellent!";
       resultTitleColor = [
         Colors.purple,
@@ -201,147 +193,115 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
           resultTitle,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: kIsWeb? 35 : 20,
+            fontSize: kIsWeb ? 35 : 20,
           ),
         ),
         duration: const Duration(milliseconds: 500),
       );
-    }
-    else if (finishedQuestCorrectly.length >= userSelection.length*0.75) {
+    } else if (finishedQuestCorrectly.length >= userSelection.length * 0.75) {
       resultTitle = "Pretty Good, keep it up!";
       resultTitleColor = const Color(0xFFd4af37);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(
-            fontSize: kIsWeb? 35 : 20,
-            color: resultTitleColor
-        ),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
-    }
-    else if (finishedQuestCorrectly.length >= userSelection.length*0.5) {
+    } else if (finishedQuestCorrectly.length >= userSelection.length * 0.5) {
       resultTitle = "Not bad, improvement still necessary";
       resultTitleColor = const Color(0xFFBcc6cc);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(
-            fontSize: kIsWeb? 35 : 20,
-            color: resultTitleColor
-        ),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
-    }
-    else if (finishedQuestCorrectly.length >= userSelection.length*0.25){
+    } else if (finishedQuestCorrectly.length >= userSelection.length * 0.25) {
       resultTitle = "Not the worst, but still have tough road to go";
       resultTitleColor = const Color(0xFF5B391E);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(
-            fontSize: kIsWeb? 35 : 20,
-            color: resultTitleColor
-        ),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
-    }
-    else {
+    } else {
       resultTitle = "Too Bad, better try next time !";
       resultTitleColor = Colors.black87;
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(
-            fontSize: kIsWeb? 35 : 20,
-            color: resultTitleColor
-        ),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
     }
   }
 
-  Color isAnswerChosenCorrectlyColor(String? userOption, String result,
-      String currentOption, int shade){
-
-    if (userSelection[currentIndex]== null){
+  Color isAnswerChosenCorrectlyColor(
+      String? userOption, String result, String currentOption, int shade) {
+    if (userSelection[currentIndex] == null) {
       return Colors.blue[shade] as Color;
     }
 
-    if (userSelection[currentIndex]== currentOption){
-      if (result == currentOption){
+    if (userSelection[currentIndex] == currentOption) {
+      if (result == currentOption) {
         return Colors.green[shade] as Color;
       }
       return Colors.red[shade] as Color;
     }
 
-    if (result == currentOption){
+    if (result == currentOption) {
       return Colors.green[shade] as Color;
     }
-    return Colors.grey[shade*2] as Color;
-
-
+    return Colors.grey[shade * 2] as Color;
   }
 
   Color isAnswerChosenCorrectlyIcon(String? userOption, String result,
-      String currentOption, Color defaultColor){
-
-    if (userSelection[currentIndex]== null){
+      String currentOption, Color defaultColor) {
+    if (userSelection[currentIndex] == null) {
       return defaultColor;
     }
 
-    if (userSelection[currentIndex]== currentOption){
-      if (result == currentOption){
+    if (userSelection[currentIndex] == currentOption) {
+      if (result == currentOption) {
         return Colors.green.shade200;
       }
       return Colors.red.shade200;
     }
 
-    if (result == currentOption){
+    if (result == currentOption) {
       return Colors.green.shade200;
     }
     return Colors.grey.shade400;
-
-
   }
 
-  Widget answerCardWidget(String option,String result, int index){
+  Widget answerCardWidget(String option, String result, int index) {
     return TextButton(
-      onPressed: () async{
-        if (userSelection[currentIndex]==null){
+      onPressed: () async {
+        if (userSelection[currentIndex] == null) {
           setState(() {
             userSelection[currentIndex] = option;
           });
-          if (option == result){
+          if (option == result) {
             finishedQuestCorrectly.add(currentIndex);
-          }
-          else {
+          } else {
             finishedQuestWrongly.add(currentIndex);
           }
         }
         await Future.delayed(const Duration(milliseconds: 400));
         if (isFinished()) return showResultDialog();
         _pageController.nextPage(
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeIn
-        );
+            duration: const Duration(milliseconds: 350), curve: Curves.easeIn);
       },
       style: TextButton.styleFrom(
-          backgroundColor:isAnswerChosenCorrectlyColor(
-              userSelection[currentIndex],
-              result,option,200
-          ),
+          backgroundColor: isAnswerChosenCorrectlyColor(
+              userSelection[currentIndex], result, option, 200),
           side: BorderSide(
               color: isAnswerChosenCorrectlyColor(
-                  userSelection[currentIndex],
-                  result,option,400
-              ),
-              width: 3
-          ),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15)
-          )
-      ),
+                  userSelection[currentIndex], result, option, 400),
+              width: 3),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
       child: Container(
         alignment: Alignment.center,
-        width: kIsWeb? mainPageWidth * 0.17 : mainPageWidth,
-        height: kIsWeb? mainPageHeight * 0.22: mainPageHeight * 0.1,
+        width: kIsWeb ? mainPageWidth * 0.17 : mainPageWidth,
+        height: kIsWeb ? mainPageHeight * 0.22 : mainPageHeight * 0.1,
         child: Row(
           children: [
             Container(
@@ -354,78 +314,76 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
               child: Text(
                 '$index',
                 style: const TextStyle(
-                    fontSize: kIsWeb? 20 : 15,
-                    color: Colors.black
-                ),
+                    fontSize: kIsWeb ? 20 : 15, color: Colors.black),
               ),
             ),
             Expanded(
                 child: Container(
-                  alignment: Alignment.center,
-                  margin: const EdgeInsets.only(right: 40),
-                  child: Text(
-                    option,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: kIsWeb? 25 : 20,
-                    ),
-                  ),
-                )
-            )
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(right: 40),
+              child: Text(
+                option,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: kIsWeb ? 25 : 20,
+                ),
+              ),
+            ))
           ],
         ),
       ),
     );
   }
 
-  Widget answerGroupWidget(List<String> optionList, String result){
+  Widget answerGroupWidget(List<String> optionList, String result) {
     return Container(
         alignment: Alignment.center,
         margin: const EdgeInsets.symmetric(vertical: 10),
-        width: kIsWeb?mainPageWidth * 0.4:mainPageWidth * 0.95,
+        width: kIsWeb ? mainPageWidth * 0.4 : mainPageWidth * 0.95,
         height: mainPageHeight * 0.5,
-        child: kIsWeb?
-        //in web view
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                answerCardWidget(optionList[0],result,0),
-                answerCardWidget(optionList[1],result,1),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                answerCardWidget(optionList[2],result,2),
-                answerCardWidget(optionList[3],result,3),
-              ],
-            ),
-          ],
-        ):
-        //in mobile view
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            answerCardWidget(optionList[0],result,0),
-            answerCardWidget(optionList[1],result,1),
-            answerCardWidget(optionList[2],result,2),
-            answerCardWidget(optionList[3],result,3),
-          ],
-        )
-    );
+        child: kIsWeb
+            ?
+            //in web view
+            Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      answerCardWidget(optionList[0], result, 0),
+                      answerCardWidget(optionList[1], result, 1),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      answerCardWidget(optionList[2], result, 2),
+                      answerCardWidget(optionList[3], result, 3),
+                    ],
+                  ),
+                ],
+              )
+            :
+            //in mobile view
+            Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  answerCardWidget(optionList[0], result, 0),
+                  answerCardWidget(optionList[1], result, 1),
+                  answerCardWidget(optionList[2], result, 2),
+                  answerCardWidget(optionList[3], result, 3),
+                ],
+              ));
   }
 
-  Widget questionGroupWidget(String question){
+  Widget questionGroupWidget(String question) {
     return Container(
-      //alignment: Alignment.center,
+        //alignment: Alignment.center,
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.all(30),
         width: kIsWeb ? mainPageWidth * 0.4 : mainPageWidth,
         height: kIsWeb ? mainPageHeight * 0.2 : mainPageHeight * 0.25,
-        child:Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -434,9 +392,8 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
               textAlign: TextAlign.start,
               style: const TextStyle(
                   color: Colors.black87,
-                  fontSize: kIsWeb?40:35,
-                  fontWeight: FontWeight.bold
-              ),
+                  fontSize: kIsWeb ? 40 : 35,
+                  fontWeight: FontWeight.bold),
             ),
             const Text(
               "Choose the correct answer",
@@ -444,39 +401,42 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
               style: TextStyle(
                   color: Colors.black54,
                   fontSize: 18,
-                  fontWeight: FontWeight.bold
-              ),
+                  fontWeight: FontWeight.bold),
             )
           ],
-        )
-    );
+        ));
   }
 
-  Widget multipleChoicePageWidget(){
+  Widget multipleChoicePageWidget() {
     return Container(
-        width: mainPageWidth ,
-        height: mainPageHeight ,
+        width: mainPageWidth,
+        height: mainPageHeight,
         child: NotificationListener<ScrollNotification>(
           onNotification: (scrollNotification) {
-            if (!isProcessingNotification && scrollNotification is ScrollUpdateNotification) {
+            if (!isProcessingNotification &&
+                scrollNotification is ScrollUpdateNotification) {
               isProcessingNotification = true;
-              if (scrollNotification.scrollDelta! < 0 && isProcessingNotification) {
+              if (scrollNotification.scrollDelta! < 0 &&
+                  isProcessingNotification) {
                 // User is scrolling down
-                if (currentIndex<wordList.length-1){
-                  _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeIn)
+                if (currentIndex < wordList.length - 1) {
+                  _pageController
+                      .nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeIn)
                       .then((_) {
                     isProcessingNotification = false;
                   });
                   return true;
                 }
-              } else if (scrollNotification.scrollDelta! > 0 && isProcessingNotification) {
+              } else if (scrollNotification.scrollDelta! > 0 &&
+                  isProcessingNotification) {
                 // User is scrolling up
-                if (currentIndex>0){
-                  _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut)
+                if (currentIndex > 0) {
+                  _pageController
+                      .previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut)
                       .then((_) {
                     isProcessingNotification = false;
                   });
@@ -484,20 +444,20 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                 }
               }
             }
-            return false;// Return true to allow further handling of the notification
+            return false; // Return true to allow further handling of the notification
           },
           child: PageView.builder(
             allowImplicitScrolling: false,
             scrollDirection: Axis.vertical,
             controller: _pageController,
-            onPageChanged: (i){
+            onPageChanged: (i) {
               setState(() {
                 currentIndex = i;
               });
             },
             pageSnapping: true,
             itemCount: wordList.length,
-            itemBuilder: (context,index){
+            itemBuilder: (context, index) {
               return Container(
                 color: CupertinoColors.white,
                 child: Column(
@@ -508,103 +468,93 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
 
                     //Answer widget
                     answerGroupWidget(
-                        questList[index]['answer']as List<String>,
+                        questList[index]['answer'] as List<String>,
                         questList[index]['result']),
 
-                    userSelection[currentIndex]==null?
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: !skippedQuest.contains(currentIndex)?
-                      TextButton(
-                          child: Container(
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                                color: Colors.grey[400],
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.grey.shade800,
-                                  width: 3,
-                                )
-                            ),
-                            child:const Text(
-                              "I don't Know",
-                              style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 20
-                              ),
-                            ),
+                    userSelection[currentIndex] == null
+                        ? AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: !skippedQuest.contains(currentIndex)
+                                ? TextButton(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(15),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[400],
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: Colors.grey.shade800,
+                                            width: 3,
+                                          )),
+                                      child: const Text(
+                                        "I don't Know",
+                                        style: TextStyle(
+                                            color: Colors.black54,
+                                            fontSize: 20),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      skippedQuest.add(currentIndex);
+                                      userSelection[currentIndex] = 'Skipped';
+                                      setState(() {});
+                                      await Future.delayed(
+                                          const Duration(milliseconds: 300));
+                                      if (isFinished()) {
+                                        return setState(() {
+                                          showResultDialog();
+                                        });
+                                      }
+                                      if (currentIndex < wordList.length - 1) {
+                                        _pageController.nextPage(
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            curve: Curves.easeIn);
+                                      }
+                                    })
+                                : Container(
+                                    padding: const EdgeInsets.all(15),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[400],
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Colors.grey.shade800,
+                                          width: 3,
+                                        )),
+                                    child: const Text(
+                                      'You have skipped this quest',
+                                      style: TextStyle(
+                                          color: Colors.black54, fontSize: 20),
+                                    ),
+                                  ),
+                          )
+                        : AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: !skippedQuest.contains(currentIndex)
+                                ? const SizedBox.shrink()
+                                : Container(
+                                    padding: const EdgeInsets.all(15),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[400],
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Colors.grey.shade800,
+                                          width: 3,
+                                        )),
+                                    child: const Text(
+                                      'You have skipped this quest',
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  ),
                           ),
-                          onPressed: () async {
-                            skippedQuest.add(currentIndex);
-                            userSelection[currentIndex] = 'Skipped';
-                            setState(() {
-
-                            });
-                            await Future.delayed(const Duration(milliseconds: 300));
-                            if (isFinished()) {
-                              return setState(() {
-                                showResultDialog();
-                              });
-                            }
-                            if (currentIndex < wordList.length-1){
-                              _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeIn
-                              );
-                            }
-                          }
-                      ):
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.grey.shade800,
-                              width: 3,
-                            )
-                        ),
-                        child:const Text(
-                          'You have skipped this quest',
-                          style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 20
-                          ),
-                        ),
-                      ),
-                    ):
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: !skippedQuest.contains(currentIndex)?
-                      const SizedBox.shrink():
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.grey.shade800,
-                              width: 3,
-                            )
-                        ),
-                        child:const Text(
-                          'You have skipped this quest',
-                          style: TextStyle(
-                              fontSize: 20
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               );
             },
           ),
-        )
-    );
+        ));
   }
 
-  Widget multipleChoiceQuizMainPage(){
+  Widget multipleChoiceQuizMainPage() {
     return Stack(
       children: [
         //main content
@@ -622,18 +572,22 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
               children: [
                 FloatingActionButton(
                   shape: const CircleBorder(),
-                  onPressed: (){
-                    if (currentIndex>0){
-                      _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+                  onPressed: () {
+                    if (currentIndex > 0) {
+                      _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeIn);
                     }
                   },
-                  child:const Icon(Icons.arrow_upward),
+                  child: const Icon(Icons.arrow_upward),
                 ),
                 FloatingActionButton(
                   shape: const CircleBorder(),
-                  onPressed: (){
-                    if (currentIndex < wordList.length-1){
-                      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                  onPressed: () {
+                    if (currentIndex < wordList.length - 1) {
+                      _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut);
                     }
                   },
                   child: const Center(
@@ -648,28 +602,34 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   }
 
   void showResultDialog() {
-    score = finishedQuestCorrectly.length*500;
+    score = finishedQuestCorrectly.length * 500;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           child: Container(
-            width: kIsWeb? mainPageWidth * 0.8 : mainPageWidth * 0.95,
-            height: kIsWeb? mainPageHeight * 0.8: mainPageHeight * 0.85,
+            width: kIsWeb ? mainPageWidth * 0.8 : mainPageWidth * 0.95,
+            height: kIsWeb ? mainPageHeight * 0.8 : mainPageHeight * 0.85,
             child: Stack(
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 10,left: 10),
+                  margin: EdgeInsets.only(top: 10, left: 10),
                   alignment: Alignment.topLeft,
                   child: RepaintBoundary(
                     child: ConfettiWidget(
                       confettiController: _confettiControllerLeft,
-                      blastDirection: pi / 6, // 45 degrees
-                      emissionFrequency: 0.2, // Adjusted emission frequency
-                      numberOfParticles: 5, // Increased number of particles
-                      maxBlastForce: 65, // Increased blast force
-                      minBlastForce: 8, // Increased minimum blast force
-                      gravity: 0.01, // Adjusted gravity
+                      blastDirection: pi / 6,
+                      // 45 degrees
+                      emissionFrequency: 0.2,
+                      // Adjusted emission frequency
+                      numberOfParticles: 5,
+                      // Increased number of particles
+                      maxBlastForce: 65,
+                      // Increased blast force
+                      minBlastForce: 8,
+                      // Increased minimum blast force
+                      gravity: 0.01,
+                      // Adjusted gravity
                       colors: const [
                         Colors.red,
                         Colors.blue,
@@ -682,17 +642,23 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: 10,right: 10),
+                  margin: EdgeInsets.only(top: 10, right: 10),
                   alignment: Alignment.topRight,
                   child: RepaintBoundary(
                     child: ConfettiWidget(
                       confettiController: _confettiControllerRight,
-                      blastDirection: 5 * pi / 6, // 135 degrees
-                      emissionFrequency: 0.2, // Adjusted emission frequency
-                      numberOfParticles: 5, // Increased number of particles
-                      maxBlastForce: 65, // Increased blast force
-                      minBlastForce: 8, // Increased minimum blast force
-                      gravity: 0.01, // Adjusted gravity
+                      blastDirection: 5 * pi / 6,
+                      // 135 degrees
+                      emissionFrequency: 0.2,
+                      // Adjusted emission frequency
+                      numberOfParticles: 5,
+                      // Increased number of particles
+                      maxBlastForce: 65,
+                      // Increased blast force
+                      minBlastForce: 8,
+                      // Increased minimum blast force
+                      gravity: 0.01,
+                      // Adjusted gravity
                       colors: const [
                         Colors.red,
                         Colors.blue,
@@ -711,18 +677,18 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         );
       },
     );
-    if (!isShownOnce){
-      if (finishedQuestCorrectly.length > userSelection.length*0.5){
+    if (!isShownOnce) {
+      if (finishedQuestCorrectly.length > userSelection.length * 0.5) {
         _confettiControllerLeft.play();
         _confettiControllerRight.play();
       }
       updateScoreToDatabase(score);
     }
-    if (!isShownOnce) isShownOnce=true;
+    if (!isShownOnce) isShownOnce = true;
     setState(() {});
   }
 
-  Widget resultContext(){
+  Widget resultContext() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -734,12 +700,11 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
           ),
           Container(
             margin: const EdgeInsets.all(10),
-            width: kIsWeb? mainPageWidth * 0.7 : mainPageWidth * 0.9,
-            height: kIsWeb? mainPageHeight * 0.35 : mainPageHeight * 0.5,
+            width: kIsWeb ? mainPageWidth * 0.7 : mainPageWidth * 0.9,
+            height: kIsWeb ? mainPageHeight * 0.35 : mainPageHeight * 0.5,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-
                 //Progress indicator
                 if (kIsWeb)
                   Column(
@@ -750,43 +715,42 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                         child: const Text(
                           'Your Progress',
                           style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold
-                          ),
+                              fontSize: 25, fontWeight: FontWeight.bold),
                         ),
                       ),
                       SizedBox(
-                        width: kIsWeb? mainPageHeight * 0.24: mainPageWidth * 0.4,
-                        height: kIsWeb? mainPageHeight * 0.24: mainPageWidth * 0.4,
+                        width: kIsWeb
+                            ? mainPageHeight * 0.24
+                            : mainPageWidth * 0.4,
+                        height: kIsWeb
+                            ? mainPageHeight * 0.24
+                            : mainPageWidth * 0.4,
                         child: PieChart(
-                          PieChartData(
-                              startDegreeOffset: 270.0,
-                              sections: [
-                                //Correct answer
-                                PieChartSectionData(
-                                    value: finishedQuestCorrectly.length.toDouble(),
-                                    color: Colors.green[400],
-                                    title: "Correct",
-                                    titleStyle: const TextStyle(color: Colors.white)
-                                ),
+                          PieChartData(startDegreeOffset: 270.0, sections: [
+                            //Correct answer
+                            PieChartSectionData(
+                                value: finishedQuestCorrectly.length.toDouble(),
+                                color: Colors.green[400],
+                                title: "Correct",
+                                titleStyle:
+                                    const TextStyle(color: Colors.white)),
 
-                                //Wrong answer
-                                PieChartSectionData(
-                                    value: finishedQuestWrongly.length.toDouble(),
-                                    color: Colors.red[400],
-                                    title: "Wrong",
-                                    titleStyle: const TextStyle(color: Colors.white)
-                                ),
+                            //Wrong answer
+                            PieChartSectionData(
+                                value: finishedQuestWrongly.length.toDouble(),
+                                color: Colors.red[400],
+                                title: "Wrong",
+                                titleStyle:
+                                    const TextStyle(color: Colors.white)),
 
-                                //Skipped answer
-                                PieChartSectionData(
-                                    value: skippedQuest.length.toDouble(),
-                                    color: Colors.grey[700],
-                                    title: "Skip",
-                                    titleStyle: const TextStyle(color: Colors.white)
-                                )
-                              ]
-                          ),
+                            //Skipped answer
+                            PieChartSectionData(
+                                value: skippedQuest.length.toDouble(),
+                                color: Colors.grey[700],
+                                title: "Skip",
+                                titleStyle:
+                                    const TextStyle(color: Colors.white))
+                          ]),
                         ),
                       )
                     ],
@@ -805,57 +769,56 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                             child: const Text(
                               'Your Progress',
                               style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold
-                              ),
+                                  fontSize: 25, fontWeight: FontWeight.bold),
                             ),
                           ),
                           SizedBox(
-                            width: kIsWeb? mainPageHeight * 0.24: mainPageWidth * 0.4,
-                            height: kIsWeb? mainPageHeight * 0.24: mainPageWidth * 0.4,
+                            width: kIsWeb
+                                ? mainPageHeight * 0.24
+                                : mainPageWidth * 0.4,
+                            height: kIsWeb
+                                ? mainPageHeight * 0.24
+                                : mainPageWidth * 0.4,
                             child: PieChart(
-                              PieChartData(
-                                  startDegreeOffset: 270.0,
-                                  sections: [
-                                    //Correct answer
-                                    PieChartSectionData(
-                                        value: finishedQuestCorrectly.length.toDouble(),
-                                        color: Colors.green[400],
-                                        title: "Correct",
-                                        titleStyle: const TextStyle(color: Colors.white)
-                                    ),
+                              PieChartData(startDegreeOffset: 270.0, sections: [
+                                //Correct answer
+                                PieChartSectionData(
+                                    value: finishedQuestCorrectly.length
+                                        .toDouble(),
+                                    color: Colors.green[400],
+                                    title: "Correct",
+                                    titleStyle:
+                                        const TextStyle(color: Colors.white)),
 
-                                    //Wrong answer
-                                    PieChartSectionData(
-                                        value: finishedQuestWrongly.length.toDouble(),
-                                        color: Colors.red[400],
-                                        title: "Wrong",
-                                        titleStyle: const TextStyle(color: Colors.white)
-                                    ),
+                                //Wrong answer
+                                PieChartSectionData(
+                                    value:
+                                        finishedQuestWrongly.length.toDouble(),
+                                    color: Colors.red[400],
+                                    title: "Wrong",
+                                    titleStyle:
+                                        const TextStyle(color: Colors.white)),
 
-                                    //Skipped answer
-                                    PieChartSectionData(
-                                        value: skippedQuest.length.toDouble(),
-                                        color: Colors.grey[700],
-                                        title: "Skip",
-                                        titleStyle: const TextStyle(color: Colors.white)
-                                    )
-                                  ]
-                              ),
+                                //Skipped answer
+                                PieChartSectionData(
+                                    value: skippedQuest.length.toDouble(),
+                                    color: Colors.grey[700],
+                                    title: "Skip",
+                                    titleStyle:
+                                        const TextStyle(color: Colors.white))
+                              ]),
                             ),
                           )
                         ],
                       ),
                     Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
-                        width: kIsWeb? mainPageWidth * 0.3 : mainPageWidth * 0.6,
+                        width:
+                            kIsWeb ? mainPageWidth * 0.3 : mainPageWidth * 0.6,
                         decoration: BoxDecoration(
                           color: Colors.green[200],
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.green,
-                              width: 2
-                          ),
+                          border: Border.all(color: Colors.green, width: 2),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -864,29 +827,24 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                               'Correct',
                               style: TextStyle(
                                   color: Colors.green,
-                                  fontSize: kIsWeb? 35 : 20
-                              ),
+                                  fontSize: kIsWeb ? 35 : 20),
                             ),
                             Text(
                               '${finishedQuestCorrectly.length}',
                               style: const TextStyle(
                                   color: Colors.green,
-                                  fontSize: kIsWeb? 35 : 20
-                              ),
+                                  fontSize: kIsWeb ? 35 : 20),
                             ),
                           ],
-                        )
-                    ),
+                        )),
                     Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
-                        width: kIsWeb? mainPageWidth * 0.3 : mainPageWidth * 0.6,
+                        width:
+                            kIsWeb ? mainPageWidth * 0.3 : mainPageWidth * 0.6,
                         decoration: BoxDecoration(
                           color: Colors.red[200],
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.red,
-                              width: 2
-                          ),
+                          border: Border.all(color: Colors.red, width: 2),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -895,29 +853,25 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                               'Incorrect',
                               style: TextStyle(
                                   color: Colors.red,
-                                  fontSize: kIsWeb? 35 : 20
-                              ),
+                                  fontSize: kIsWeb ? 35 : 20),
                             ),
                             Text(
                               '${finishedQuestWrongly.length}',
                               style: const TextStyle(
                                   color: Colors.red,
-                                  fontSize: kIsWeb? 35 : 20
-                              ),
+                                  fontSize: kIsWeb ? 35 : 20),
                             ),
                           ],
-                        )
-                    ),
+                        )),
                     Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
-                        width: kIsWeb? mainPageWidth * 0.3 : mainPageWidth * 0.6,
+                        width:
+                            kIsWeb ? mainPageWidth * 0.3 : mainPageWidth * 0.6,
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: Colors.grey[700] as Color,
-                              width: 2
-                          ),
+                              color: Colors.grey[700] as Color, width: 2),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -926,20 +880,16 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                               'Skipped',
                               style: TextStyle(
                                   color: Colors.grey[700],
-                                  fontSize: kIsWeb? 35 : 20
-                              ),
+                                  fontSize: kIsWeb ? 35 : 20),
                             ),
                             Text(
                               '${skippedQuest.length}',
                               style: TextStyle(
                                   color: Colors.grey[700],
-                                  fontSize: kIsWeb? 35 : 20
-                              ),
+                                  fontSize: kIsWeb ? 35 : 20),
                             ),
                           ],
-                        )
-                    ),
-
+                        )),
                   ],
                 )
               ],
@@ -953,22 +903,22 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar : AppBar(
+      appBar: AppBar(
         automaticallyImplyLeading: false,
-        centerTitle : true,
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: (){
+          onPressed: () {
             clearCache();
             Navigator.pop(context);
           },
         ),
-        title : const Text('Multiple Choice'),
-        backgroundColor: Colors.blue.shade800,
-        titleTextStyle: const TextStyle(
-            color: CupertinoColors.white,
-            fontWeight: FontWeight.bold
+        title: const Text(
+          'Multiple Choice',
+          style: TextStyle(
+              color: CupertinoColors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.blueAccent,
         actions: [
           if (isShownOnce)
             IconButton(
@@ -983,13 +933,13 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
             )
         ],
       ),
-      body:LayoutBuilder(
-        builder: (context,constraints){
+      body: LayoutBuilder(
+        builder: (context, constraints) {
           mainPageWidth = constraints.maxWidth;
           mainPageHeight = constraints.maxHeight;
           return multipleChoiceQuizMainPage();
         },
-      ) ,
+      ),
     );
   }
 }

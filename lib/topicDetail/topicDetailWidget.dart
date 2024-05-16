@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -38,6 +39,8 @@ class _TopicDetailState extends State<TopicDetail> {
   static FlutterTts flutterTts = FlutterTts();
 
   // thay doi list word mới, participant khong thay doi
+  // list words này chỉ dùng để lưu các words trong edit topic
+  // không dùng với mục đích khác
   List<Word> words = [];
   FocusNode focusForTitle = FocusNode();
   List<Folder> folders = [];
@@ -45,10 +48,15 @@ class _TopicDetailState extends State<TopicDetail> {
   List<TextEditingController> definitionControllers = [];
   List<TextEditingController> descriptionControllers = [];
   List<Widget> termsWidgets = [];
+  List<Word> markedWords = [];
+  List<bool> selected = [];
 
   @override
   void initState() {
     syncTopicFromDatabase();
+    for (var i = 0; i < widget.topic.word!.length; i++) {
+      selected.add(false);
+    }
     super.initState();
   }
 
@@ -83,7 +91,15 @@ class _TopicDetailState extends State<TopicDetail> {
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         forceMaterialTransparency: true,
-        automaticallyImplyLeading: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: <Widget>[
           IconButton(
             onPressed: () {
@@ -111,6 +127,7 @@ class _TopicDetailState extends State<TopicDetail> {
               },
               icon: Icon(
                 FluentIcons.settings_48_filled,
+                color: Colors.black,
                 size: 27,
               ))
         ],
@@ -121,7 +138,10 @@ class _TopicDetailState extends State<TopicDetail> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("MINI FLASH CARD HERE"),
+              Text(
+                "MINI FLASH CARD HERE",
+                style: TextStyle(color: Colors.black),
+              ),
               SizedBox(
                 height: 8,
               ),
@@ -129,7 +149,10 @@ class _TopicDetailState extends State<TopicDetail> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   widget.topic.title as String,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.black),
                 ),
               ),
               SizedBox(
@@ -138,14 +161,21 @@ class _TopicDetailState extends State<TopicDetail> {
               Row(
                 children: [
                   ClipOval(
-                    child: CachedNetworkImage(
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.cover,
-                      imageUrl: widget.topic.ownerAvtUrl as String,
-                      placeholder: (context, url) =>
-                          CircularProgressIndicator(),
-                    ),
+                    child: kIsWeb
+                        ? Image.network(
+                            widget.topic.ownerAvtUrl as String,
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                          )
+                        : CachedNetworkImage(
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                            imageUrl: widget.topic.ownerAvtUrl as String,
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                          ),
                   ),
                   SizedBox(
                     width: 8,
@@ -153,7 +183,10 @@ class _TopicDetailState extends State<TopicDetail> {
                   IntrinsicHeight(
                     child: Row(
                       children: [
-                        Text(widget.topic.owner as String),
+                        Text(
+                          widget.topic.owner as String,
+                          style: TextStyle(color: Colors.black),
+                        ),
                         SizedBox(
                           width: 20,
                         ),
@@ -164,7 +197,10 @@ class _TopicDetailState extends State<TopicDetail> {
                         SizedBox(
                           width: 20,
                         ),
-                        Text("${widget.topic.word?.length} terms"),
+                        Text(
+                          "${widget.topic.word?.length} terms",
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ],
                     ),
                   ),
@@ -181,8 +217,14 @@ class _TopicDetailState extends State<TopicDetail> {
                     margin: EdgeInsets.all(9),
                     color: Colors.blue[50],
                     child: ListTile(
-                      leading: Icon(FluentIcons.copy_16_regular),
-                      title: Text("Flashcard"),
+                      leading: Icon(
+                        FluentIcons.copy_16_regular,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Flashcard",
+                        style: TextStyle(color: Colors.black),
+                      ),
                       onTap: () {
                         Navigator.push(
                             context,
@@ -197,8 +239,14 @@ class _TopicDetailState extends State<TopicDetail> {
                     margin: EdgeInsets.all(9),
                     color: Colors.blue[50],
                     child: ListTile(
-                      leading: Icon(Icons.quiz_outlined),
-                      title: Text("Multiple choices"),
+                      leading: Icon(
+                        Icons.quiz_outlined,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Multiple choices",
+                        style: TextStyle(color: Colors.black),
+                      ),
                       onTap: () {
                         showSelectionDialog(context, isMultipleQuiz: true);
                       },
@@ -209,19 +257,38 @@ class _TopicDetailState extends State<TopicDetail> {
                     margin: EdgeInsets.all(9),
                     color: Colors.blue[50],
                     child: ListTile(
-                      leading: Icon(FluentIcons.pen_16_regular),
-                      title: Text("Fill words"),
+                      leading: Icon(
+                        FluentIcons.pen_16_regular,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Fill words",
+                        style: TextStyle(color: Colors.black),
+                      ),
                       onTap: () {
                         showSelectionDialog(context, isMultipleQuiz: false);
                       },
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 8, left: 8, bottom: 8),
-                    child: Text(
-                      "Terms",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    padding:
+                        EdgeInsets.only(top: 8, left: 8, bottom: 8, right: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Terms",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black),
+                        ),
+                        Expanded(child: SizedBox()),
+                        Text(
+                          "${markedWords.length} words marked",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(
@@ -232,7 +299,7 @@ class _TopicDetailState extends State<TopicDetail> {
                       itemBuilder: (BuildContext context, int index) {
                         if (widget.topic.word?[index] != null) {
                           Word? word = widget.topic.word?[index];
-                          return wordBlock(word!);
+                          return wordBlock(word!, index);
                         }
                         return null;
                       },
@@ -251,13 +318,18 @@ class _TopicDetailState extends State<TopicDetail> {
     // Initial states for options
     bool language = false;
     bool shuffle = false;
-
+    bool marked = false;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              backgroundColor: CupertinoColors.white,
+              surfaceTintColor: Colors.transparent,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -265,6 +337,8 @@ class _TopicDetailState extends State<TopicDetail> {
                     title: Text('Language'),
                     subtitle: Text('(default: English)'),
                     trailing: Switch(
+                      activeColor: Colors.blue,
+                      inactiveTrackColor: Colors.white,
                       value: language,
                       onChanged: (bool value) {
                         setState(() {
@@ -277,6 +351,8 @@ class _TopicDetailState extends State<TopicDetail> {
                     title: Text('Shuffle'),
                     subtitle: Text('(default: Off)'),
                     trailing: Switch(
+                      activeColor: Colors.blue,
+                      inactiveTrackColor: Colors.white,
                       value: shuffle,
                       onChanged: (bool value) {
                         setState(() {
@@ -285,33 +361,76 @@ class _TopicDetailState extends State<TopicDetail> {
                       },
                     ),
                   ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: (){
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            if (isMultipleQuiz!){
-                              return MultipleChoiceQuizPage(
-                                  topic: widget.topic,
-                                  isChangeLanguage: language,
-                                  isShuffle: shuffle
-                              );
-                            }
-                            else {
-                              return FillWordQuizPage(
-                                  topic: widget.topic,
-                                  isChangeLanguage: language,
-                                  isShuffle: shuffle
-                              );
-                            }
+                  ListTile(
+                    title: Text('Only marked words'),
+                    subtitle: Text('(default: Off)'),
+                    trailing: Switch(
+                      activeColor: Colors.blue,
+                      inactiveTrackColor: Colors.white,
+                      value: marked,
+                      onChanged: (bool incomingValue) {
+                        setState(() {
+                          if (incomingValue && markedWords.length >= 4) {
+                            marked = incomingValue;
+                          } else if (incomingValue && markedWords.length < 4) {
+                            showAlertDialog(
+                                "Please mark at least 4 words to enable this",
+                                Colors.red);
+                          } else {
+                            marked = incomingValue;
                           }
-                        )
-                      );
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        if (isMultipleQuiz!) {
+                          if (marked) {
+                            Topic topicWithMarkedWords = widget.topic;
+                            topicWithMarkedWords.word = markedWords;
+                            return MultipleChoiceQuizPage(
+                                topic: topicWithMarkedWords,
+                                isChangeLanguage: language,
+                                isShuffle: shuffle);
+                          } else {
+                            return MultipleChoiceQuizPage(
+                                topic: widget.topic,
+                                isChangeLanguage: language,
+                                isShuffle: shuffle);
+                          }
+                        } else {
+                          if (marked) {
+                            Topic topicWithMarkedWords = widget.topic;
+                            topicWithMarkedWords.word = markedWords;
+                            return FillWordQuizPage(
+                                topic: topicWithMarkedWords,
+                                isChangeLanguage: language,
+                                isShuffle: shuffle);
+                          } else {
+                            return FillWordQuizPage(
+                                topic: widget.topic,
+                                isChangeLanguage: language,
+                                isShuffle: shuffle);
+                          }
+                        }
+                      }));
                     },
-                    child: Text('OK'),
+                    child: Text(
+                      'OK',
+                      style:
+                          TextStyle(color: CupertinoColors.white, fontSize: 15),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -322,7 +441,7 @@ class _TopicDetailState extends State<TopicDetail> {
     );
   }
 
-  Widget wordBlock(Word word) {
+  Widget wordBlock(Word word, int index) {
     return Card(
       elevation: 4,
       margin: EdgeInsets.all(4),
@@ -337,26 +456,41 @@ class _TopicDetailState extends State<TopicDetail> {
                 Expanded(
                   child: Text(
                     word.english as String,
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 20, color: Colors.black),
                   ),
                 ),
                 IconButton(
-                    onPressed: () {
-                      _speak(word.english as String, 'en-US');
-                    },
-                    icon: Icon(FluentIcons.speaker_2_16_filled)),
+                  onPressed: () {
+                    _speak(word.english as String, 'en-US');
+                  },
+                  icon: Icon(FluentIcons.speaker_2_16_filled),
+                  color: Colors.black,
+                ),
                 IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      FluentIcons.star_12_regular,
-                      color: Colors.amber,
-                    )),
+                    onPressed: () {
+                      setState(() {
+                        selected[index] = !selected[index];
+                        selected[index]
+                            ? markedWords.add(word)
+                            : markedWords.removeWhere((w) => w == word);
+                      });
+                    },
+                    icon: selected.elementAt(index)
+                        ? Icon(
+                            FluentIcons.star_12_filled,
+                            color: Colors.amber,
+                          )
+                        : Icon(
+                            FluentIcons.star_12_regular,
+                            color: Colors.amber,
+                          )),
               ],
             ),
             SizedBox(
               height: 4,
             ),
-            Text(word.vietnamese as String, style: TextStyle(fontSize: 20)),
+            Text(word.vietnamese as String,
+                style: TextStyle(fontSize: 20, color: Colors.black)),
           ],
         ),
       ),
@@ -548,6 +682,7 @@ class _TopicDetailState extends State<TopicDetail> {
                                     termControllers,
                                     definitionControllers,
                                     descriptionControllers);
+                                Navigator.of(context).pop();
                               } else {
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
@@ -906,7 +1041,6 @@ class _TopicDetailState extends State<TopicDetail> {
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             )));
-        Navigator.of(context).pop();
       });
     } else {
       showAlertDialog("Please fill at least 4 words", Colors.red);
@@ -941,8 +1075,11 @@ class _TopicDetailState extends State<TopicDetail> {
               SizedBox(
                 height: 12,
               ),
-              Text(notification,
-                  style: TextStyle(color: Colors.white, fontSize: 20)),
+              Center(
+                child: Text(notification,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 20)),
+              ),
             ],
           ),
         );
@@ -959,6 +1096,11 @@ class _TopicDetailState extends State<TopicDetail> {
       if (changedTopic.id == widget.topic.id) {
         setState(() {
           widget.topic = changedTopic;
+          selected.clear();
+          for (var i = 0; i < widget.topic.word!.length; i++) {
+            selected.add(false);
+          }
+          markedWords.clear();
         });
       }
     });
@@ -1102,7 +1244,7 @@ class _TopicDetailState extends State<TopicDetail> {
                   child: GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 2.2,
+                      childAspectRatio: kIsWeb ? 5 : 2.2,
                     ),
                     itemBuilder: (BuildContext context, int index) {
                       Folder folder = folders[index];
@@ -1163,7 +1305,7 @@ class _TopicDetailState extends State<TopicDetail> {
           ],
         ),
         onTap: () {
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
           showConfirmFolderDialog(folder);
         },
         shape: RoundedRectangleBorder(

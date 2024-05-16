@@ -25,6 +25,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late List<Widget> _pages;
   late PageController _pageController;
   User? user;
+  bool isSwitched = false;
 
   void getUser() async {
     User fetchedUser = await fetchUserDataFromDatabase(widget.userID);
@@ -63,36 +64,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: CupertinoColors.white,
-      body: user == null
-          ? Center(
-              child: CircularProgressIndicator(
-              color: Colors.blue,
-            ))
-          : PageView(
-              controller: _pageController,
-              physics: NeverScrollableScrollPhysics(),
-              children: _pages,
-            ),
-      bottomNavigationBar: MotionTabBar(
-        initialSelectedTab: "Home",
-        labels: const ["Home", "Library", "Profile"],
-        icons: const [Icons.home, Icons.library_books, Icons.person],
-        tabSize: 50,
-        tabBarHeight: 55,
-        textStyle: const TextStyle(
-          fontSize: 12,
-          color: Colors.blue,
-          fontWeight: FontWeight.w500,
+    return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.light(),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: CupertinoColors.white,
+        body: user == null
+            ? Center(
+                child: CircularProgressIndicator(
+                color: Colors.blue,
+              ))
+            : PageView(
+                controller: _pageController,
+                physics: NeverScrollableScrollPhysics(),
+                children: _pages,
+              ),
+        bottomNavigationBar: MotionTabBar(
+          initialSelectedTab: "Home",
+          labels: const ["Home", "Library", "Profile"],
+          icons: const [Icons.home, Icons.library_books, Icons.person],
+          tabSize: 50,
+          tabBarHeight: 55,
+          textStyle: const TextStyle(
+            fontSize: 12,
+            color: Colors.blue,
+            fontWeight: FontWeight.w500,
+          ),
+          tabIconColor: Colors.blue[400],
+          tabIconSize: 28.0,
+          tabIconSelectedSize: 26.0,
+          tabSelectedColor: Colors.blue[400],
+          tabIconSelectedColor: Colors.white,
+          tabBarColor: Colors.white70,
+          onTabItemSelected: onItemTapped,
         ),
-        tabIconColor: Colors.blue[400],
-        tabIconSize: 28.0,
-        tabIconSelectedSize: 26.0,
-        tabSelectedColor: Colors.blue[400],
-        tabIconSelectedColor: Colors.white,
-        tabBarColor: Colors.white70,
-        onTabItemSelected: onItemTapped,
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../objects/folder.dart';
+import 'package:flutter/foundation.dart';
 
 class FolderTab extends StatefulWidget {
   const FolderTab({super.key});
@@ -41,14 +42,17 @@ class _FolderTabState extends State<FolderTab>
         forceMaterialTransparency: true,
         automaticallyImplyLeading: false,
         title: Center(
-          child: Text("My folder"),
+          child: Text(
+            "My folder",
+            style: TextStyle(color: Colors.black),
+          ),
         ),
       ),
       body: !folders.isEmpty
           ? GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 2.2,
+                childAspectRatio: kIsWeb ? 5 : 2.2,
               ),
               itemBuilder: (BuildContext context, int index) {
                 Folder folder = folders[index];
@@ -85,7 +89,8 @@ class _FolderTabState extends State<FolderTab>
         ),
         title: Text(
           folder.name as String,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 17, color: Colors.black),
         ),
         subtitle: Wrap(
           runSpacing: 4.0,
@@ -147,6 +152,7 @@ class _FolderTabState extends State<FolderTab>
                           onPressed: () {
                             if (validateCreateFolder()) {
                               saveFolder();
+                              Navigator.of(context).pop();
                             } else {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 focusForFolderName.requestFocus();
@@ -212,7 +218,6 @@ class _FolderTabState extends State<FolderTab>
             "Success",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           )));
-      Navigator.of(context).pop();
       _folderNameEditingController.clear();
     });
   }

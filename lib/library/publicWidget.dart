@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/topic.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -51,7 +52,10 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
         title: Padding(
           padding: const EdgeInsets.only(top: 18.0, bottom: 15),
           child: Center(
-            child: Text("Discover new topics everyday"),
+            child: Text(
+              "Discover new topics everyday",
+              style: TextStyle(color: Colors.black),
+            ),
           ),
         ),
         bottom: PreferredSize(
@@ -152,50 +156,73 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
   }
 
   Widget topicBlock(Topic topic) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.all(9),
-      color: Colors.blue[50],
-      child: ListTile(
-        leading: ClipOval(
-          child: CachedNetworkImage(
-            width: 36,
-            height: 36,
-            fit: BoxFit.cover,
-            imageUrl: topic.ownerAvtUrl as String,
-            placeholder: (context, url) => CircularProgressIndicator(),
-          ),
-        ),
-        title: Text(
-          topic.title as String,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-        ),
-        subtitle: Wrap(
-          runSpacing: 4.0,
-          children: [
-            Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Text('${topic.word?.length} terms',
-                    style: TextStyle(color: Colors.blue[800]))),
-          ],
-        ),
-        trailing: Text(
-          topic.owner as String,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        ),
-        onTap: () {
-          onClickPublicTopic(topic);
-        },
+    return Stack(children: [
+      Card(
+        elevation: 4,
+        margin: EdgeInsets.all(9),
+        color: Colors.blue[50],
         shape: RoundedRectangleBorder(
           side: BorderSide(color: Colors.blue[300] as Color, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
+        child: ListTile(
+          leading: ClipOval(
+            child: kIsWeb
+                ? Image.network(
+                    topic.ownerAvtUrl as String,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                  )
+                : CachedNetworkImage(
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                    imageUrl: topic.ownerAvtUrl as String,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                  ),
+          ),
+          title: Text(
+            topic.title as String,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 17, color: Colors.black),
+          ),
+          subtitle: Wrap(
+            runSpacing: 4.0,
+            children: [
+              Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                  child: Text('${topic.word?.length} terms',
+                      style: TextStyle(color: Colors.blue[800]))),
+            ],
+          ),
+          trailing: Text(
+            topic.owner as String,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Colors.black.withOpacity(0.75)),
+          ),
+          onTap: () {
+            updateUserActivity(topic);
+            onClickPublicTopic(topic);
+          },
+        ),
       ),
-    );
+      if (topic.access == "PRIVATE")
+        Positioned(
+          left: 5.0,
+          top: 5.0,
+          child: Image.asset(
+            'lib/icon/locked.png',
+            height: 20,
+          ),
+        ),
+    ]);
   }
 
   void syncTopicFromDatabase() {

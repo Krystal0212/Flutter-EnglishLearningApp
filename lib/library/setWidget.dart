@@ -17,6 +17,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../objects/userActivity.dart';
 import '../objects/word.dart';
+import 'package:flutter/foundation.dart';
 
 class Set extends StatefulWidget {
   const Set({super.key});
@@ -89,7 +90,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
         forceMaterialTransparency: true,
         automaticallyImplyLeading: false,
         title: Center(
-          child: Text("My study set"),
+          child: Text(
+            "My study set",
+            style: TextStyle(color: Colors.black),
+          ),
         ),
       ),
       body: isLoading
@@ -131,17 +135,25 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
         ),
         child: ListTile(
           leading: ClipOval(
-            child: CachedNetworkImage(
-              width: 36,
-              height: 36,
-              fit: BoxFit.cover,
-              imageUrl: topic.ownerAvtUrl as String,
-              placeholder: (context, url) => CircularProgressIndicator(),
-            ),
+            child: kIsWeb
+                ? Image.network(
+                    topic.ownerAvtUrl as String,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                  )
+                : CachedNetworkImage(
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                    imageUrl: topic.ownerAvtUrl as String,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                  ),
           ),
           title: Text(
             topic.title as String,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 17, color: Colors.black),
           ),
           subtitle: Wrap(
             runSpacing: 4.0,
@@ -158,7 +170,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
           ),
           trailing: Text(
             topic.owner as String,
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Colors.black.withOpacity(0.75)),
           ),
           onTap: () {
             updateUserActivity(topic);
@@ -196,8 +211,6 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     dbRef.child('Topic').onChildAdded.listen((data) {
       Topic topic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
-      // add participant checking step here in the future
-      // cụ thể là check xem user hien tai co trong participant khong
       if (topic.owner == auth.currentUser?.displayName ||
           topic.participant!.any((p) => p.userID == auth.currentUser?.uid)) {
         setState(() {
@@ -310,6 +323,7 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                                     termControllers,
                                     definitionControllers,
                                     descriptionControllers);
+                                Navigator.of(context).pop();
                               } else {
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
@@ -661,7 +675,6 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             )));
-        Navigator.of(context).pop();
         _topicTitleEditingController.clear();
       });
     } else {

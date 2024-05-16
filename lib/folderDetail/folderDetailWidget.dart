@@ -42,14 +42,29 @@ class _FolderDetailState extends State<FolderDetail> {
       appBar: AppBar(
         backgroundColor: Colors.blue[50],
         automaticallyImplyLeading: true,
-        title: Text(widget.folder.name as String),
+        title: Text(
+          widget.folder.name as String,
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: <Widget>[
           IconButton(
               onPressed: () {
                 showBottomSheetMenu();
               },
-              icon: Icon(FluentIcons.settings_32_filled))
+              icon: Icon(
+                FluentIcons.settings_32_filled,
+                color: Colors.black,
+              ))
         ],
       ),
       body: !topics.isEmpty
@@ -77,7 +92,10 @@ class _FolderDetailState extends State<FolderDetail> {
               ],
             )
           : Center(
-              child: Text("Nothing here currently"),
+              child: Text(
+                "Nothing here currently",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
     );
   }
@@ -361,13 +379,13 @@ class _FolderDetailState extends State<FolderDetail> {
 
   void deleteFolder() {
     dbRef.child('Folder/${widget.folder.id}').remove().then((value) {
-      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.redAccent,
           content: Text(
             "Folder deleted",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           )));
+      Navigator.of(context).pop();
     });
   }
 
@@ -409,6 +427,7 @@ class _FolderDetailState extends State<FolderDetail> {
                           onPressed: () {
                             if (validateCreateFolder()) {
                               updateFolder();
+                              Navigator.of(context).pop();
                             } else {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 focusForFolderName.requestFocus();
@@ -466,7 +485,6 @@ class _FolderDetailState extends State<FolderDetail> {
             "Updated",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           )));
-      Navigator.of(context).pop();
     });
   }
 

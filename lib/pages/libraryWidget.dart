@@ -46,6 +46,7 @@ class _LibraryState extends State<Library>
             controller: _tabController,
             labelColor: Colors.blue,
             indicatorColor: Colors.blue,
+            unselectedLabelColor: Colors.black,
             tabAlignment: TabAlignment.start,
             tabs: [
               Tab(
@@ -60,7 +61,10 @@ class _LibraryState extends State<Library>
             ],
             isScrollable: true,
           ),
-          title: Text("Library"),
+          title: Text(
+            "Library",
+            style: TextStyle(color: Colors.black),
+          ),
           backgroundColor: Colors.blue[50],
         ),
         body: TabBarView(controller: _tabController, children: [
