@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:Fluffy/pages/flashcardQuizPage.dart';
 import 'package:Fluffy/pages/multipleChoiceQuizPage.dart';
+import 'package:Fluffy/pages/topicAchivementPage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -98,7 +99,16 @@ class _TopicDetailState extends State<TopicDetail> {
           Padding(
             padding: EdgeInsets.all(8),
             child: InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => TopicAchievementPage(
+                            topic: widget.topic
+                        )
+                    )
+                );
+              },
               child: Image.asset(
                 'lib/icon/trophy.png',
                 height: 23,
