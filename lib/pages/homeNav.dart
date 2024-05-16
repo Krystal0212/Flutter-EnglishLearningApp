@@ -1,20 +1,15 @@
-import 'package:Fluffy/objects/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/pages/profile.dart';
 import 'homeWidget.dart';
 import 'libraryWidget.dart';
-import 'package:motion_tab_bar/MotionBadgeWidget.dart';
 import 'package:motion_tab_bar/MotionTabBar.dart';
-import 'package:motion_tab_bar/MotionTabBarController.dart';
-import 'package:motion_tab_bar/MotionTabItem.dart';
-import 'package:motion_tab_bar/helpers/HalfClipper.dart';
-import 'package:motion_tab_bar/helpers/HalfPainter.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.userID});
+  const MyHomePage({super.key, required this.user});
 
-  final String userID;
+  final User user;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -22,30 +17,23 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex;
-  late List<Widget> _pages;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late List<Widget> _pages = [
+    Home(),
+    Library(),
+    Profile(),
+  ];
   late PageController _pageController;
   User? user;
-  bool isSwitched = false;
 
-  void getUser() async {
-    User fetchedUser = await fetchUserDataFromDatabase(widget.userID);
-    setState(() {
-      user = fetchedUser;
-      _pages = [
-        Home(),
-        Library(),
-        Profile(user: user!),
-      ];
-    });
-    print(user.toString());
-  }
 
   @override
   void initState() {
     selectedIndex = 0;
     _pageController = PageController(initialPage: selectedIndex);
+    user = auth.currentUser;
+    // print(user.toString());
 
-    getUser();
     super.initState();
   }
 
