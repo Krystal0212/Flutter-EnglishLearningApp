@@ -7,7 +7,7 @@ import 'package:Fluffy/constants/theme.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'dart:io';
 
 class Profile extends StatefulWidget {
@@ -58,7 +58,7 @@ class MyProfileState extends State<Profile> {
     });
   }
 
-  Widget profileBox(BuildContext context) {
+  Widget profileBox() {
     return Center(
       child: Column(
         children: [
@@ -83,7 +83,7 @@ class MyProfileState extends State<Profile> {
                       ),
                       child: IconButton(
                         onPressed: () {
-                          changeAvatar(context);
+                          changeAvatar();
                         },
                         icon: Icon(
                           Icons.add_photo_alternate,
@@ -141,7 +141,7 @@ class MyProfileState extends State<Profile> {
     }
   }
 
-  Future<void> signOutUser(BuildContext context) async {
+  Future<void> signOutUser() async {
     setIndicatorTrue();
     try {
       await auth.signOut();
@@ -183,7 +183,7 @@ class MyProfileState extends State<Profile> {
     }
   }
 
-  Future<void> changeAvatar(BuildContext context) async {
+  Future<void> changeAvatar() async {
     setIndicatorTrue();
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -195,7 +195,7 @@ class MyProfileState extends State<Profile> {
         url = await sendAvatarToFirebaseStorage(webImage, pickedFile.name);
       } else {
         url = await sendAvatarToFirebaseStorage(
-            File(pickedFile.path), basename(pickedFile.path));
+            File(pickedFile.path), path.basename(pickedFile.path));
       }
 
       if (!url.isEmpty) {
@@ -205,27 +205,38 @@ class MyProfileState extends State<Profile> {
         setState(() {
           imageAvatar = NetworkImage(url);
         });
+        showResultDialog("Changed avatar successfully");
       }
     } else {
-      print("Could not get the image data");
+      showResultDialog("Could not get the image data");
     }
     setIndicatorFalse();
   }
 
-  Future<void> setPasswordForUser(
-      String email, String password, BuildContext context) async {
+  Future<void> setPasswordForUser(String email, String password) async {
     try {
       AuthCredential credential = EmailAuthProvider.credential(
           email: email.trim(), password: password.trim());
-      await auth.currentUser?.linkWithCredential(credential);
+
+      User? user =  auth.currentUser;
+
+      await user?.linkWithCredential(credential);
+      await user?.sendEmailVerification();
+      showResultDialog("Verification email has been sent. Please check your email !");
     } on FirebaseAuthException catch (e) {
-      print("Error re-authenticating: ${e.code}");
-    } catch (e) {
-      print("Unknown error re-authenticating");
+      String validateResult;
+      if (e.code == 'provider-already-linked') {
+        validateResult =
+            "This account is already linked. Please use another account to link.";
+      } else {
+        validateResult = "Failed to set your password. Please try again.";
+      }
+
+      showResultDialog(validateResult);
     }
   }
 
-  Future<void> linkEmailPasswordForAccount(BuildContext context) {
+  Future<void> linkEmailPasswordForAccount() {
     TextEditingController passwordController = TextEditingController();
     TextEditingController confirmPasswordController = TextEditingController();
 
@@ -274,21 +285,18 @@ class MyProfileState extends State<Profile> {
                     validateResult = "Passwords are not match";
                   } else if (password == confirmPassword) {
                     await setPasswordForUser(
-                        auth.currentUser!.email!, password, context);
+                        auth.currentUser!.email!, password);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        duration: Duration(seconds: 2),
-                        content: Text("Set password successfully"),
-                      ),
-                    );
+                    setState(() {
+                      isCasualUser = true;
+                    });
 
                     Navigator.of(context).pop();
+                    validateResult = "Set password successfully";
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    duration: Duration(seconds: 2),
-                    content: Text(validateResult),
-                  ));
+                  if (validateResult != "") {
+                    showResultDialog(validateResult);
+                  }
                 },
               ),
             ],
@@ -296,32 +304,26 @@ class MyProfileState extends State<Profile> {
         });
   }
 
-  Future<bool> reAuthenticateUser(
-      String email, String password, BuildContext context) async {
+  Future<bool> reAuthenticateUser(String email, String password) async {
     try {
       AuthCredential credential = EmailAuthProvider.credential(
-          email: email.trim(),
-          password: password.trim()
-      );
+          email: email.trim(), password: password.trim());
       await auth.currentUser?.reauthenticateWithCredential(credential);
 
       return true;
     } on FirebaseAuthException catch (e) {
-      if(e.code == "invalid-credential"){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 2),
-            content: Text("Wrong password, please enter valid password of account"),
-          ),
-        );
+      if (e.code == "invalid-credential") {
+        String validateResult =
+            "Wrong password, please enter valid password of account";
+        showResultDialog(validateResult);
+      } else {
+        print("Error re-authenticating: ${e.code}");
       }
-      else{
-      print("Error re-authenticating: ${e.code}");}
       return false;
     }
   }
 
-  Future<void> changePasswordForAccount(BuildContext context) {
+  Future<void> changePasswordForAccount() {
     TextEditingController passwordController = TextEditingController();
     TextEditingController newPasswordController = TextEditingController();
     TextEditingController confirmPasswordController = TextEditingController();
@@ -369,38 +371,32 @@ class MyProfileState extends State<Profile> {
                   String password = passwordController.text;
                   String confirmPassword = confirmPasswordController.text;
 
-                  if (newPassword.isEmpty) {
+                  if (password.isEmpty) {
                     validateResult = "Password field is empty";
-                  } else if (confirmPassword.isEmpty) {
+                  } else if (newPassword.isEmpty) {
+                    validateResult = "New password field is empty";
+                  }
+                  if (confirmPassword.isEmpty) {
                     validateResult = "Confirm password field is empty";
                   } else if (newPassword != confirmPassword) {
-                    validateResult = "Passwords are not match";
+                    validateResult = "New passwords are not match";
                   } else if (newPassword == confirmPassword) {
                     setIndicatorTrue();
                     String email = user.email!;
-                    bool reAuthen = await reAuthenticateUser(email, password, context);
+                    bool reAuthen = await reAuthenticateUser(email, password);
 
-                    if( reAuthen == true ){
-                    await setPasswordForUser(
-                        auth.currentUser!.email!, newPassword, context);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          duration: Duration(seconds: 2),
-                          content: Text("Changed password successfully"),
-                        ),
-                      );
-
-                    Navigator.of(context).pop();
-
+                    if (reAuthen) {
+                      await auth.currentUser?.updatePassword(newPassword);
+                      validateResult = "Changed password successfully";
                     }
-                    setIndicatorFalse();
-                    return;
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    duration: Duration(seconds: 2),
-                    content: Text(validateResult),
-                  ));
+                  Navigator.of(context).pop();
+
+                  setIndicatorFalse();
+
+                  if (validateResult != "") {
+                    showResultDialog(validateResult);
+                  }
                 },
               ),
             ],
@@ -408,16 +404,25 @@ class MyProfileState extends State<Profile> {
         });
   }
 
-  Widget linkingAccountsGroup(BuildContext context) {
+  void showResultDialog(String validateResult) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: Duration(seconds: 2),
+        content: Text(validateResult),
+      ));
+    }
+  }
+
+  Widget linkingAccountsGroup() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.7,
       child: Column(
         children: [
           SizedBox(height: 20),
-          (isGoogleUser && ! isCasualUser)
+          (isGoogleUser && !isCasualUser)
               ? ElevatedButton(
                   onPressed: () async {
-                    linkEmailPasswordForAccount(context);
+                    linkEmailPasswordForAccount();
                   },
                   child: Center(
                     child: Text("Create a password for your account"),
@@ -426,7 +431,7 @@ class MyProfileState extends State<Profile> {
           isCasualUser
               ? ElevatedButton(
                   onPressed: () async {
-                    changePasswordForAccount(context);
+                    changePasswordForAccount();
                   },
                   child: Center(
                     child: Text("Change password"),
@@ -434,7 +439,9 @@ class MyProfileState extends State<Profile> {
               : SizedBox(),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed: () async {
+              onPressed:
+              (!isGoogleUser)
+              ?  () async {
                 try {
                   late String? idToken;
                   late String? userEmail;
@@ -465,16 +472,16 @@ class MyProfileState extends State<Profile> {
                 } on FirebaseAuthException catch (e) {
                   switch (e.code) {
                     case "provider-already-linked":
-                      print(
+                      showResultDialog(
                           "The provider has already been linked to the user.");
-                      break;
                     default:
                       print("Unknown error: ${e.code}");
                       break;
                   }
                   setIndicatorFalse();
                 }
-              },
+              }
+              : (){},
               child: Center(
                 child: Text(isGoogleUser
                     ? "Google account linked"
@@ -485,7 +492,7 @@ class MyProfileState extends State<Profile> {
     );
   }
 
-  Future<void> changeUsername(BuildContext context) async {
+  Future<void> changeUsername() async {
     TextEditingController userNameController = TextEditingController();
 
     return showDialog<void>(
@@ -558,7 +565,7 @@ class MyProfileState extends State<Profile> {
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                     left: 0, right: 0, top: 70, bottom: 42),
-                                child: profileBox(context),
+                                child: profileBox(),
                               ),
                             )
                           ],
@@ -590,7 +597,7 @@ class MyProfileState extends State<Profile> {
                                     vertical: 10, horizontal: 12),
                               ),
                               onPressed: () {
-                                changeUsername(context);
+                                changeUsername();
                               },
                               child: Text("Change Username",
                                   style: TextStyle(fontSize: 13.0)),
@@ -611,7 +618,7 @@ class MyProfileState extends State<Profile> {
                               fixedSize: Size(38, 38), // size of the button
                             ),
                             onPressed: () {
-                              signOutUser(context);
+                              signOutUser();
                             },
                             child: Icon(Icons.logout,
                                 size: 14.0, color: Colors.white),
@@ -622,7 +629,7 @@ class MyProfileState extends State<Profile> {
                   ),
                 ],
               ),
-              linkingAccountsGroup(context),
+              linkingAccountsGroup(),
             ],
           ),
           if (isLoading)

@@ -277,7 +277,7 @@ class SignUpPageState extends State<SignUpPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 duration: Duration(seconds: 2),
-                content: Text("Verification email has been sent. Please check your email."),
+                content: Text("Verification email has been sent. Please check your email !"),
               ),
             );
 
