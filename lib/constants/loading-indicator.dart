@@ -76,3 +76,50 @@ class LoadingTextAnimationState extends State<LoadingIndicator>{
     );
   }
 }
+
+class MiniLoadingIndicator extends StatefulWidget {
+  MiniLoadingIndicator({super.key, this.title});
+
+  final String? title;
+
+  @override
+  State<MiniLoadingIndicator> createState() => MiniLoadingTextAnimationState();
+}
+
+class MiniLoadingTextAnimationState extends State<MiniLoadingIndicator>{
+  int dotCount = 0;
+  late Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 200,
+        height: 200,// Adjust the width as needed to fit the text
+        decoration: BoxDecoration(
+          color: Colors.white, // Background color
+          shape: BoxShape.circle, // Rounded rectangle
+        ),
+        child: ClipOval(
+          child: Image.asset(
+            'assets/gifs/campfire-loading-indicator.gif',
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover, // Ensures the image covers the container
+          ),
+        ),
+      ),
+    );
+  }
+}
