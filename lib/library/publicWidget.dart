@@ -10,6 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart';
 
+import '../constants/loading-indicator.dart';
 import '../objects/participant.dart';
 import '../objects/userActivity.dart';
 import '../topicDetail/topicDetailWidget.dart';
@@ -169,20 +170,14 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
         ),
         child: ListTile(
           leading: ClipOval(
-            child: kIsWeb
-                ? Image.network(
-                    topic.ownerAvtUrl as String,
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                  )
-                : CachedNetworkImage(
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                    imageUrl: topic.ownerAvtUrl as String,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                  ),
+            child: CachedNetworkImage(
+              width: 36,
+              height: 36,
+              fit: BoxFit.cover,
+              imageUrl: topic.ownerAvtUrl as String,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
           ),
           title: Text(
             topic.title as String,
@@ -372,7 +367,8 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
   }
 
   void addParticipantToTopic(Topic topic, String? uId) {
-    Participant newParticipant = Participant(uId, null, null);
+    Participant newParticipant =
+        Participant(uId, auth.currentUser?.displayName, null, null);
     topic.participant?.add(newParticipant);
     List<Participant> newParticipantsList = topic.participant!;
     dbRef

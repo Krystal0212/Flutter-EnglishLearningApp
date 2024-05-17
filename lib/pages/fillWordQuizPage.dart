@@ -470,8 +470,11 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     if (widget.topic.participant![index].fillWordResult == null ||
         widget.topic.participant![index].fillWordResult! < score) {
       print('update score');
-      Participant toUpdateParticipant = Participant(auth.currentUser?.uid,
-          widget.topic.participant![index].multipleChoicesResult ?? 0, score);
+      Participant toUpdateParticipant = Participant(
+          auth.currentUser?.uid,
+          auth.currentUser?.displayName,
+          widget.topic.participant![index].multipleChoicesResult ?? 0,
+          score);
       dbRef
           .child("Topic/${widget.topic.id}/participant/$index")
           .update(toUpdateParticipant.toMap())
@@ -764,7 +767,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                               title: kIsWeb
                                   ? "Correct"
                                   : "Correct: ${finishedCardCorrectly.length}",
-                              titleStyle: const TextStyle(color: CupertinoColors.white),
+                              titleStyle:
+                                  const TextStyle(color: CupertinoColors.white),
                             ),
 
                             //Wrong answer
@@ -774,7 +778,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                               title: kIsWeb
                                   ? "Wrong"
                                   : "Wrong: ${finishedCardWrongly.length}",
-                              titleStyle: const TextStyle(color: CupertinoColors.white),
+                              titleStyle:
+                                  const TextStyle(color: CupertinoColors.white),
                             ),
 
                             //Skipped answer
@@ -784,7 +789,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                               title: kIsWeb
                                   ? "Skip"
                                   : "Skip: ${skippedCard.length}",
-                              titleStyle: const TextStyle(color: CupertinoColors.white),
+                              titleStyle:
+                                  const TextStyle(color: CupertinoColors.white),
                             )
                           ]),
                         ),
@@ -1063,7 +1069,9 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
           title: const Text('Fill word quiz'),
           backgroundColor: Colors.blueAccent,
           titleTextStyle: const TextStyle(
-              color: CupertinoColors.white, fontWeight: FontWeight.bold, fontSize: 25),
+              color: CupertinoColors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 25),
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 1000),

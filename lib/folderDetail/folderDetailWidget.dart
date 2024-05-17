@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../constants/loading-indicator.dart';
 import '../objects/folder.dart';
 import '../objects/topic.dart';
 import '../topicDetail/topicDetailWidget.dart';
@@ -266,6 +267,7 @@ class _FolderDetailState extends State<FolderDetail> {
                   ? 'https://firebasestorage.googleapis.com/v0/b/finaltermandroid-ba01a.appspot.com/o/icons8-avatar-64.png?alt=media&token=efb2e06d-589a-40f0-96a0-a1eddfdbb352'
                   : topic.ownerAvtUrl as String,
               placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
             ),
           ),
           title: Text(

@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../constants/loading-indicator.dart';
 import '../objects/userActivity.dart';
 import '../objects/word.dart';
 import 'package:flutter/foundation.dart';
@@ -135,20 +136,14 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
         ),
         child: ListTile(
           leading: ClipOval(
-            child: kIsWeb
-                ? Image.network(
-                    topic.ownerAvtUrl as String,
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                  )
-                : CachedNetworkImage(
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                    imageUrl: topic.ownerAvtUrl as String,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                  ),
+            child: CachedNetworkImage(
+              width: 36,
+              height: 36,
+              fit: BoxFit.cover,
+              imageUrl: topic.ownerAvtUrl as String,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
           ),
           title: Text(
             topic.title as String,
@@ -654,7 +649,8 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     }
     if (words.length >= 4) {
       // Get current user as the first participant
-      Participant participant = Participant(auth.currentUser?.uid, null, null);
+      Participant participant = Participant(
+          auth.currentUser?.uid, auth.currentUser?.displayName, null, null);
       participants.add(participant);
       Topic toAddTopic = Topic(
           isAccessible == false ? "PRIVATE" : "PUBLIC",

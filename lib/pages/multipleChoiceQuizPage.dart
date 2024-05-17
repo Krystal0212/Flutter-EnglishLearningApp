@@ -68,8 +68,11 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     if (widget.topic.participant![index].multipleChoicesResult == null ||
         widget.topic.participant![index].multipleChoicesResult! < score) {
       print('update score');
-      Participant toUpdateParticipant = Participant(auth.currentUser?.uid,
-          score, widget.topic.participant![index].fillWordResult);
+      Participant toUpdateParticipant = Participant(
+          auth.currentUser?.uid,
+          auth.currentUser?.displayName,
+          score,
+          widget.topic.participant![index].fillWordResult);
       dbRef
           .child("Topic/${widget.topic.id}/participant/$index")
           .update(toUpdateParticipant.toMap())

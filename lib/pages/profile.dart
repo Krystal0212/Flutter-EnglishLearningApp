@@ -45,10 +45,11 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
   final String defaultLink =
       "https://firebasestorage.googleapis.com/v0/b/cross-platform-final-term.appspot.com/o/profile-img.jpg?alt=media&token=a3619fea-311e-4529-bbc6-dc9809ce8f80";
 
-  final String mailGifUrl = "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
+  final String mailGifUrl =
+      "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
   final String errorGifUrl = "";
 
-
+  @override
   initState() {
     super.initState();
     imageAvatar = AssetImage(defaultLink);
@@ -57,7 +58,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     isGoogleUser = false;
     user = auth.currentUser!;
     // userName = user.displayName ?? 'User';
-    getAvatar();
+    // getAvatar();
     getProviders();
   }
 
@@ -85,9 +86,10 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
               children: [
                 CircleAvatar(
                   radius: 85,
-                  child: CachedNetworkImage(imageUrl: auth.currentUser!.photoURL!,
-                      placeholder: (context, url) => MiniLoadingIndicator(),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
+                  child: CachedNetworkImage(
+                    imageUrl: auth.currentUser!.photoURL!,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
                     imageBuilder: (context, imageProvider) => Container(
                       width: 200,
                       height: 200,
@@ -97,7 +99,8 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
                           image: imageProvider,
                           fit: BoxFit.cover,
                         ),
-                      ),),
+                      ),
+                    ),
                   ),
                 ),
                 Align(
@@ -128,7 +131,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
             padding: const EdgeInsets.only(top: 24.0),
             child: Text(auth.currentUser?.displayName as String,
                 style: TextStyle(
-                    color: LabColors.white,
+                    color: LabColors.black,
                     fontWeight: FontWeight.w600,
                     fontSize: 22)),
           ),
@@ -254,19 +257,20 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
       await user?.linkWithCredential(credential);
       await user?.sendEmailVerification();
       setIndicatorFalse();
-
     } on FirebaseAuthException catch (e) {
       setIndicatorFalse();
 
-      String gifUrl = "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
+      String gifUrl =
+          "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
       String content = "Failed to set your password. Please try again";
       String title = "There is something wrong";
 
       if (e.code == 'provider-already-linked') {
-        content = "This account is already linked. Please use another account to link.";
+        content =
+            "This account is already linked. Please use another account to link.";
       }
 
-      showGifDialog(gifUrl, title, content );
+      showGifDialog(gifUrl, title, content);
     }
   }
 
@@ -329,16 +333,18 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
 
                     String gifUrl = mailGifUrl;
                     String title = "Set password successfully";
-                    String content = "Verification email has been sent. Please check your email !";
-                    showGifDialog(gifUrl, title, content );
+                    String content =
+                        "Verification email has been sent. Please check your email !";
+                    showGifDialog(gifUrl, title, content);
                     return;
                     // validateResult = "Verification email has been sent. Please check your email !";
                   }
                   if (validateResult != "") {
-                    String gifUrl = "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
+                    String gifUrl =
+                        "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
                     String title = "There is something wrong";
                     String content = "$validateResult . Please try again !";
-                    showGifDialog(gifUrl, title, content );
+                    showGifDialog(gifUrl, title, content);
                   }
                 },
               ),
@@ -457,7 +463,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void showGifDialog(String gifUrl, String title, String content){
+  void showGifDialog(String gifUrl, String title, String content) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -514,48 +520,49 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
               : SizedBox(),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed:
-              (!isGoogleUser) ?  () async {
-                try {
-                  late String? idToken;
-                  late String? userEmail;
+              onPressed: (!isGoogleUser)
+                  ? () async {
+                      try {
+                        late String? idToken;
+                        late String? userEmail;
 
-                  if (kIsWeb) {
-                    UserCredential userCredential =
-                        await auth.signInWithPopup(authProvider);
-                    idToken = await userCredential.user?.getIdToken();
-                    userEmail = userCredential.user?.email;
-                  } else {
-                    final GoogleSignInAccount? googleUser =
-                        await GoogleSignIn().signIn();
-                    final GoogleSignInAuthentication googleAuth =
-                        await googleUser!.authentication;
+                        if (kIsWeb) {
+                          UserCredential userCredential =
+                              await auth.signInWithPopup(authProvider);
+                          idToken = await userCredential.user?.getIdToken();
+                          userEmail = userCredential.user?.email;
+                        } else {
+                          final GoogleSignInAccount? googleUser =
+                              await GoogleSignIn().signIn();
+                          final GoogleSignInAuthentication googleAuth =
+                              await googleUser!.authentication;
 
-                    idToken = googleAuth.idToken;
-                    userEmail = googleUser.email;
-                  }
+                          idToken = googleAuth.idToken;
+                          userEmail = googleUser.email;
+                        }
 
-                  AuthCredential credential = GoogleAuthProvider.credential(
-                    idToken: idToken,
-                  );
+                        AuthCredential credential =
+                            GoogleAuthProvider.credential(
+                          idToken: idToken,
+                        );
 
-                  final User? currentUser = auth.currentUser;
-                  assert(userEmail == currentUser!.email);
+                        final User? currentUser = auth.currentUser;
+                        assert(userEmail == currentUser!.email);
 
-                  await auth.currentUser?.linkWithCredential(credential);
-                } on FirebaseAuthException catch (e) {
-                  switch (e.code) {
-                    case "provider-already-linked":
-                      showResultSnackbar(
-                          "The provider has already been linked to the user.");
-                    default:
-                      print("Unknown error: ${e.code}");
-                      break;
-                  }
-                  setIndicatorFalse();
-                }
-              }
-              : (){},
+                        await auth.currentUser?.linkWithCredential(credential);
+                      } on FirebaseAuthException catch (e) {
+                        switch (e.code) {
+                          case "provider-already-linked":
+                            showResultSnackbar(
+                                "The provider has already been linked to the user.");
+                          default:
+                            print("Unknown error: ${e.code}");
+                            break;
+                        }
+                        setIndicatorFalse();
+                      }
+                    }
+                  : () {},
               child: Center(
                 child: Text(isGoogleUser
                     ? "Google account linked"
@@ -597,6 +604,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
               child: Text('Submit'),
               onPressed: () async {
                 await updateUserTopicField('owner', userNameController.text);
+                await updateUserParticipantData(userNameController.text);
                 await auth.currentUser
                     ?.updateDisplayName(userNameController.text);
                 await auth.currentUser?.reload();
@@ -743,6 +751,32 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
       });
     } catch (error) {
       log("Error updating topic fields: $error");
+    }
+  }
+
+  Future<void> updateUserParticipantData(String newName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DataSnapshot topicsSnapshot = await dbRef.child("Topic").get();
+
+      if (topicsSnapshot.exists) {
+        Map<dynamic, dynamic> topics =
+            topicsSnapshot.value as Map<dynamic, dynamic>;
+        topics.forEach((key, value) async {
+          if (value is Map<dynamic, dynamic> && value['participant'] != null) {
+            List<dynamic> participants =
+                List<dynamic>.from(value['participant']);
+            participants.asMap().forEach((index, participant) async {
+              if (participant is Map<dynamic, dynamic> &&
+                  participant['userID'] == user.uid) {
+                await dbRef
+                    .child('Topic/$key/participant/$index/userName')
+                    .set(newName);
+              }
+            });
+          }
+        });
+      }
     }
   }
 }
