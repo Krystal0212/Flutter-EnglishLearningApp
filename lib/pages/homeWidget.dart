@@ -53,46 +53,45 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-        backgroundColor: CupertinoColors.white,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(
-            "Dashboard",
-            style: TextStyle(color: Colors.black),
-          ),
-          backgroundColor: Colors.blue[50],
+      backgroundColor: CupertinoColors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          "Dashboard",
+          style: TextStyle(color: Colors.black),
         ),
-        body: userActivity != null && recentAccessTopic != null
-            ? Column(
-                children: [
-                  kIsWeb
-                      ? Image.network(
-                          recentAccessTopic!.ownerAvtUrl as String,
-                          width: 36,
-                          height: 36,
-                          fit: BoxFit.cover,
-                        )
-                      : CachedNetworkImage(
-                          height: 36,
-                          imageUrl: recentAccessTopic!.ownerAvtUrl as String),
-                  Row(
-                    children: [
-                      Text("Topic title: ${recentAccessTopic?.title as String}",
-                          style: TextStyle(color: Colors.black)),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Text("by ${recentAccessTopic?.owner}",
-                          style: TextStyle(color: Colors.black))
-                    ],
-                  ),
-                  Text(
-                      "access since: ${getTimeDifference(userActivity?.timestamp as String)}",
-                      style: TextStyle(color: Colors.black)),
-                ],
-              )
-            :
-                  Center(child: LoadingIndicator(title: "Getting data")),
+        backgroundColor: Colors.blue[50],
+      ),
+      body: userActivity != null && recentAccessTopic != null
+          ? Column(
+              children: [
+                kIsWeb
+                    ? Image.network(
+                        recentAccessTopic!.ownerAvtUrl as String,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                      )
+                    : CachedNetworkImage(
+                        height: 36,
+                        imageUrl: recentAccessTopic!.ownerAvtUrl as String),
+                Row(
+                  children: [
+                    Text("Topic title: ${recentAccessTopic?.title as String}",
+                        style: TextStyle(color: Colors.black)),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text("by ${recentAccessTopic?.owner}",
+                        style: TextStyle(color: Colors.black))
+                  ],
+                ),
+                Text(
+                    "access since: ${getTimeDifference(userActivity?.timestamp as String)}",
+                    style: TextStyle(color: Colors.black)),
+              ],
+            )
+          : Center(child: LoadingIndicator(title: "Getting data")),
     );
   }
 
@@ -142,6 +141,9 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
       } else {
         print('No data available.');
       }
+    }, onError: (error) {
+      // Xử lý lỗi
+      log('Error: $error');
     });
   }
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -208,7 +210,6 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
                 color: Colors.black.withOpacity(0.75)),
           ),
           onTap: () {
-            updateUserActivity(topic);
             onClickPublicTopic(topic);
           },
         ),
@@ -388,6 +389,8 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
       updateUserActivity(topic);
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => TopicDetail(topic: topic)));
+    }, onError: (error) {
+      log('Error: $error');
     });
   }
 
