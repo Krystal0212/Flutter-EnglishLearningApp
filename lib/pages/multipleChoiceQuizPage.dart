@@ -566,6 +566,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 FloatingActionButton(
+                  heroTag: 'btn1',
                   shape: const CircleBorder(),
                   onPressed: () {
                     if (currentIndex > 0) {
@@ -577,6 +578,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                   child: const Icon(Icons.arrow_upward),
                 ),
                 FloatingActionButton(
+                  heroTag: 'btn2',
                   shape: const CircleBorder(),
                   onPressed: () {
                     if (currentIndex < wordList.length - 1) {
@@ -602,6 +604,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          backgroundColor: CupertinoColors.white,
           child: Container(
             width: kIsWeb ? mainPageWidth * 0.8 : mainPageWidth * 0.95,
             height: kIsWeb ? mainPageHeight * 0.8 : mainPageHeight * 0.85,
@@ -727,24 +730,24 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                 value: finishedQuestCorrectly.length.toDouble(),
                                 color: Colors.green[400],
                                 title: "Correct",
-                                titleStyle:
-                                    const TextStyle(color: CupertinoColors.white)),
+                                titleStyle: const TextStyle(
+                                    color: CupertinoColors.white)),
 
                             //Wrong answer
                             PieChartSectionData(
                                 value: finishedQuestWrongly.length.toDouble(),
                                 color: Colors.red[400],
                                 title: "Wrong",
-                                titleStyle:
-                                    const TextStyle(color: CupertinoColors.white)),
+                                titleStyle: const TextStyle(
+                                    color: CupertinoColors.white)),
 
                             //Skipped answer
                             PieChartSectionData(
                                 value: skippedQuest.length.toDouble(),
                                 color: Colors.grey[700],
                                 title: "Skip",
-                                titleStyle:
-                                    const TextStyle(color: CupertinoColors.white))
+                                titleStyle: const TextStyle(
+                                    color: CupertinoColors.white))
                           ]),
                         ),
                       )
@@ -782,8 +785,8 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                         .toDouble(),
                                     color: Colors.green[400],
                                     title: "Correct",
-                                    titleStyle:
-                                        const TextStyle(color: CupertinoColors.white)),
+                                    titleStyle: const TextStyle(
+                                        color: CupertinoColors.white)),
 
                                 //Wrong answer
                                 PieChartSectionData(
@@ -791,16 +794,16 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                                         finishedQuestWrongly.length.toDouble(),
                                     color: Colors.red[400],
                                     title: "Wrong",
-                                    titleStyle:
-                                        const TextStyle(color: CupertinoColors.white)),
+                                    titleStyle: const TextStyle(
+                                        color: CupertinoColors.white)),
 
                                 //Skipped answer
                                 PieChartSectionData(
                                     value: skippedQuest.length.toDouble(),
                                     color: Colors.grey[700],
                                     title: "Skip",
-                                    titleStyle:
-                                        const TextStyle(color: CupertinoColors.white))
+                                    titleStyle: const TextStyle(
+                                        color: CupertinoColors.white))
                               ]),
                             ),
                           )

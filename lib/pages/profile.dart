@@ -1,9 +1,12 @@
 import 'package:Fluffy/constants/loading-indicator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:Fluffy/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/constants/theme.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -33,6 +36,10 @@ class MyProfileState extends State<Profile> {
   final String defaultLink =
       "https://firebasestorage.googleapis.com/v0/b/cross-platform-final-term.appspot.com/o/profile-img.jpg?alt=media&token=a3619fea-311e-4529-bbc6-dc9809ce8f80";
 
+  final String mailGifUrl = "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
+  final String errorGifUrl = "";
+
+
   initState() {
     super.initState();
     imageAvatar = AssetImage(defaultLink);
@@ -41,7 +48,7 @@ class MyProfileState extends State<Profile> {
     isGoogleUser = false;
     user = auth.currentUser!;
     userName = user.displayName ?? 'User';
-    getAvatar();
+    // getAvatar();
     getProviders();
   }
 
@@ -68,8 +75,21 @@ class MyProfileState extends State<Profile> {
             child: Stack(
               children: [
                 CircleAvatar(
-                  backgroundImage: imageAvatar,
                   radius: 85,
+                  child: CachedNetworkImage(imageUrl: auth.currentUser!.photoURL!,
+                      placeholder: (context, url) => MiniLoadingIndicator(),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    imageBuilder: (context, imageProvider) => Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),),
+                  ),
                 ),
                 Align(
                     alignment: Alignment.bottomRight,
@@ -116,16 +136,17 @@ class MyProfileState extends State<Profile> {
     );
   }
 
-  Future<void> getAvatar() async {
-    setIndicatorTrue();
-    setState(() {
-      imageAvatar = NetworkImage(
-        auth.currentUser!.photoURL ?? defaultLink,
-        scale: 1.0,
-      );
-    });
-    setIndicatorFalse();
-  }
+  // Future<void> getAvatar() async {
+  //   setIndicatorTrue();
+  //   setState(() {
+  //     imageAvatar = NetworkImage(
+  //       auth.currentUser!.photoURL ?? defaultLink,
+  //       scale: 1.0,
+  //     );
+  //     imageAvatar = "";
+  //   });
+  //   setIndicatorFalse();
+  // }
 
   Future<void> getProviders() async {
     for (UserInfo provider in user.providerData) {
@@ -205,16 +226,17 @@ class MyProfileState extends State<Profile> {
         setState(() {
           imageAvatar = NetworkImage(url);
         });
-        showResultDialog("Changed avatar successfully");
+        showResultSnackbar("Changed avatar successfully");
       }
     } else {
-      showResultDialog("Could not get the image data");
+      showResultSnackbar("Could not get the image data");
     }
     setIndicatorFalse();
   }
 
   Future<void> setPasswordForUser(String email, String password) async {
     try {
+      setIndicatorTrue();
       AuthCredential credential = EmailAuthProvider.credential(
           email: email.trim(), password: password.trim());
 
@@ -222,17 +244,20 @@ class MyProfileState extends State<Profile> {
 
       await user?.linkWithCredential(credential);
       await user?.sendEmailVerification();
-      showResultDialog("Verification email has been sent. Please check your email !");
+      setIndicatorFalse();
+
     } on FirebaseAuthException catch (e) {
-      String validateResult;
+      setIndicatorFalse();
+
+      String gifUrl = "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
+      String content = "Failed to set your password. Please try again";
+      String title = "There is something wrong";
+
       if (e.code == 'provider-already-linked') {
-        validateResult =
-            "This account is already linked. Please use another account to link.";
-      } else {
-        validateResult = "Failed to set your password. Please try again.";
+        content = "This account is already linked. Please use another account to link.";
       }
 
-      showResultDialog(validateResult);
+      showGifDialog(gifUrl, title, content );
     }
   }
 
@@ -292,10 +317,19 @@ class MyProfileState extends State<Profile> {
                     });
 
                     Navigator.of(context).pop();
-                    validateResult = "Set password successfully";
+
+                    String gifUrl = mailGifUrl;
+                    String title = "Set password successfully";
+                    String content = "Verification email has been sent. Please check your email !";
+                    showGifDialog(gifUrl, title, content );
+                    return;
+                    // validateResult = "Verification email has been sent. Please check your email !";
                   }
                   if (validateResult != "") {
-                    showResultDialog(validateResult);
+                    String gifUrl = "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
+                    String title = "There is something wrong";
+                    String content = "$validateResult . Please try again !";
+                    showGifDialog(gifUrl, title, content );
                   }
                 },
               ),
@@ -315,7 +349,8 @@ class MyProfileState extends State<Profile> {
       if (e.code == "invalid-credential") {
         String validateResult =
             "Wrong password, please enter valid password of account";
-        showResultDialog(validateResult);
+
+        showResultSnackbar(validateResult);
       } else {
         print("Error re-authenticating: ${e.code}");
       }
@@ -395,7 +430,7 @@ class MyProfileState extends State<Profile> {
                   setIndicatorFalse();
 
                   if (validateResult != "") {
-                    showResultDialog(validateResult);
+                    showResultSnackbar(validateResult);
                   }
                 },
               ),
@@ -404,13 +439,44 @@ class MyProfileState extends State<Profile> {
         });
   }
 
-  void showResultDialog(String validateResult) {
+  void showResultSnackbar(String validateResult) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         duration: Duration(seconds: 2),
         content: Text(validateResult),
       ));
     }
+  }
+
+  void showGifDialog(String gifUrl, String title, String content){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return GiffyDialog.image(
+          backgroundColor: CupertinoColors.white,
+          surfaceTintColor: Colors.transparent,
+          Image.network(
+            gifUrl,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+          title: Text(
+            title,
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            content,
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget linkingAccountsGroup() {
@@ -440,8 +506,7 @@ class MyProfileState extends State<Profile> {
           SizedBox(height: 20),
           ElevatedButton(
               onPressed:
-              (!isGoogleUser)
-              ?  () async {
+              (!isGoogleUser) ?  () async {
                 try {
                   late String? idToken;
                   late String? userEmail;
@@ -472,7 +537,7 @@ class MyProfileState extends State<Profile> {
                 } on FirebaseAuthException catch (e) {
                   switch (e.code) {
                     case "provider-already-linked":
-                      showResultDialog(
+                      showResultSnackbar(
                           "The provider has already been linked to the user.");
                     default:
                       print("Unknown error: ${e.code}");
@@ -555,7 +620,7 @@ class MyProfileState extends State<Profile> {
                         decoration: BoxDecoration(
                             image: DecorationImage(
                                 image:
-                                    AssetImage("assets/images/bg-profile.png"),
+                                    AssetImage("assets/gifs/dog-and-cat.gif"),
                                 fit: BoxFit.cover)),
                         child: Stack(
                           children: <Widget>[

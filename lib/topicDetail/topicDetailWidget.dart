@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
-
+import 'package:universal_html/html.dart' as html;
 import 'package:Fluffy/pages/flashcardQuizPage.dart';
 import 'package:Fluffy/pages/multipleChoiceQuizPage.dart';
 import 'package:Fluffy/pages/topicAchivementPage.dart';
@@ -119,11 +120,8 @@ class _TopicDetailState extends State<TopicDetail> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TopicAchievementPage(
-                            topic: widget.topic
-                        )
-                    )
-                );
+                        builder: (context) =>
+                            TopicAchievementPage(topic: widget.topic)));
               },
               child: Image.asset(
                 'lib/icon/trophy.png',
@@ -219,103 +217,107 @@ class _TopicDetailState extends State<TopicDetail> {
               SizedBox(
                 height: 8,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 4,
-                    margin: EdgeInsets.all(9),
-                    color: Colors.blue[50],
-                    child: ListTile(
-                      leading: Icon(
-                        FluentIcons.copy_16_regular,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        "Flashcard",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    FlashcardQuizPage(topic: widget.topic)));
-                      },
-                    ),
-                  ),
-                  Card(
-                    elevation: 4,
-                    margin: EdgeInsets.all(9),
-                    color: Colors.blue[50],
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.quiz_outlined,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        "Multiple choices",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      onTap: () {
-                        showSelectionDialog(context, isMultipleQuiz: true);
-                      },
-                    ),
-                  ),
-                  Card(
-                    elevation: 4,
-                    margin: EdgeInsets.all(9),
-                    color: Colors.blue[50],
-                    child: ListTile(
-                      leading: Icon(
-                        FluentIcons.pen_16_regular,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        "Fill words",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      onTap: () {
-                        showSelectionDialog(context, isMultipleQuiz: false);
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(top: 8, left: 8, bottom: 8, right: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Terms",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.black),
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      elevation: 4,
+                      margin: EdgeInsets.all(9),
+                      color: Colors.blue[50],
+                      child: ListTile(
+                        leading: Icon(
+                          FluentIcons.copy_16_regular,
+                          color: Colors.black,
                         ),
-                        Expanded(child: SizedBox()),
-                        Text(
-                          "${markedWords.length} words marked",
+                        title: Text(
+                          "Flashcard",
                           style: TextStyle(color: Colors.black),
                         ),
-                      ],
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FlashcardQuizPage(topic: widget.topic)));
+                        },
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 300,
-                    child: ListView.builder(
-                      padding: EdgeInsets.all(5),
-                      itemCount: widget.topic.word?.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (widget.topic.word?[index] != null) {
-                          Word? word = widget.topic.word?[index];
-                          return wordBlock(word!, index);
-                        }
-                        return null;
-                      },
+                    Card(
+                      elevation: 4,
+                      margin: EdgeInsets.all(9),
+                      color: Colors.blue[50],
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.quiz_outlined,
+                          color: Colors.black,
+                        ),
+                        title: Text(
+                          "Multiple choices",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onTap: () {
+                          showSelectionDialog(context, isMultipleQuiz: true);
+                        },
+                      ),
                     ),
-                  )
-                ],
+                    Card(
+                      elevation: 4,
+                      margin: EdgeInsets.all(9),
+                      color: Colors.blue[50],
+                      child: ListTile(
+                        leading: Icon(
+                          FluentIcons.pen_16_regular,
+                          color: Colors.black,
+                        ),
+                        title: Text(
+                          "Fill words",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onTap: () {
+                          showSelectionDialog(context, isMultipleQuiz: false);
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.only(top: 8, left: 8, bottom: 8, right: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Terms",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black),
+                          ),
+                          Expanded(child: SizedBox()),
+                          Text(
+                            "${markedWords.length} words marked",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height -
+                          kToolbarHeight -
+                          48,
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(5),
+                        itemCount: widget.topic.word?.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (widget.topic.word?[index] != null) {
+                            Word? word = widget.topic.word?[index];
+                            return wordBlock(word!, index);
+                          }
+                          return null;
+                        },
+                      ),
+                    )
+                  ],
+                ),
               )
             ],
           ),
@@ -344,7 +346,7 @@ class _TopicDetailState extends State<TopicDetail> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    title: Text('Language'),
+                    title: Text('Answer by Vietnamese'),
                     subtitle: Text('(default: English)'),
                     trailing: Switch(
                       activeColor: Colors.blue,
@@ -379,17 +381,15 @@ class _TopicDetailState extends State<TopicDetail> {
                       inactiveTrackColor: Colors.white,
                       value: marked,
                       onChanged: (bool incomingValue) {
-                        setState(() {
-                          if (incomingValue && markedWords.length >= 4) {
+                        if (markedWords.length >= 4) {
+                          setState(() {
                             marked = incomingValue;
-                          } else if (incomingValue && markedWords.length < 4) {
-                            showAlertDialog(
-                                "Please mark at least 4 words to enable this",
-                                Colors.red);
-                          } else {
-                            marked = incomingValue;
-                          }
-                        });
+                          });
+                        } else {
+                          showAlertDialog(
+                              "You need to mark at least 4 words to use this option",
+                              Colors.red);
+                        }
                       },
                     ),
                   ),
@@ -399,34 +399,28 @@ class _TopicDetailState extends State<TopicDetail> {
                       Navigator.pop(context);
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
+                        Topic selectedTopic = widget.topic;
+                        if (marked) {
+                          selectedTopic = Topic(
+                              widget.topic.access,
+                              widget.topic.createDate,
+                              widget.topic.id,
+                              widget.topic.title,
+                              widget.topic.owner,
+                              widget.topic.ownerAvtUrl,
+                              widget.topic.participant,
+                              markedWords);
+                        }
                         if (isMultipleQuiz!) {
-                          if (marked) {
-                            Topic topicWithMarkedWords = widget.topic;
-                            topicWithMarkedWords.word = markedWords;
-                            return MultipleChoiceQuizPage(
-                                topic: topicWithMarkedWords,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          } else {
-                            return MultipleChoiceQuizPage(
-                                topic: widget.topic,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          }
+                          return MultipleChoiceQuizPage(
+                              topic: selectedTopic,
+                              isChangeLanguage: language,
+                              isShuffle: shuffle);
                         } else {
-                          if (marked) {
-                            Topic topicWithMarkedWords = widget.topic;
-                            topicWithMarkedWords.word = markedWords;
-                            return FillWordQuizPage(
-                                topic: topicWithMarkedWords,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          } else {
-                            return FillWordQuizPage(
-                                topic: widget.topic,
-                                isChangeLanguage: language,
-                                isShuffle: shuffle);
-                          }
+                          return FillWordQuizPage(
+                              topic: selectedTopic,
+                              isChangeLanguage: language,
+                              isShuffle: shuffle);
                         }
                       }));
                     },
@@ -480,9 +474,11 @@ class _TopicDetailState extends State<TopicDetail> {
                     onPressed: () {
                       setState(() {
                         selected[index] = !selected[index];
-                        selected[index]
-                            ? markedWords.add(word)
-                            : markedWords.removeWhere((w) => w == word);
+                        if (selected[index]) {
+                          markedWords.add(word);
+                        } else {
+                          markedWords.remove(word);
+                        }
                       });
                     },
                     icon: selected.elementAt(index)
@@ -929,11 +925,6 @@ class _TopicDetailState extends State<TopicDetail> {
   }
 
   Future<void> exportWords(List<Word>? words) async {
-    var status = await Permission.storage.status;
-    if (!status.isGranted) {
-      await Permission.storage.request();
-    }
-
     List<List<dynamic>> rows = [];
     rows.add(["english", "vietnamese", "description"]);
     for (Word word in words!) {
@@ -946,18 +937,31 @@ class _TopicDetailState extends State<TopicDetail> {
 
     String csv = const ListToCsvConverter().convert(rows);
 
-    final directory = await getExternalStorageDirectory();
-    final path = "${directory?.path}/${widget.topic.title}.csv";
-    final File file = File(path);
+    if (kIsWeb) {
+      final content = Uri.encodeComponent("\uFEFF$csv");
+      html.AnchorElement(href: "data:text/csv;charset=utf-8,$content")
+        ..setAttribute("download", "${widget.topic.title}.csv")
+        ..click();
+    } else {
+      var status = await Permission.storage.status;
+      if (!status.isGranted) {
+        await Permission.storage.request();
+      }
 
-    await file.writeAsBytes(utf8.encode('\uFEFF$csv'));
+      final directory = await getExternalStorageDirectory();
+      final path = "${directory?.path}/${widget.topic.title}.csv";
+      final File file = File(path);
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      await file.writeAsBytes(utf8.encode('\uFEFF$csv'));
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.green,
         content: Text(
           "CSV File saved to $path",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        )));
+        ),
+      ));
+    }
   }
 
   Future<void> importWords(StateSetter setStateDialog) async {
@@ -1099,20 +1103,18 @@ class _TopicDetailState extends State<TopicDetail> {
 
   void syncTopicFromDatabase() {
     loadFolderFromDatabase();
-    // listen to all change in Topic node
-    dbRef.child('Topic').onChildChanged.listen((data) {
+    // listen to all change in this Topic node
+    dbRef.child('Topic/${widget.topic.id}').onValue.listen((data) {
       Topic changedTopic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
-      if (changedTopic.id == widget.topic.id) {
-        setState(() {
-          widget.topic = changedTopic;
-          selected.clear();
-          for (var i = 0; i < widget.topic.word!.length; i++) {
-            selected.add(false);
-          }
-          markedWords.clear();
-        });
-      }
+      setState(() {
+        widget.topic = changedTopic;
+        selected.clear();
+        for (var i = 0; i < widget.topic.word!.length; i++) {
+          selected.add(false);
+        }
+        markedWords.clear();
+      });
     });
   }
 

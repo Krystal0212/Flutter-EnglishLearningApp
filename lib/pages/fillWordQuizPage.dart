@@ -110,7 +110,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
 
   //initiate data into word list
   void initWordList() {
-    wordList = widget.topic.word as List<Word>;
+    wordList = List.from(widget.topic.word as List<Word>);
     if (widget.isShuffle) {
       wordList.shuffle(Random());
     }
@@ -668,12 +668,18 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                   child: RepaintBoundary(
                     child: ConfettiWidget(
                       confettiController: _confettiControllerLeft,
-                      blastDirection: pi / 6, // 45 degrees
-                      emissionFrequency: 0.2, // Adjusted emission frequency
-                      numberOfParticles: 5, // Increased number of particles
-                      maxBlastForce: 65, // Increased blast force
-                      minBlastForce: 8, // Increased minimum blast force
-                      gravity: 0.01, // Adjusted gravity
+                      blastDirection: pi / 6,
+                      // 45 degrees
+                      emissionFrequency: 0.2,
+                      // Adjusted emission frequency
+                      numberOfParticles: 5,
+                      // Increased number of particles
+                      maxBlastForce: 65,
+                      // Increased blast force
+                      minBlastForce: 8,
+                      // Increased minimum blast force
+                      gravity: 0.01,
+                      // Adjusted gravity
                       colors: const [
                         Colors.red,
                         Colors.blue,
@@ -691,12 +697,18 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
                   child: RepaintBoundary(
                     child: ConfettiWidget(
                       confettiController: _confettiControllerRight,
-                      blastDirection: 5 * pi / 6, // 135 degrees
-                      emissionFrequency: 0.2, // Adjusted emission frequency
-                      numberOfParticles: 5, // Increased number of particles
-                      maxBlastForce: 65, // Increased blast force
-                      minBlastForce: 8, // Increased minimum blast force
-                      gravity: 0.01, // Adjusted gravity
+                      blastDirection: 5 * pi / 6,
+                      // 135 degrees
+                      emissionFrequency: 0.2,
+                      // Adjusted emission frequency
+                      numberOfParticles: 5,
+                      // Increased number of particles
+                      maxBlastForce: 65,
+                      // Increased blast force
+                      minBlastForce: 8,
+                      // Increased minimum blast force
+                      gravity: 0.01,
+                      // Adjusted gravity
                       colors: const [
                         Colors.red,
                         Colors.blue,
