@@ -175,8 +175,8 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   }
 
   Widget mainResultTitle() {
+    resultTitle = "Your Score: $score";
     if (finishedQuestCorrectly.length == userSelection.length) {
-      resultTitle = "Excellent!";
       resultTitleColor = [
         Colors.purple,
         Colors.indigo,
@@ -186,7 +186,6 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         Colors.orange,
         Colors.red,
       ].toList();
-
       return GradientAnimationText(
         colors: resultTitleColor as List<Color>,
         text: Text(
@@ -199,7 +198,6 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         duration: const Duration(milliseconds: 500),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.75) {
-      resultTitle = "Pretty Good, keep it up!";
       resultTitleColor = const Color(0xFFd4af37);
       return Text(
         resultTitle,
@@ -207,7 +205,6 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.5) {
-      resultTitle = "Not bad, improvement still necessary";
       resultTitleColor = const Color(0xFFBcc6cc);
       return Text(
         resultTitle,
@@ -215,7 +212,6 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.25) {
-      resultTitle = "Not the worst, but still have tough road to go";
       resultTitleColor = const Color(0xFF5B391E);
       return Text(
         resultTitle,
@@ -223,7 +219,6 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
       );
     } else {
-      resultTitle = "Too Bad, better try next time !";
       resultTitleColor = Colors.black87;
       return Text(
         resultTitle,
