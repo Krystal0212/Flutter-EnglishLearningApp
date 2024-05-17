@@ -1,4 +1,5 @@
 import 'package:Fluffy/objects/word.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/material.dart';
@@ -55,8 +56,8 @@ class MyFlippingCard extends StatelessWidget {
 
   final Color frontCardColor = const Color(0xFFa49fd3),
       backCardColor = const Color(0xFFcba7bd),
-      defAreaColor = Colors.white,
-      imgAreaColor = Colors.white70,
+      defAreaColor = CupertinoColors.white,
+      imgAreaColor = CupertinoColors.white,
       cardBorderColor = Colors.black;
 
   static FlutterTts flutterTts = FlutterTts();
@@ -261,8 +262,8 @@ class MyNormalCard extends StatelessWidget {
 
   final Color frontCardColor = const Color(0xFFa49fd3),
       backCardColor = const Color(0xFFcba7bd),
-      defAreaColor = Colors.white,
-      imgAreaColor = Colors.white,
+      defAreaColor = CupertinoColors.white,
+      imgAreaColor = CupertinoColors.white,
       cardBorderColor = Colors.black;
 
   final String cardBackground = 'assets/images/cardBackgroundImage.jpg';
@@ -342,7 +343,6 @@ class MyNormalCard extends StatelessWidget {
                         ),
                       ),
                       //Speaking button
-                      /*
                       IconButton(
                           iconSize: 40,
                           onPressed: () {
@@ -351,7 +351,6 @@ class MyNormalCard extends StatelessWidget {
                           },
                           icon: const Icon(Icons.volume_down)
                       ),
-                       */
                     ],
                   )
               ),
