@@ -135,6 +135,14 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
               setState(() {
                 recentAccessTopic = topic;
               });
+              // listen event callback
+              topicRef.onValue.listen((data) {
+                Topic topic1 = Topic.fromJson(
+                    data.snapshot.value as Map<dynamic, dynamic>);
+                setState(() {
+                  recentAccessTopic = topic1;
+                });
+              });
             }
           }
         });

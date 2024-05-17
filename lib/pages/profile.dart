@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:Fluffy/constants/loading-indicator.dart';
 import 'package:Fluffy/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/constants/theme.dart';
@@ -17,15 +20,21 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => MyProfileState();
 }
 
-class MyProfileState extends State<Profile> {
+class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final FirebaseAuth auth = FirebaseAuth.instance;
   final GoogleAuthProvider authProvider = GoogleAuthProvider();
+  DatabaseReference dbRef = FirebaseDatabase.instance.ref();
 
   late ImageProvider<Object> imageAvatar;
   late bool isLoading;
   late File image;
   late Uint8List webImage;
-  late String userName;
+
+  // there are some problems with this userName
+  // so I comment it
+  // late String userName;
   late User user;
   late bool isCasualUser;
   late bool isGoogleUser;
@@ -40,14 +49,14 @@ class MyProfileState extends State<Profile> {
     isCasualUser = false;
     isGoogleUser = false;
     user = auth.currentUser!;
-    userName = user.displayName ?? 'User';
+    // userName = user.displayName ?? 'User';
     getAvatar();
     getProviders();
   }
 
   void setIndicatorFalse() {
     setState(() {
-      userName = user.displayName.toString();
+      // userName = user.displayName.toString();
       isLoading = false;
     });
   }
@@ -97,7 +106,7 @@ class MyProfileState extends State<Profile> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 24.0),
-            child: Text(userName,
+            child: Text(auth.currentUser?.displayName as String,
                 style: TextStyle(
                     color: LabColors.white,
                     fontWeight: FontWeight.w600,
@@ -198,10 +207,10 @@ class MyProfileState extends State<Profile> {
             File(pickedFile.path), path.basename(pickedFile.path));
       }
 
-      if (!url.isEmpty) {
-        auth.currentUser?.updatePhotoURL(url);
+      if (url.isNotEmpty) {
+        await auth.currentUser?.updatePhotoURL(url);
         await auth.currentUser?.reload();
-
+        await updateUserTopicField('ownerAvtUrl', auth.currentUser?.photoURL);
         setState(() {
           imageAvatar = NetworkImage(url);
         });
@@ -218,11 +227,12 @@ class MyProfileState extends State<Profile> {
       AuthCredential credential = EmailAuthProvider.credential(
           email: email.trim(), password: password.trim());
 
-      User? user =  auth.currentUser;
+      User? user = auth.currentUser;
 
       await user?.linkWithCredential(credential);
       await user?.sendEmailVerification();
-      showResultDialog("Verification email has been sent. Please check your email !");
+      showResultDialog(
+          "Verification email has been sent. Please check your email !");
     } on FirebaseAuthException catch (e) {
       String validateResult;
       if (e.code == 'provider-already-linked') {
@@ -439,49 +449,49 @@ class MyProfileState extends State<Profile> {
               : SizedBox(),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed:
-              (!isGoogleUser)
-              ?  () async {
-                try {
-                  late String? idToken;
-                  late String? userEmail;
+              onPressed: (!isGoogleUser)
+                  ? () async {
+                      try {
+                        late String? idToken;
+                        late String? userEmail;
 
-                  if (kIsWeb) {
-                    UserCredential userCredential =
-                        await auth.signInWithPopup(authProvider);
-                    idToken = await userCredential.user?.getIdToken();
-                    userEmail = userCredential.user?.email;
-                  } else {
-                    final GoogleSignInAccount? googleUser =
-                        await GoogleSignIn().signIn();
-                    final GoogleSignInAuthentication googleAuth =
-                        await googleUser!.authentication;
+                        if (kIsWeb) {
+                          UserCredential userCredential =
+                              await auth.signInWithPopup(authProvider);
+                          idToken = await userCredential.user?.getIdToken();
+                          userEmail = userCredential.user?.email;
+                        } else {
+                          final GoogleSignInAccount? googleUser =
+                              await GoogleSignIn().signIn();
+                          final GoogleSignInAuthentication googleAuth =
+                              await googleUser!.authentication;
 
-                    idToken = googleAuth.idToken;
-                    userEmail = googleUser.email;
-                  }
+                          idToken = googleAuth.idToken;
+                          userEmail = googleUser.email;
+                        }
 
-                  AuthCredential credential = GoogleAuthProvider.credential(
-                    idToken: idToken,
-                  );
+                        AuthCredential credential =
+                            GoogleAuthProvider.credential(
+                          idToken: idToken,
+                        );
 
-                  final User? currentUser = auth.currentUser;
-                  assert(userEmail == currentUser!.email);
+                        final User? currentUser = auth.currentUser;
+                        assert(userEmail == currentUser!.email);
 
-                  await auth.currentUser?.linkWithCredential(credential);
-                } on FirebaseAuthException catch (e) {
-                  switch (e.code) {
-                    case "provider-already-linked":
-                      showResultDialog(
-                          "The provider has already been linked to the user.");
-                    default:
-                      print("Unknown error: ${e.code}");
-                      break;
-                  }
-                  setIndicatorFalse();
-                }
-              }
-              : (){},
+                        await auth.currentUser?.linkWithCredential(credential);
+                      } on FirebaseAuthException catch (e) {
+                        switch (e.code) {
+                          case "provider-already-linked":
+                            showResultDialog(
+                                "The provider has already been linked to the user.");
+                          default:
+                            print("Unknown error: ${e.code}");
+                            break;
+                        }
+                        setIndicatorFalse();
+                      }
+                    }
+                  : () {},
               child: Center(
                 child: Text(isGoogleUser
                     ? "Google account linked"
@@ -522,11 +532,12 @@ class MyProfileState extends State<Profile> {
             TextButton(
               child: Text('Submit'),
               onPressed: () async {
+                await updateUserTopicField('owner', userNameController.text);
                 await auth.currentUser
                     ?.updateDisplayName(userNameController.text);
                 await auth.currentUser?.reload();
                 setState(() {
-                  userName = auth.currentUser!.displayName!;
+                  // userName = auth.currentUser!.displayName!;
                 });
                 Navigator.of(context).pop(); // Dismiss the dialog
               },
@@ -539,6 +550,7 @@ class MyProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: LabColors.bgColorScreen,
@@ -645,5 +657,28 @@ class MyProfileState extends State<Profile> {
         ],
       ),
     );
+  }
+
+  Future<void> updateUserTopicField(String field, String? fieldData) async {
+    try {
+      String? currentUserName = auth.currentUser?.displayName;
+
+      if (currentUserName == null) return;
+
+      Query query =
+          dbRef.child('Topic').orderByChild('owner').equalTo(currentUserName);
+
+      query.once().then((DatabaseEvent event) {
+        if (event.snapshot.exists) {
+          Map<dynamic, dynamic> topics =
+              event.snapshot.value as Map<dynamic, dynamic>? ?? {};
+          topics.forEach((key, value) {
+            dbRef.child('Topic/$key').update({field: fieldData});
+          });
+        }
+      });
+    } catch (error) {
+      log("Error updating topic fields: $error");
+    }
   }
 }
