@@ -227,7 +227,7 @@ class SignUpPageState extends State<SignUpPage> {
       String confirmPassword) {
     if (userName.contains(" ")) {
       return "Username should not contain spaces";
-    } else if (userName.length > 16) {
+    } else if (userName.length > 10) {
       return "Username too long";
     }
     else if (email == null || email.isEmpty) {
@@ -347,6 +347,16 @@ class SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
+          Positioned(
+            top: 10,
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
         ],
       ),
     );

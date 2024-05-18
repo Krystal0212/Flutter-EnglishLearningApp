@@ -96,6 +96,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     super.build(context);
     var parentHeight = MediaQuery.of(context).size.height;
     var parentWidth = MediaQuery.of(context).size.width;
+
     final randomQuote = getRandomQuote();
 
     return MaterialApp(
@@ -121,7 +122,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                     FadeInUp(
                       duration: Duration(milliseconds: 600),
                       child: Container(
-                        height: parentHeight * 0.2,
+                        height: parentHeight * 0.25,
                         width: parentWidth,
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -129,33 +130,29 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                               left: parentWidth * 0.05,
                               right: parentWidth * 0.075),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
                                   Expanded(
                                     child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "Welcome back, ",
-                                              style: TextStyle(
-                                                  fontSize: 25,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500,
-                                                  letterSpacing: 1),
-                                            ),
-                                            Text(
-                                              FirebaseAuth.instance.currentUser!
-                                                  .displayName!,
-                                              style: TextStyle(
-                                                  fontSize: 25,
-                                                  color: Color(0xFF000000),
-                                                  fontWeight: FontWeight.bold,
-                                                  letterSpacing: 1),
-                                            ),
-                                          ],
+                                        Text(
+                                          "Welcome back, ",
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                              letterSpacing: 1),
+                                        ),
+                                        Text(
+                                          FirebaseAuth.instance.currentUser!
+                                              .displayName!,
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              color: Color(0xFF000000),
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1),
                                         ),
                                         SizedBox(height: 10),
                                         Row(
@@ -174,18 +171,18 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                     ),
                                   ),
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Adjust the radius as needed
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    // Adjust the radius as needed
                                     child: kIsWeb
                                         ? Image.network(
                                             FirebaseAuth.instance.currentUser!
                                                 .photoURL!,
-                                            width: 70,
-                                            height: 70,
+                                            width: 90,
+                                            height: 90,
                                             fit: BoxFit.cover,
                                           )
                                         : CachedNetworkImage(
-                                            height: 70,
+                                            height: 90,
                                             imageUrl: FirebaseAuth.instance
                                                 .currentUser!.photoURL!,
                                           ),

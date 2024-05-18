@@ -152,16 +152,16 @@ class MyProfileState extends State<Profile> {
                     : auth.currentUser?.displayName as String,
                 style: TextStyle(
                     color: LabColors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 22)),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30)),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 15.0),
             child: Text(user.email.toString(),
                 style: TextStyle(
-                    color: LabColors.white.withOpacity(0.85),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600)),
+                    color: LabColors.black.withOpacity(0.85),
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold)),
           ),
         ],
       ),
