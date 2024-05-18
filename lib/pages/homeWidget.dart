@@ -142,7 +142,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                         Row(
                                           children: [
                                             Text(
-                                              "Last access since : ${getTimeDifference(userActivity!.timestamp.toString())}",
+                                              "Last topic visited since : ${getTimeDifference(userActivity!.timestamp.toString())}",
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.white54,
