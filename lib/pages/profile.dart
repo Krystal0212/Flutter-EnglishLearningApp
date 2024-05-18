@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
-
+import 'package:Fluffy/constants/avatar-loading-indicator.dart';
 import 'package:Fluffy/constants/loading-indicator.dart';
 import 'package:Fluffy/constants/gifs-lab.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -103,7 +103,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
                   radius: 85,
                   child: CachedNetworkImage(
                     imageUrl: auth.currentUser!.photoURL!,
-                    placeholder: (context, url) => CircularProgressIndicator(),
+                    placeholder: (context, url) => AvatarLoadingIndicator(),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                     imageBuilder: (context, imageProvider) => Container(
                       width: 200,
@@ -164,15 +164,19 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
   }
 
   void getProviders() {
+    User user = auth.currentUser!;
     for (UserInfo provider in user.providerData) {
       if (provider.providerId == "google.com") {
+        if (mounted) {
         setState(() {
           isGoogleUser = true;
-        });
-      } else if (provider.providerId == "password") {
+        });}
+      }
+      if (provider.providerId == "password") {
+        if (mounted) {
         setState(() {
           isCasualUser = true;
-        });
+        });}
       }
     }
   }
@@ -256,6 +260,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
       User? user = auth.currentUser;
 
       await user?.linkWithCredential(credential);
+      await user?.reload();
       await user?.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       String content = "Failed to set your password. Please try again";
@@ -337,12 +342,9 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
                     } else if (password != confirmPassword) {
                       validateResult = "Passwords are not match";
                     } else if (password == confirmPassword) {
-                      await setPasswordForUser(
-                          auth.currentUser!.email!, password);
-
-                      setState(() {
-                        isCasualUser = true;
-                      });
+                      await setPasswordForUser(auth.currentUser!.email!, password);
+                      await auth.currentUser?.reload();
+                      getProviders();
 
                       Navigator.of(context).pop();
 

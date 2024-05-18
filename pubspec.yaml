@@ -93,6 +93,8 @@ flutter:
     - assets/gifs/campfire-loading-indicator.gif
     - assets/gifs/dog-and-cat.gif
     - assets/gifs/crown.gif
+    - assets/gifs/brush-stroke.gif
+    - assets/gifs/sparkle.gif
     - lib/icon/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

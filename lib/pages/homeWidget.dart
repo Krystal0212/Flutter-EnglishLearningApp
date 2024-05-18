@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:Fluffy/constants/dashboard-loading-indicator.dart';
 import 'package:Fluffy/constants/loading-indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
@@ -52,46 +53,50 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Scaffold(
-      backgroundColor: CupertinoColors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
-          "Dashboard",
-          style: TextStyle(color: Colors.black),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: Color(0xFFFDFCFB), // Set your custom color here
+        scaffoldBackgroundColor: Color(0xFFFDFCFB), // Set scaffold background color
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFFFDFCFB), // Set AppBar background color
+          titleTextStyle: TextStyle(color: Colors.black),
+          iconTheme: IconThemeData(color: Colors.black),
         ),
-        backgroundColor: Colors.blue[50],
       ),
-      body: userActivity != null && recentAccessTopic != null
-          ? Column(
-              children: [
-                kIsWeb
-                    ? Image.network(
-                        recentAccessTopic!.ownerAvtUrl as String,
-                        width: 36,
-                        height: 36,
-                        fit: BoxFit.cover,
-                      )
-                    : CachedNetworkImage(
-                        height: 36,
-                        imageUrl: recentAccessTopic!.ownerAvtUrl as String),
-                Row(
-                  children: [
-                    Text("Topic title: ${recentAccessTopic?.title as String}",
-                        style: TextStyle(color: Colors.black)),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Text("by ${recentAccessTopic?.owner}",
-                        style: TextStyle(color: Colors.black))
-                  ],
-                ),
-                Text(
-                    "access since: ${getTimeDifference(userActivity?.timestamp as String)}",
-                    style: TextStyle(color: Colors.black)),
-              ],
-            )
-          : Center(child: LoadingIndicator(title: "Getting data")),
+      home: Scaffold(
+        backgroundColor: CupertinoColors.white,
+        body: userActivity != null && recentAccessTopic != null
+            ? Column(
+                children: [
+                  kIsWeb
+                      ? Image.network(
+                          recentAccessTopic!.ownerAvtUrl as String,
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.cover,
+                        )
+                      : CachedNetworkImage(
+                          height: 36,
+                          imageUrl: recentAccessTopic!.ownerAvtUrl as String),
+                  Row(
+                    children: [
+                      Text("Topic title: ${recentAccessTopic?.title as String}",
+                          style: TextStyle(color: Colors.black)),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("by ${recentAccessTopic?.owner}",
+                          style: TextStyle(color: Colors.black))
+                    ],
+                  ),
+                  Text(
+                      "access since: ${getTimeDifference(userActivity?.timestamp as String)}",
+                      style: TextStyle(color: Colors.black)),
+                ],
+              )
+            : Center(child: DashboardLoadingIndicator()),
+      ),
     );
   }
 
