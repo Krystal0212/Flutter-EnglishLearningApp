@@ -21,7 +21,6 @@ class TopicAchievementPage extends StatefulWidget {
 }
 
 class _TopicAchievementPageState extends State<TopicAchievementPage> {
-
   final FirebaseAuth auth = FirebaseAuth.instance;
   DatabaseReference dbRef = FirebaseDatabase.instance.ref();
 
@@ -42,19 +41,20 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     super.dispose();
   }
 
-  void clearCache() {
+  void clearCache() {}
 
-  }
-
-  Future<String?> takeImg(String uid) async{
+  Future<String> takeImg(String uid) async {
     String path = 'userAvatar/$uid';
-    String url = 'https://firebasestorage.googleapis.com/v0/b/cross-platform-final-term.appspot.com/o/profile-img.jpg?alt=media&token=a3619fea-311e-4529-bbc6-dc9809ce8f80';
+    String url = '';
 
     try {
       url = await FirebaseStorage.instance.ref(path).getDownloadURL();
       return url;
-    }
-    catch (e){
+    } catch (e) {
+      url = await FirebaseStorage.instance
+          .ref()
+          .child('avatardefault_92824.png')
+          .getDownloadURL();
       return url;
     }
   }
@@ -63,7 +63,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
   Future<List<String>> getParticipant() async {
     participantsList = List.from(widget.topic.participant!);
 
-    participantsList.sort((a,b){
+    participantsList.sort((a, b) {
       int totalA = (a.multipleChoicesResult ??= 0) + (a.fillWordResult ??= 0);
       int totalB = (b.multipleChoicesResult ??= 0) + (b.fillWordResult ??= 0);
       return totalB.compareTo(totalA);
@@ -71,17 +71,17 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
     img = [];
 
-    for (Participant p in participantsList){
-      log(name: p.userName as String ,p.userID as String);
-      p.userName??='N/A';
+    for (Participant p in participantsList) {
+      log(name: p.userName ?? 'null userName', p.userID as String);
+      p.userName ??= 'N/A';
     }
 
-    int particiList = participantsList.length>3?3:participantsList.length;
+    int particiList = participantsList.length > 3 ? 3 : participantsList.length;
     log('$particiList');
-    for (int i = 0;i<particiList;i++){
-      log(name: '$i',participantsList[i].userID as String);
-      var a = await takeImg(participantsList[i].userID as String);
-      log(a!);
+    for (int i = 0; i < particiList; i++) {
+      log(name: '$i', participantsList[i].userID as String);
+      String a = await takeImg(participantsList[i].userID as String);
+      log(a);
       img.add(a);
     }
 
@@ -93,10 +93,9 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     return FutureBuilder(
         future: getParticipant(),
         builder: (context, snapshot) {
-          print(snapshot.connectionState);
           if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData){
-              print(snapshot.data);
+            if (snapshot.hasData) {
+              log('${snapshot.data}');
               return Container(
                 padding: EdgeInsets.all(10),
                 child: Column(
@@ -114,13 +113,10 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                               decoration: BoxDecoration(
                                 color: Color(0xFFcbd0d4),
                                 border: Border.all(
-                                    color: Color(0xFF77868e),
-                                    width: 3
-                                ),
+                                    color: Color(0xFF77868e), width: 3),
                                 borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(100),
-                                    topRight: Radius.circular(100)
-                                ),
+                                    topRight: Radius.circular(100)),
                               ),
                               width: kIsWeb ? 190 : mainPageWidth * 0.3,
                               height: kIsWeb ? 250 : mainPageHeight * 0.28,
@@ -133,7 +129,6 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                     child: Stack(
                                         alignment: Alignment.topCenter,
                                         children: [
-
                                           //user avatar border
                                           Container(
                                             margin: EdgeInsets.only(top: 15),
@@ -148,11 +143,13 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                             ),
                                             child: ClipOval(
                                               child: CachedNetworkImage(
+                                                fit: BoxFit.fill,
                                                 imageUrl: snapshot.data![1],
                                                 placeholder: (context, url) =>
                                                     CircularProgressIndicator(),
-                                                errorWidget: (context, url,
-                                                    error) => Icon(Icons.error),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Icon(Icons.error),
                                               ),
                                             ),
                                           ),
@@ -164,22 +161,18 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                                 decoration: BoxDecoration(
                                                     color: Color(0xFF5f6c73),
                                                     border: Border.all(
-                                                        color: Color(
-                                                            0xFF77868e),
-                                                        width: 3
-                                                    ),
-                                                    borderRadius: BorderRadius
-                                                        .circular(100)
-                                                ),
+                                                        color:
+                                                            Color(0xFF77868e),
+                                                        width: 3),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            100)),
                                                 child: Image.asset(
                                                     width: 40,
                                                     height: 40,
-                                                    'lib/icon/secondPlaceMedal.png'
-                                                ),
-                                              )
-                                          ),
-                                        ]
-                                    ),
+                                                    'lib/icon/secondPlaceMedal.png'),
+                                              )),
+                                        ]),
                                   ),
 
                                   //user name
@@ -199,11 +192,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                   Container(
                                     child: Text(
                                       'Score: '
-                                          '${(participantsList[1]
-                                          .multipleChoicesResult ??= 0)
-                                          + (participantsList[1]
-                                              .fillWordResult ??= 0)
-                                      }',
+                                      '${(participantsList[1].multipleChoicesResult ??= 0) + (participantsList[1].fillWordResult ??= 0)}',
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         fontSize: 15,
@@ -213,8 +202,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                     ),
                                   ),
                                 ],
-                              )
-                          ),
+                              )),
 
                         //1st place participant
                         if (participantsList.isNotEmpty)
@@ -223,13 +211,10 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                             decoration: BoxDecoration(
                               color: Color(0xFFffff89),
                               border: Border.all(
-                                  color: Color(0xFFd4af37),
-                                  width: 3
-                              ),
+                                  color: Color(0xFFd4af37), width: 3),
                               borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(100),
-                                  topRight: Radius.circular(100)
-                              ),
+                                  topRight: Radius.circular(100)),
                             ),
                             width: kIsWeb ? 190 : mainPageWidth * 0.3,
                             height: kIsWeb ? 250 : mainPageHeight * 0.32,
@@ -242,7 +227,6 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                   child: Stack(
                                     alignment: Alignment.topCenter,
                                     children: [
-
                                       //user avatar border
                                       Positioned(
                                           top: 40,
@@ -258,15 +242,16 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                             ),
                                             child: ClipOval(
                                               child: CachedNetworkImage(
+                                                fit: BoxFit.fill,
                                                 imageUrl: snapshot.data![0],
                                                 placeholder: (context, url) =>
                                                     CircularProgressIndicator(),
-                                                errorWidget: (context, url,
-                                                    error) => Icon(Icons.error),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Icon(Icons.error),
                                               ),
                                             ),
-                                          )
-                                      ),
+                                          )),
 
                                       //animated crown
                                       SizedBox(
@@ -284,18 +269,14 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                                 color: Color(0xFF9d8022),
                                                 border: Border.all(
                                                     color: Color(0xFFd4af37),
-                                                    width: 3
-                                                ),
-                                                borderRadius: BorderRadius
-                                                    .circular(100)
-                                            ),
+                                                    width: 3),
+                                                borderRadius:
+                                                    BorderRadius.circular(100)),
                                             child: Image.asset(
                                                 width: 40,
                                                 height: 40,
-                                                'lib/icon/firstPlaceMedal.png'
-                                            ),
-                                          )
-                                      ),
+                                                'lib/icon/firstPlaceMedal.png'),
+                                          )),
                                     ],
                                   ),
                                 ),
@@ -317,11 +298,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                 Container(
                                   child: Text(
                                     'Score: '
-                                        '${(participantsList[0]
-                                        .multipleChoicesResult ??= 0)
-                                        + (participantsList[0]
-                                            .fillWordResult ??= 0)
-                                    }',
+                                    '${(participantsList[0].multipleChoicesResult ??= 0) + (participantsList[0].fillWordResult ??= 0)}',
                                     textAlign: TextAlign.start,
                                     style: TextStyle(
                                       fontSize: 15,
@@ -343,13 +320,10 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                             decoration: BoxDecoration(
                               color: Color(0xFF9c4e15),
                               border: Border.all(
-                                  color: Color(0xFF5b2a03),
-                                  width: 3
-                              ),
+                                  color: Color(0xFF5b2a03), width: 3),
                               borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(100),
-                                  topRight: Radius.circular(100)
-                              ),
+                                  topRight: Radius.circular(100)),
                             ),
                             width: kIsWeb ? 190 : mainPageWidth * 0.3,
                             height: kIsWeb ? 250 : mainPageHeight * 0.28,
@@ -362,7 +336,6 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                   child: Stack(
                                       alignment: Alignment.topCenter,
                                       children: [
-
                                         //user avatar border
                                         Container(
                                           width: 90,
@@ -377,11 +350,13 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                           ),
                                           child: ClipOval(
                                             child: CachedNetworkImage(
+                                              fit: BoxFit.fill,
                                               imageUrl: snapshot.data![2],
                                               placeholder: (context, url) =>
                                                   CircularProgressIndicator(),
-                                              errorWidget: (context, url,
-                                                  error) => Icon(Icons.error),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Icon(Icons.error),
                                             ),
                                           ),
                                         ),
@@ -394,20 +369,16 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                                   color: Color(0xFF743504),
                                                   border: Border.all(
                                                       color: Color(0xFF5b2a03),
-                                                      width: 3
-                                                  ),
-                                                  borderRadius: BorderRadius
-                                                      .circular(100)
-                                              ),
+                                                      width: 3),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100)),
                                               child: Image.asset(
                                                   width: 40,
                                                   height: 40,
-                                                  'lib/icon/thirdPlaceMedal.png'
-                                              ),
-                                            )
-                                        ),
-                                      ]
-                                  ),
+                                                  'lib/icon/thirdPlaceMedal.png'),
+                                            )),
+                                      ]),
                                 ),
 
                                 //user name
@@ -427,11 +398,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                 Container(
                                   child: Text(
                                     'Score: '
-                                        '${(participantsList[2]
-                                        .multipleChoicesResult ??= 0)
-                                        + (participantsList[2]
-                                            .fillWordResult ??= 0)
-                                    }',
+                                    '${(participantsList[2].multipleChoicesResult ??= 0) + (participantsList[2].fillWordResult ??= 0)}',
                                     textAlign: TextAlign.start,
                                     style: TextStyle(
                                       fontSize: 15,
@@ -450,72 +417,60 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                     if (participantsList.length > 3)
                       Expanded(
                           child: Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                  color: Colors.grey.shade800,
-                                  width: 3
-                              ),
-                            ),
-                            width: 600,
-                            child: ListView.builder(
-                                itemCount: participantsList.length > 47 ?
-                                47 : participantsList.length - 3,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    alignment: Alignment.center,
-                                    margin: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade500,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                          color: Colors.grey.shade800,
-                                          width: 2
-                                      ),
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border:
+                              Border.all(color: Colors.grey.shade800, width: 3),
+                        ),
+                        width: 600,
+                        child: ListView.builder(
+                            itemCount: participantsList.length > 47
+                                ? 47
+                                : participantsList.length - 3,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                alignment: Alignment.center,
+                                margin: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade500,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: Colors.grey.shade800, width: 2),
+                                ),
+                                child: ListTile(
+                                  leading: Text(
+                                    '#${index + 4}',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade700,
                                     ),
-                                    child: ListTile(
-                                      leading: Text(
-                                        '#${index + 4}',
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-
-                                      title: Text(
-                                        '${participantsList[index + 3]
-                                            .userName}',
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey.shade800,
-                                        ),
-                                      ),
-
-                                      trailing: Text(
-                                        'Score: '
-                                            '${(participantsList[index + 3]
-                                            .multipleChoicesResult ??= 0)
-                                            + (participantsList[index + 3]
-                                                .fillWordResult ??= 0)
-                                        }',
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey.shade800,
-                                        ),
-                                      ),
+                                  ),
+                                  title: Text(
+                                    '${participantsList[index + 3].userName}',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade800,
                                     ),
-                                  );
-                                }
-                            ),
-                          )
-                      )
+                                  ),
+                                  trailing: Text(
+                                    'Score: '
+                                    '${(participantsList[index + 3].multipleChoicesResult ??= 0) + (participantsList[index + 3].fillWordResult ??= 0)}',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                      ))
                   ],
                 ),
               );
@@ -524,19 +479,18 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
           print('return circular');
           return Center(
             child: Container(
-              width: mainPageWidth*0.4,
-              height: mainPageWidth*0.4,
+              width: mainPageWidth * 0.4,
+              height: mainPageWidth * 0.4,
               child: CircularProgressIndicator(
                 color: Colors.blue,
               ),
             ),
           );
-        }
-    );
+        });
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -544,30 +498,29 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
             Icons.arrow_back,
             color: Colors.white,
           ),
-          onPressed: (){
+          onPressed: () {
             clearCache();
             Navigator.pop(context);
           },
         ),
         automaticallyImplyLeading: false,
-        centerTitle : true,
-        title : const Text('Hall of Fame'),
+        centerTitle: true,
+        title: const Text('Hall of Fame'),
         backgroundColor: Colors.blue[800],
         titleTextStyle: const TextStyle(
             color: CupertinoColors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 25
-        ),
+            fontSize: 25),
       ),
       body: LayoutBuilder(
-        builder: (context,constraints){
+        builder: (context, constraints) {
           mainPageWidth = constraints.maxWidth;
           mainPageHeight = constraints.maxHeight;
           return Center(
             child: Container(
               color: CupertinoColors.white,
-              width: kIsWeb? mainPageWidth * 0.7 : mainPageWidth,
-              height: kIsWeb? mainPageHeight * 0.85 : mainPageHeight,
+              width: kIsWeb ? mainPageWidth * 0.7 : mainPageWidth,
+              height: kIsWeb ? mainPageHeight * 0.85 : mainPageHeight,
               child: scoreboard(),
             ),
           );
