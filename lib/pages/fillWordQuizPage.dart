@@ -469,7 +469,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
         .indexWhere((p) => p.userID == auth.currentUser?.uid);
     if (widget.topic.participant![index].fillWordResult == null ||
         widget.topic.participant![index].fillWordResult! < score) {
-      print('update score');
+
       Participant toUpdateParticipant = Participant(
           auth.currentUser?.uid,
           auth.currentUser?.displayName,
@@ -480,7 +480,6 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
           .update(toUpdateParticipant.toMap())
           .then((value) {});
     }
-    print('not update score');
   }
 
   //||===========================||

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gradient_animation_text/flutter_gradient_animation_text.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../objects/participant.dart';
 import '../objects/topic.dart';
@@ -52,6 +53,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   static dynamic resultTitleColor = Colors.black;
   static bool isProcessingNotification = false;
   static int score = 0;
+  static FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -100,6 +102,14 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     score = 0;
   }
 
+  //text to speak word
+  Future _speak(String inputText) async{
+    flutterTts.setLanguage(widget.isChangeLanguage?"en-US":"vi-VN");
+    flutterTts.setVolume(1);
+    await flutterTts.speak(inputText);
+  }
+
+  //implement confetti for summary page
   void initConfetti() {
     _confettiControllerLeft =
         ConfettiController(duration: const Duration(seconds: 3));
@@ -120,6 +130,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     }
   }
 
+  //make answer random
   Map<String, dynamic> shuffleAnswer(int index) {
     List<Word> listOfWord = List.from(wordList);
     List<String> answerList;
@@ -164,12 +175,14 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     return mainQuestion;
   }
 
+  // create one page
   void generateMultipleChoiceQuestions() {
     for (int i = 0; i < wordList.length; i++) {
       questList.add(shuffleAnswer(i));
     }
   }
 
+  //check if user complete all question
   static bool isFinished() {
     if (userSelection.length == wordList.length) {
       return true;
@@ -177,6 +190,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     return false;
   }
 
+  //summary page Score title
   Widget mainResultTitle() {
     resultTitle = "Your Score: $score";
     if (finishedQuestCorrectly.length == userSelection.length) {
@@ -231,6 +245,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     }
   }
 
+  //return color of correctness of user answers
   Color isAnswerChosenCorrectlyColor(
       String? userOption, String result, String currentOption, int shade) {
     if (userSelection[currentIndex] == null) {
@@ -250,6 +265,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     return Colors.grey[shade * 2] as Color;
   }
 
+  //return icon of correctness of user answers
   Color isAnswerChosenCorrectlyIcon(String? userOption, String result,
       String currentOption, Color defaultColor) {
     if (userSelection[currentIndex] == null) {
@@ -269,6 +285,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     return Colors.grey.shade400;
   }
 
+  //4 tiles of answers
   Widget answerCardWidget(String option, String result, int index) {
     return TextButton(
       onPressed: () async {
@@ -333,6 +350,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     );
   }
 
+  //container hold 4 tiles of answer
   Widget answerGroupWidget(List<String> optionList, String result) {
     return Container(
         alignment: Alignment.center,
@@ -374,6 +392,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
               ));
   }
 
+  //container hold question
   Widget questionGroupWidget(String question) {
     return Container(
         //alignment: Alignment.center,
@@ -393,6 +412,14 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                   fontSize: kIsWeb ? 40 : 35,
                   fontWeight: FontWeight.bold),
             ),
+            IconButton(
+                iconSize: 40,
+                onPressed: () {
+                  _speak(question);
+                  //_stop();
+                },
+                icon: const Icon(Icons.volume_down)
+            ),
             const Text(
               "Choose the correct answer",
               textAlign: TextAlign.start,
@@ -405,6 +432,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         ));
   }
 
+  //main content of page (hold question and answer tiles)
   Widget multipleChoicePageWidget() {
     return Container(
         width: mainPageWidth,
@@ -552,6 +580,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         ));
   }
 
+  //finished page that has content and redirect button (if web)
   Widget multipleChoiceQuizMainPage() {
     return Stack(
       children: [
@@ -601,6 +630,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     );
   }
 
+  //summary dialog when user finished
   void showResultDialog() {
     score = finishedQuestCorrectly.length * 500;
     showDialog(
@@ -689,6 +719,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     setState(() {});
   }
 
+  //summary data in summary dialog
   Widget resultContext() {
     return Center(
       child: Column(
