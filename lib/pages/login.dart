@@ -4,7 +4,6 @@ import 'package:Fluffy/pages/homeNav.dart';
 import 'register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:Fluffy/constants/loading-indicator.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';

@@ -49,10 +49,11 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
 
   static int currentIndex = 0;
   static bool isShownOnce = false;
+  static bool isNewHighScore = false;
   static String resultTitle = '';
   static dynamic resultTitleColor = Colors.black;
   static bool isProcessingNotification = false;
-  static int score = 0;
+  static int score = 0, highScore = 0;
   static final FlutterTts flutterTts = FlutterTts();
 
   @override
@@ -64,12 +65,25 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     initConfetti();
   }
 
+  Widget highScoreBadge() {
+
+    return Container(
+      width: kIsWeb?170:120,
+      height: kIsWeb?170:120,
+      alignment: Alignment.topCenter,
+      child: Transform.rotate(
+        angle: 50,
+        child: Image.asset('assets/images/new_record.png'),
+      ),
+    );
+  }
+
   void updateScoreToDatabase(int score) {
     int index = widget.topic.participant!
         .indexWhere((p) => p.userID == auth.currentUser?.uid);
     if (widget.topic.participant![index].multipleChoicesResult == null ||
         widget.topic.participant![index].multipleChoicesResult! < score) {
-      print('update score');
+
       Participant toUpdateParticipant = Participant(
           auth.currentUser?.uid,
           auth.currentUser?.displayName,
@@ -80,7 +94,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
           .update(toUpdateParticipant.toMap())
           .then((value) {});
     }
-    print('not update score');
+
   }
 
   @override
@@ -100,6 +114,8 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
     resultTitle = '';
     resultTitleColor = Colors.black;
     score = 0;
+    highScore = 0;
+    isNewHighScore = false;
   }
 
   //text to speak word
@@ -245,7 +261,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
           resultTitle,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: kIsWeb ? 35 : 30,
+            fontSize: kIsWeb ? 55 : 30,
           ),
         ),
         duration: const Duration(milliseconds: 500),
@@ -255,28 +271,28 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 55 : 30, color: resultTitleColor),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.5) {
       resultTitleColor = const Color(0xFFBcc6cc);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 55 : 30, color: resultTitleColor),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.25) {
       resultTitleColor = const Color(0xFF5B391E);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 55 : 30, color: resultTitleColor),
       );
     } else {
       resultTitleColor = Colors.black87;
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 55 : 30, color: resultTitleColor),
       );
     }
   }
@@ -434,8 +450,8 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         //alignment: Alignment.center,
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.all(30),
-        width: kIsWeb ? mainPageWidth * 0.4 : mainPageWidth,
-        height: kIsWeb ? mainPageHeight * 0.2 : mainPageHeight * 0.25,
+        width: kIsWeb ? mainPageWidth * 0.42 : mainPageWidth,
+        height: kIsWeb ? mainPageHeight * 0.23 : mainPageHeight * 0.25,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
@@ -449,7 +465,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                   fontWeight: FontWeight.bold),
             ),
             IconButton(
-                iconSize: kIsWeb? 40:30,
+                iconSize: kIsWeb? 35:30,
                 onPressed: () {
                   speak(question);
                   //_stop();
@@ -675,6 +691,19 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   //summary dialog when user finished
   void showResultDialog() {
     score = finishedQuestCorrectly.length * 500;
+    int index = widget.topic.participant!
+        .indexWhere((p) => p.userID == auth.currentUser?.uid);
+    if (widget.topic.participant![index].multipleChoicesResult == null ) {
+      highScore = -1;
+      isNewHighScore = true;
+    } else if (widget.topic.participant![index].multipleChoicesResult! < score) {
+      highScore = score;
+      isNewHighScore = true;
+    }
+    else {
+      highScore = widget.topic.participant![index].multipleChoicesResult!;
+      isNewHighScore = false;
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -743,7 +772,9 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                     ),
                   ),
                 ),
-                resultContext()
+                resultContext(),
+                if (isNewHighScore)
+                  highScoreBadge()
               ],
             ),
           ),
@@ -768,6 +799,11 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           mainResultTitle(),
+          if (highScore!=-1)
+          Text(
+            'High Score: $highScore',
+            style: TextStyle(fontSize: kIsWeb?30:22),
+          ),
           const Text(
             'You have completed the quiz.',
             style: TextStyle(fontSize: 18),

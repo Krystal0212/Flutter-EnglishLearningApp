@@ -44,10 +44,10 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
   static const double mainIconSize = kIsWeb ? 50 : 20;
   static late double mainPageWidth, mainPageHeight;
   static int currentIndex = 0;
-  static bool isQuizFinished = false;
+  static bool isQuizFinished = false, isNewHighScore = false;
   static String resultTitle = '';
   static dynamic resultTitleColor = Colors.black;
-  static int score = 0;
+  static int score = 0, highScore = 0;
   static String actionText = 'Result';
   static int selectedSummaryOption = 0;
 
@@ -93,6 +93,8 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     actionText = 'Result';
     score = 0;
     selectedSummaryOption = 0;
+    highScore = 0;
+    isNewHighScore = false;
   }
 
   //short snack bar function
@@ -210,6 +212,7 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     });
   }
 
+  //filter word with selected option
   void filterWords() {
     setState(() {
       filteredUserInputResult = {};
@@ -405,6 +408,20 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
     );
   }
 
+  //new record badge
+  Widget highScoreBadge() {
+
+    return Container(
+      width: kIsWeb?170:90,
+      height: kIsWeb?170:90,
+      alignment: Alignment.topCenter,
+      child: Transform.rotate(
+        angle: 50,
+        child: Image.asset('assets/images/new_record.png'),
+      ),
+    );
+  }
+
   //initiate title for summary page and update user score
   Widget summaryTitleWidget() {
     double titleFontSize = kIsWeb ? 70 : 30;
@@ -479,6 +496,18 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
           .child("Topic/${widget.topic.id}/participant/$index")
           .update(toUpdateParticipant.toMap())
           .then((value) {});
+    }
+
+    if (widget.topic.participant![index].fillWordResult == null ) {
+      highScore = -1;
+      isNewHighScore = true;
+    } else if (widget.topic.participant![index].fillWordResult! < score) {
+      highScore = score;
+      isNewHighScore = true;
+    }
+    else {
+      highScore = widget.topic.participant![index].fillWordResult!;
+      isNewHighScore = false;
     }
   }
 
@@ -659,354 +688,365 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
       width: mainPageWidth,
       height: mainPageHeight,
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Stack(
+            //confetti widget
+            Container(
+              margin: EdgeInsets.only(top: 10, left: 10),
+              alignment: Alignment.topLeft,
+              child: RepaintBoundary(
+                child: ConfettiWidget(
+                  confettiController: _confettiControllerLeft,
+                  blastDirection: pi / 6,
+                  // 45 degrees
+                  emissionFrequency: 0.2,
+                  // Adjusted emission frequency
+                  numberOfParticles: 5,
+                  // Increased number of particles
+                  maxBlastForce: 65,
+                  // Increased blast force
+                  minBlastForce: 8,
+                  // Increased minimum blast force
+                  gravity: 0.01,
+                  // Adjusted gravity
+                  colors: const [
+                    Colors.red,
+                    Colors.blue,
+                    Colors.green,
+                    Colors.yellow,
+                    Colors.purple, // Added more colors
+                    Colors.orange
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 10, right: 10),
+              alignment: Alignment.topRight,
+              child: RepaintBoundary(
+                child: ConfettiWidget(
+                  confettiController: _confettiControllerRight,
+                  blastDirection: 5 * pi / 6,
+                  // 135 degrees
+                  emissionFrequency: 0.2,
+                  // Adjusted emission frequency
+                  numberOfParticles: 5,
+                  // Increased number of particles
+                  maxBlastForce: 65,
+                  // Increased blast force
+                  minBlastForce: 8,
+                  // Increased minimum blast force
+                  gravity: 0.01,
+                  // Adjusted gravity
+                  colors: const [
+                    Colors.red,
+                    Colors.blue,
+                    Colors.green,
+                    Colors.yellow,
+                    Colors.purple, // Added more colors
+                    Colors.orange
+                  ],
+                ),
+              ),
+            ),
+            if (isNewHighScore)
+              highScoreBadge(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 10, left: 10),
-                  alignment: Alignment.topLeft,
-                  child: RepaintBoundary(
-                    child: ConfettiWidget(
-                      confettiController: _confettiControllerLeft,
-                      blastDirection: pi / 6,
-                      // 45 degrees
-                      emissionFrequency: 0.2,
-                      // Adjusted emission frequency
-                      numberOfParticles: 5,
-                      // Increased number of particles
-                      maxBlastForce: 65,
-                      // Increased blast force
-                      minBlastForce: 8,
-                      // Increased minimum blast force
-                      gravity: 0.01,
-                      // Adjusted gravity
-                      colors: const [
-                        Colors.red,
-                        Colors.blue,
-                        Colors.green,
-                        Colors.yellow,
-                        Colors.purple, // Added more colors
-                        Colors.orange
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 10, right: 10),
-                  alignment: Alignment.topRight,
-                  child: RepaintBoundary(
-                    child: ConfettiWidget(
-                      confettiController: _confettiControllerRight,
-                      blastDirection: 5 * pi / 6,
-                      // 135 degrees
-                      emissionFrequency: 0.2,
-                      // Adjusted emission frequency
-                      numberOfParticles: 5,
-                      // Increased number of particles
-                      maxBlastForce: 65,
-                      // Increased blast force
-                      minBlastForce: 8,
-                      // Increased minimum blast force
-                      gravity: 0.01,
-                      // Adjusted gravity
-                      colors: const [
-                        Colors.red,
-                        Colors.blue,
-                        Colors.green,
-                        Colors.yellow,
-                        Colors.purple, // Added more colors
-                        Colors.orange
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            //result title
-            Container(
-              child: summaryTitleWidget(),
-            ),
-
-            //result data
-            Container(
-              margin: const EdgeInsets.all(10),
-              width: kIsWeb ? mainPageWidth * 0.7 : mainPageWidth,
-              height: mainPageHeight * 0.35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  //Progress indicator
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
                     children: [
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 15),
-                        child: const Text(
-                          'Your Progress',
-                          style: TextStyle(
-                              fontSize: kIsWeb ? 30 : 25,
-                              fontWeight: FontWeight.bold),
+                      summaryTitleWidget(),
+                      if (highScore!=-1)
+                        Text(
+                          'High Score: $highScore',
+                          style: TextStyle(fontSize: kIsWeb?30:22),
                         ),
+                    ],
+                  ),
+                ),
+
+                //result data
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  width: kIsWeb ? mainPageWidth * 0.7 : mainPageWidth,
+                  height: mainPageHeight * 0.35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      //Progress indicator
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 15),
+                            child: const Text(
+                              'Your Progress',
+                              style: TextStyle(
+                                  fontSize: kIsWeb ? 30 : 25,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          SizedBox(
+                            width: kIsWeb
+                                ? mainPageHeight * 0.24
+                                : mainPageWidth * 0.4,
+                            height: kIsWeb
+                                ? mainPageHeight * 0.24
+                                : mainPageWidth * 0.4,
+                            child: PieChart(
+                              PieChartData(startDegreeOffset: 270.0, sections: [
+                                //Correct answer
+                                PieChartSectionData(
+                                  value: finishedCardCorrectly.length.toDouble(),
+                                  color: Colors.green[400],
+                                  title: kIsWeb
+                                      ? "Correct"
+                                      : "Correct: ${finishedCardCorrectly.length}",
+                                  titleStyle:
+                                  const TextStyle(color: CupertinoColors.white),
+                                ),
+
+                                //Wrong answer
+                                PieChartSectionData(
+                                  value: finishedCardWrongly.length.toDouble(),
+                                  color: Colors.red[400],
+                                  title: kIsWeb
+                                      ? "Wrong"
+                                      : "Wrong: ${finishedCardWrongly.length}",
+                                  titleStyle:
+                                  const TextStyle(color: CupertinoColors.white),
+                                ),
+
+                                //Skipped answer
+                                PieChartSectionData(
+                                  value: skippedCard.length.toDouble(),
+                                  color: Colors.grey[700],
+                                  title: kIsWeb
+                                      ? "Skip"
+                                      : "Skip: ${skippedCard.length}",
+                                  titleStyle:
+                                  const TextStyle(color: CupertinoColors.white),
+                                )
+                              ]),
+                            ),
+                          )
+                        ],
                       ),
-                      SizedBox(
-                        width: kIsWeb
-                            ? mainPageHeight * 0.24
-                            : mainPageWidth * 0.4,
-                        height: kIsWeb
-                            ? mainPageHeight * 0.24
-                            : mainPageWidth * 0.4,
-                        child: PieChart(
-                          PieChartData(startDegreeOffset: 270.0, sections: [
-                            //Correct answer
-                            PieChartSectionData(
-                              value: finishedCardCorrectly.length.toDouble(),
-                              color: Colors.green[400],
-                              title: kIsWeb
-                                  ? "Correct"
-                                  : "Correct: ${finishedCardCorrectly.length}",
-                              titleStyle:
-                                  const TextStyle(color: CupertinoColors.white),
-                            ),
 
-                            //Wrong answer
-                            PieChartSectionData(
-                              value: finishedCardWrongly.length.toDouble(),
-                              color: Colors.red[400],
-                              title: kIsWeb
-                                  ? "Wrong"
-                                  : "Wrong: ${finishedCardWrongly.length}",
-                              titleStyle:
-                                  const TextStyle(color: CupertinoColors.white),
-                            ),
-
-                            //Skipped answer
-                            PieChartSectionData(
-                              value: skippedCard.length.toDouble(),
-                              color: Colors.grey[700],
-                              title: kIsWeb
-                                  ? "Skip"
-                                  : "Skip: ${skippedCard.length}",
-                              titleStyle:
-                                  const TextStyle(color: CupertinoColors.white),
-                            )
-                          ]),
-                        ),
+                      //Result statistic
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                              onPressed: () {
+                                cycleGroupOption(1);
+                              },
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(mainPageWidth * 0.3, 40),
+                                  backgroundColor: Colors.green[200],
+                                  side: BorderSide(color: Colors.green, width: 2),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  )),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Correct',
+                                    textAlign:
+                                    kIsWeb ? TextAlign.start : TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.green,
+                                        fontSize: kIsWeb ? 35 : 20),
+                                  ),
+                                  kIsWeb
+                                      ? Text(
+                                    '${finishedCardCorrectly.length}',
+                                    style: const TextStyle(
+                                        color: Colors.green,
+                                        fontSize: kIsWeb ? 35 : 20),
+                                  )
+                                      : SizedBox.shrink(),
+                                ],
+                              )),
+                          TextButton(
+                              onPressed: () {
+                                cycleGroupOption(2);
+                              },
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(mainPageWidth * 0.3, 40),
+                                  backgroundColor: Colors.red[200],
+                                  side: BorderSide(color: Colors.red, width: 2),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  )),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Incorrect',
+                                    textAlign:
+                                    kIsWeb ? TextAlign.start : TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: kIsWeb ? 35 : 20),
+                                  ),
+                                  kIsWeb
+                                      ? Text(
+                                    '${finishedCardWrongly.length}',
+                                    style: const TextStyle(
+                                        color: Colors.red,
+                                        fontSize: kIsWeb ? 35 : 20),
+                                  )
+                                      : SizedBox.shrink(),
+                                ],
+                              )),
+                          TextButton(
+                              onPressed: () {
+                                cycleGroupOption(3);
+                              },
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(mainPageWidth * 0.3, 40),
+                                  backgroundColor: Colors.grey[300],
+                                  side: BorderSide(
+                                      color: Colors.grey[700] as Color, width: 2),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  )),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Skipped',
+                                    textAlign:
+                                    kIsWeb ? TextAlign.start : TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: kIsWeb ? 35 : 20),
+                                  ),
+                                  kIsWeb
+                                      ? Text(
+                                    '${skippedCard.length}',
+                                    style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: kIsWeb ? 35 : 20),
+                                  )
+                                      : SizedBox.shrink(),
+                                ],
+                              )),
+                        ],
                       )
                     ],
                   ),
+                ),
 
-                  //Result statistic
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                          onPressed: () {
-                            cycleGroupOption(1);
-                          },
-                          style: TextButton.styleFrom(
-                              minimumSize: Size(mainPageWidth * 0.3, 40),
-                              backgroundColor: Colors.green[200],
-                              side: BorderSide(color: Colors.green, width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Correct',
-                                textAlign:
-                                    kIsWeb ? TextAlign.start : TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.green,
-                                    fontSize: kIsWeb ? 35 : 20),
-                              ),
-                              kIsWeb
-                                  ? Text(
-                                      '${finishedCardCorrectly.length}',
-                                      style: const TextStyle(
-                                          color: Colors.green,
-                                          fontSize: kIsWeb ? 35 : 20),
-                                    )
-                                  : SizedBox.shrink(),
-                            ],
-                          )),
-                      TextButton(
-                          onPressed: () {
-                            cycleGroupOption(2);
-                          },
-                          style: TextButton.styleFrom(
-                              minimumSize: Size(mainPageWidth * 0.3, 40),
-                              backgroundColor: Colors.red[200],
-                              side: BorderSide(color: Colors.red, width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Incorrect',
-                                textAlign:
-                                    kIsWeb ? TextAlign.start : TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: kIsWeb ? 35 : 20),
-                              ),
-                              kIsWeb
-                                  ? Text(
-                                      '${finishedCardWrongly.length}',
-                                      style: const TextStyle(
-                                          color: Colors.red,
-                                          fontSize: kIsWeb ? 35 : 20),
-                                    )
-                                  : SizedBox.shrink(),
-                            ],
-                          )),
-                      TextButton(
-                          onPressed: () {
-                            cycleGroupOption(3);
-                          },
-                          style: TextButton.styleFrom(
-                              minimumSize: Size(mainPageWidth * 0.3, 40),
-                              backgroundColor: Colors.grey[300],
-                              side: BorderSide(
-                                  color: Colors.grey[700] as Color, width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Skipped',
-                                textAlign:
-                                    kIsWeb ? TextAlign.start : TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    fontSize: kIsWeb ? 35 : 20),
-                              ),
-                              kIsWeb
-                                  ? Text(
-                                      '${skippedCard.length}',
-                                      style: TextStyle(
-                                          color: Colors.grey[700],
-                                          fontSize: kIsWeb ? 35 : 20),
-                                    )
-                                  : SizedBox.shrink(),
-                            ],
-                          )),
-                    ],
-                  )
-                ],
-              ),
-            ),
+                //result progress
+                Expanded(
+                    flex: 1,
+                    child: Container(
+                      width: kIsWeb ? mainPageWidth * 0.7 : mainPageWidth,
+                      child: ListView.builder(
+                          itemCount: filteredWordList.length,
+                          itemBuilder: (context, index) {
+                            var word = filteredWordList[index];
+                            //filteredUserInputResult = userInputResult;
+                            //var wordIndex = wordList.indexOf(word);
+                            var borderColor, tileColor, showIcon;
 
-            //result progress
-            Expanded(
-                flex: 1,
-                child: Container(
-                  width: kIsWeb ? mainPageWidth * 0.7 : mainPageWidth,
-                  child: ListView.builder(
-                      itemCount: filteredWordList.length,
-                      itemBuilder: (context, index) {
-                        var word = filteredWordList[index];
-                        //filteredUserInputResult = userInputResult;
-                        //var wordIndex = wordList.indexOf(word);
-                        var borderColor, tileColor, showIcon;
-
-                        if (selectedSummaryOption == 1) {
-                          borderColor = Colors.green;
-                          tileColor = Colors.green[200];
-                          showIcon = const Icon(
-                            Icons.check,
-                            color: Colors.green,
-                            size: mainIconSize,
-                          );
-                        } else if (selectedSummaryOption == 2) {
-                          borderColor = Colors.red;
-                          tileColor = Colors.red[200];
-                          showIcon = const Icon(Icons.close,
-                              color: Colors.red, size: mainIconSize);
-                        } else if (selectedSummaryOption == 3) {
-                          borderColor = Colors.grey;
-                          tileColor = Colors.grey[400];
-                          showIcon = Icon(Icons.backspace_outlined,
-                              color: Colors.grey[700], size: mainIconSize);
-                        } else {
-                          filteredUserInputResult = userInputResult;
-                          borderColor = finishedCardCorrectly.contains(index)
-                              ? Colors.green
-                              : skippedCard.contains(index)
+                            if (selectedSummaryOption == 1) {
+                              borderColor = Colors.green;
+                              tileColor = Colors.green[200];
+                              showIcon = const Icon(
+                                Icons.check,
+                                color: Colors.green,
+                                size: mainIconSize,
+                              );
+                            } else if (selectedSummaryOption == 2) {
+                              borderColor = Colors.red;
+                              tileColor = Colors.red[200];
+                              showIcon = const Icon(Icons.close,
+                                  color: Colors.red, size: mainIconSize);
+                            } else if (selectedSummaryOption == 3) {
+                              borderColor = Colors.grey;
+                              tileColor = Colors.grey[400];
+                              showIcon = Icon(Icons.backspace_outlined,
+                                  color: Colors.grey[700], size: mainIconSize);
+                            } else {
+                              filteredUserInputResult = userInputResult;
+                              borderColor = finishedCardCorrectly.contains(index)
+                                  ? Colors.green
+                                  : skippedCard.contains(index)
                                   ? Colors.grey
                                   : Colors.red;
-                          tileColor = finishedCardCorrectly.contains(index)
-                              ? Colors.green[200]
-                              : skippedCard.contains(index)
+                              tileColor = finishedCardCorrectly.contains(index)
+                                  ? Colors.green[200]
+                                  : skippedCard.contains(index)
                                   ? Colors.grey[400]
                                   : Colors.red[200];
-                          showIcon = finishedCardCorrectly.contains(index)
-                              ? const Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: mainIconSize,
-                                )
-                              : skippedCard.contains(index)
+                              showIcon = finishedCardCorrectly.contains(index)
+                                  ? const Icon(
+                                Icons.check,
+                                color: Colors.green,
+                                size: mainIconSize,
+                              )
+                                  : skippedCard.contains(index)
                                   ? Icon(Icons.backspace_outlined,
-                                      color: Colors.grey[700],
-                                      size: mainIconSize)
+                                  color: Colors.grey[700],
+                                  size: mainIconSize)
                                   : const Icon(Icons.close,
-                                      color: Colors.red, size: mainIconSize);
-                        }
+                                  color: Colors.red, size: mainIconSize);
+                            }
 
-                        //if (){}
-                        return Container(
-                          margin: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: tileColor,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: borderColor, width: 2),
-                          ),
-                          child: ListTile(
-                            trailing: showIcon,
-                            textColor: Colors.black,
-                            titleTextStyle:
+                            //if (){}
+                            return Container(
+                              margin: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: tileColor,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: borderColor, width: 2),
+                              ),
+                              child: ListTile(
+                                trailing: showIcon,
+                                textColor: Colors.black,
+                                titleTextStyle:
                                 const TextStyle(fontSize: kIsWeb ? 25 : 18),
-                            subtitleTextStyle:
+                                subtitleTextStyle:
                                 const TextStyle(fontSize: kIsWeb ? 20 : 15),
-                            subtitle: Text(
-                              'Your answer: ${filteredUserInputResult[index]}',
-                            ),
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    textAlign: TextAlign.left,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    'Result: ${word.vietnamese}',
-                                  ),
+                                subtitle: Text(
+                                  'Your answer: ${filteredUserInputResult[index]}',
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    textAlign: TextAlign.right,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    widget.isChangeLanguage
-                                        ? 'Vietnamese'
-                                        : 'English'
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        textAlign: TextAlign.left,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        'Result: ${word.vietnamese}',
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        textAlign: TextAlign.right,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        widget.isChangeLanguage
+                                            ? 'Vietnamese'
+                                            : 'English'
                                             ': ${word.english}',
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                ))
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                    ))
+              ],
+            )
           ],
         ),
       ),
@@ -1079,110 +1119,3 @@ class _FillWordQuizPageState extends State<FillWordQuizPage>
   }
 }
 
-/*
-Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          width: mainPageWidth * 0.3,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.green[200],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: Colors.green,
-                                width: 2
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Correct',
-                                textAlign: kIsWeb?TextAlign.start:TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.green,
-                                    fontSize: kIsWeb? 35 : 20
-                                ),
-                              ),
-                              kIsWeb?
-                              Text(
-                                '${finishedCardCorrectly.length}',
-                                style: const TextStyle(
-                                    color: Colors.green,
-                                    fontSize: kIsWeb? 35 : 20
-                                ),
-                              )
-                                  :SizedBox.shrink(),
-                            ],
-                          )
-                      ),
-                      Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          alignment: Alignment.center,
-                          width: mainPageWidth * 0.3,
-                          decoration: BoxDecoration(
-                            color: Colors.red[200],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: Colors.red,
-                                width: 2
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Incorrect',
-                                textAlign: kIsWeb?TextAlign.start:TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: kIsWeb? 35 : 20
-                                ),
-                              ),
-                              kIsWeb?
-                              Text(
-                                '${finishedCardWrongly.length}',
-                                style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: kIsWeb? 35 : 20
-                                ),
-                              )
-                                  :SizedBox.shrink(),
-                            ],
-                          )
-                      ),
-                      Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          width: mainPageWidth * 0.3,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: Colors.grey[700] as Color,
-                                width: 2
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Skipped',
-                                textAlign: kIsWeb?TextAlign.start:TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    fontSize: kIsWeb? 35 : 20
-                                ),
-                              ),
-                              kIsWeb?
-                              Text(
-                                '${skippedCard.length}',
-                                style: TextStyle(
-                                    color: Colors.grey[700],
-                                    fontSize: kIsWeb? 35 : 20
-                                ),
-                              )
-                                  :SizedBox.shrink(),
-                            ],
-                          )
-                      )
- */
