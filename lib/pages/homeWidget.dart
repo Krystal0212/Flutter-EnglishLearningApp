@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:math' as math;
 import 'package:Fluffy/constants/dashboard-loading-indicator.dart';
+import 'package:Fluffy/constants/gifs-lab.dart';
 import 'package:Fluffy/constants/loading-indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
@@ -8,6 +10,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
 
 import '../objects/topic.dart';
 import '../objects/userActivity.dart';
@@ -30,17 +33,10 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   UserActivity? userActivity;
   Topic? recentAccessTopic;
 
-  // Timer? _timer;
-
   @override
   void initState() {
     syncUserActivity();
-    // func to update topic every x seconds
-    // _timer = Timer.periodic(Duration(minutes: 1), (timer) {
-    //   if (mounted) {
-    //     setState(() {});
-    //   }
-    // });
+
     super.initState();
   }
 
@@ -50,14 +46,50 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     super.dispose();
   }
 
+  final List<Map<String, String>> quotes = [
+    {
+      'quote':
+          "Live as if you were to die tomorrow. Learn as if you were to live forever.",
+      'author': "Mahatma Gandhi",
+    },
+    {
+      'quote':
+          "Education is the most powerful weapon which you can use to change the world.",
+      'author': "Nelson Mandela",
+    },
+    {
+      'quote':
+          "The beautiful thing about learning is that nobody can take it away from you.",
+      'author': "B.B. King",
+    },
+    {
+      'quote':
+          "Develop a passion for learning. If you do, you will never cease to grow.",
+      'author': "Anthony J. D'Angelo",
+    },
+  ];
+
+  Map<String, String> getRandomQuote() {
+    final random = math.Random();
+    int index = random.nextInt(quotes.length);
+    return quotes[index];
+  }
+
   @override
   Widget build(BuildContext context) {
+    var parentHeight = MediaQuery.of(context).size.height;
+    var parentWidth = MediaQuery.of(context).size.width;
     super.build(context);
+
+    final randomQuote = getRandomQuote();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color(0xFFFDFCFB), // Set your custom color here
-        scaffoldBackgroundColor: Color(0xFFFDFCFB), // Set scaffold background color
+        primaryColor: Color(0xFFFDFCFB),
+        // Set your custom color here
+        scaffoldBackgroundColor: Color(0xFFFDFCFB),
+        // Set scaffold background color
         appBarTheme: AppBarTheme(
           backgroundColor: Color(0xFFFDFCFB), // Set AppBar background color
           titleTextStyle: TextStyle(color: Colors.black),
@@ -67,33 +99,199 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
       home: Scaffold(
         backgroundColor: CupertinoColors.white,
         body: userActivity != null && recentAccessTopic != null
-            ? Column(
-                children: [
-                  kIsWeb
-                      ? Image.network(
-                          recentAccessTopic!.ownerAvtUrl as String,
-                          width: 36,
-                          height: 36,
-                          fit: BoxFit.cover,
-                        )
-                      : CachedNetworkImage(
-                          height: 36,
-                          imageUrl: recentAccessTopic!.ownerAvtUrl as String),
-                  Row(
-                    children: [
-                      Text("Topic title: ${recentAccessTopic?.title as String}",
-                          style: TextStyle(color: Colors.black)),
-                      SizedBox(
-                        width: 20,
+            ? SingleChildScrollView(
+                child: Container(
+                  color: Color(0xFF7B88D9),
+                  child: Column(children: [
+                    FadeInUp(
+                      duration: Duration(milliseconds: 600),
+                      child:Container(
+                      height: parentHeight * 0.2,
+                      width: parentWidth,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            top: parentHeight * 0.05, left: parentWidth * 0.05, right: parentWidth * 0.075),
+                        child:  Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Welcome back, ",
+                                              style: TextStyle(
+                                                  fontSize: 25,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 1),
+                                            ),
+                                            Text(
+                                              FirebaseAuth
+                                                  .instance.currentUser!.displayName!,
+                                              style: TextStyle(
+                                                  fontSize: 25,
+                                                  color: Color(0xFF000000),
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 1),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Last access since : ${getTimeDifference(userActivity!.timestamp.toString())}",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.white54,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 1),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
+                                      child:kIsWeb
+                                      ? Image.network(
+                                          FirebaseAuth
+                                              .instance.currentUser!.photoURL!,
+                                          width: 70,
+                                          height: 70,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : CachedNetworkImage(
+                                          height: 70,
+                                          imageUrl: FirebaseAuth
+                                              .instance.currentUser!.photoURL!,
+                                        ),),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      Text("by ${recentAccessTopic?.owner}",
-                          style: TextStyle(color: Colors.black))
-                    ],
-                  ),
-                  Text(
-                      "access since: ${getTimeDifference(userActivity?.timestamp as String)}",
-                      style: TextStyle(color: Colors.black)),
-                ],
+                    ),
+          FadeInUp(
+              duration: Duration(milliseconds: 800),
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            top: 25,
+                            left: parentWidth * 0.125,
+                            right: parentWidth * 0.125),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(50),
+                              topRight: Radius.circular(50)),
+                        ),
+                        height: parentHeight * 0.9,
+                        width: parentWidth,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '" ${randomQuote['quote']} "',
+                              style: TextStyle(
+                                  fontSize: 16, fontStyle: FontStyle.italic),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '- ${randomQuote['author']} -',
+                                  style: TextStyle(
+                                      fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 6),
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: 500,
+                                maxHeight: 500 / 1.8,
+                              ),
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              height:
+                                  (MediaQuery.of(context).size.width * 0.7) / 1.8,
+                              child: Image.network(
+                                LabGifs.exploreUrl,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Recently Accessed Topic : ",
+                                      style: TextStyle(
+                                          fontSize: 16, letterSpacing: 1),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      (recentAccessTopic?.title as String)
+                                          .toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1,
+                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("by "),
+                                Text(
+                                  "${recentAccessTopic!.owner!}   ",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent),
+                                ),
+                                kIsWeb
+                                    ? Image.network(
+                                        recentAccessTopic!.ownerAvtUrl as String,
+                                        width: 30,
+                                        height: 30,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : CachedNetworkImage(
+                                        height: 36,
+                                        imageUrl: recentAccessTopic!.ownerAvtUrl
+                                            as String),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                    )
+                  ]),
+                ),
               )
             : Center(child: DashboardLoadingIndicator()),
       ),
