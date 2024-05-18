@@ -35,6 +35,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
   }
 
+  //take participant in topic and sort
   void getParticipant() {
     participantsList = List.from(widget.topic.participant!);
 
@@ -49,6 +50,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     }
   }
 
+  //score board widget
   Widget scoreboard() {
     return Container(
       padding: EdgeInsets.all(10),
@@ -75,7 +77,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                   ),
                 ),
                 width: kIsWeb?190:mainPageWidth*0.3,
-                height: kIsWeb?250:mainPageHeight*0.25,
+                height: kIsWeb?250:mainPageHeight*0.28,
                 child: Column(
                   children: [
                     //user avatar
@@ -178,7 +180,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                     ),
                   ),
                   width: kIsWeb?190:mainPageWidth*0.3,
-                  height: kIsWeb?250:mainPageHeight*0.3,
+                  height: kIsWeb?250:mainPageHeight*0.32,
                   child: Column(
                     children: [
                       //user avatar
@@ -289,7 +291,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                   ),
                 ),
                 width: kIsWeb?190:mainPageWidth*0.3,
-                height: kIsWeb?250:mainPageHeight*0.25,
+                height: kIsWeb?250:mainPageHeight*0.28,
                 child: Column(
                   children: [
                     //user avatar
