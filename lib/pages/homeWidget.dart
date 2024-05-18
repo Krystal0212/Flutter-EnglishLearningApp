@@ -135,7 +135,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           "Welcome back, ",
