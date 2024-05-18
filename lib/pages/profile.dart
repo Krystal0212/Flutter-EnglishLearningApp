@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:Fluffy/constants/loading-indicator.dart';
+import 'package:Fluffy/constants/gifs-lab.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:Fluffy/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,7 +32,6 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
   final GoogleAuthProvider authProvider = GoogleAuthProvider();
   DatabaseReference dbRef = FirebaseDatabase.instance.ref();
 
-  late ImageProvider<Object> imageAvatar;
   late bool isLoading;
   late File image;
   late Uint8List webImage;
@@ -41,26 +42,21 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
   late User user;
   late bool isCasualUser;
   late bool isGoogleUser;
+  late final StreamSubscription<User?> userSubscription;
 
   final String defaultLink =
       "https://firebasestorage.googleapis.com/v0/b/cross-platform-final-term.appspot.com/o/profile-img.jpg?alt=media&token=a3619fea-311e-4529-bbc6-dc9809ce8f80";
 
-  final String mailGifUrl =
-      "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
-  final String errorGifUrl = "";
-
   @override
   initState() {
     super.initState();
-    imageAvatar = AssetImage(defaultLink);
     isLoading = false;
     isCasualUser = false;
     isGoogleUser = false;
     user = auth.currentUser!;
     // userName = user.displayName ?? 'User';
-    // getAvatar();
     checkCurrentUser();
-    FirebaseAuth.instance.userChanges().listen((User? user) {
+    userSubscription = auth.userChanges().listen((User? user) {
       if (user != null) {
         setState(() {});
       }
@@ -68,8 +64,14 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     getProviders();
   }
 
+  @override
+  void dispose() {
+    userSubscription.cancel();
+    super.dispose();
+  }
+
   Future<void> checkCurrentUser() async {
-    User? user = FirebaseAuth.instance.currentUser;
+    User? user = auth.currentUser;
     if (user != null) {
       await user.reload();
     }
@@ -161,19 +163,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  // Future<void> getAvatar() async {
-  //   setIndicatorTrue();
-  //   setState(() {
-  //     imageAvatar = NetworkImage(
-  //       auth.currentUser!.photoURL ?? defaultLink,
-  //       scale: 1.0,
-  //     );
-  //     imageAvatar = "";
-  //   });
-  //   setIndicatorFalse();
-  // }
-
-  Future<void> getProviders() async {
+  void getProviders() {
     for (UserInfo provider in user.providerData) {
       if (provider.providerId == "google.com") {
         setState(() {
@@ -230,7 +220,6 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
   }
 
   Future<void> changeAvatar() async {
-    setIndicatorTrue();
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     String url = "";
@@ -248,20 +237,19 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
         await auth.currentUser?.updatePhotoURL(url);
         await auth.currentUser?.reload();
         await updateUserTopicField('ownerAvtUrl', auth.currentUser?.photoURL);
-        setState(() {
-          imageAvatar = NetworkImage(url);
-        });
-        showResultSnackbar("Changed avatar successfully");
+        String title = "Woohoo !";
+        String content = "Changed avatar successfully";
+        showGifDialog(LabGifs.changeGifUrl, title, content);
       }
     } else {
-      showResultSnackbar("Could not get the image data");
+      String title = "There is something wrong !";
+      String content = "Could not get the image data";
+      showGifDialog(LabGifs.errorGifUrl, title, content);
     }
-    setIndicatorFalse();
   }
 
   Future<void> setPasswordForUser(String email, String password) async {
     try {
-      setIndicatorTrue();
       AuthCredential credential = EmailAuthProvider.credential(
           email: email.trim(), password: password.trim());
 
@@ -269,100 +257,112 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
 
       await user?.linkWithCredential(credential);
       await user?.sendEmailVerification();
-      setIndicatorFalse();
     } on FirebaseAuthException catch (e) {
-      setIndicatorFalse();
-
-      String gifUrl =
-          "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
       String content = "Failed to set your password. Please try again";
-      String title = "There is something wrong";
+      String title = "There is something wrong !";
 
       if (e.code == 'provider-already-linked') {
         content =
-            "This account is already linked. Please use another account to link.";
+            "This account is already linked. Please use another account to link";
       }
 
-      showGifDialog(gifUrl, title, content);
+      showGifDialog(LabGifs.errorGifUrl, title, content);
     }
   }
 
   Future<void> linkEmailPasswordForAccount() {
     TextEditingController passwordController = TextEditingController();
     TextEditingController confirmPasswordController = TextEditingController();
+    bool isPasswordHidden = true;
 
     return showDialog<void>(
         context: context,
         barrierDismissible: false, // User must tap a button to dismiss
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Create password for your account'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('Please enter your new password:'),
-                  TextField(
-                    obscureText: false,
-                    controller: passwordController,
-                    decoration: InputDecoration(hintText: "Password"),
-                  ),
-                  TextField(
-                    obscureText: false,
-                    controller: confirmPasswordController,
-                    decoration: InputDecoration(hintText: "Confirm Password"),
-                  ),
-                ],
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Create password for your account'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('Please enter your new password:'),
+                    TextField(
+                      obscureText: isPasswordHidden,
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        hintText: "Password",
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isPasswordHidden =
+                                  !isPasswordHidden; // Toggle the state to show or hide the password
+                            });
+                          },
+                          child: Icon(
+                            isPasswordHidden
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextField(
+                      obscureText: true,
+                      controller: confirmPasswordController,
+                      decoration: InputDecoration(hintText: "Confirm Password"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the dialog
-                },
-              ),
-              TextButton(
-                child: Text('Submit'),
-                onPressed: () async {
-                  String validateResult = "";
-                  String password = passwordController.text;
-                  String confirmPassword = confirmPasswordController.text;
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                ),
+                TextButton(
+                  child: Text('Submit'),
+                  onPressed: () async {
+                    String validateResult = "";
+                    String password = passwordController.text;
+                    String confirmPassword = confirmPasswordController.text;
 
-                  if (password.isEmpty) {
-                    validateResult = "Password field is empty";
-                  } else if (confirmPassword.isEmpty) {
-                    validateResult = "Confirm password field is empty";
-                  } else if (password != confirmPassword) {
-                    validateResult = "Passwords are not match";
-                  } else if (password == confirmPassword) {
-                    await setPasswordForUser(
-                        auth.currentUser!.email!, password);
+                    if (password.isEmpty) {
+                      validateResult = "Password field is empty";
+                    } else if (confirmPassword.isEmpty) {
+                      validateResult = "Confirm password field is empty";
+                    } else if (password != confirmPassword) {
+                      validateResult = "Passwords are not match";
+                    } else if (password == confirmPassword) {
+                      await setPasswordForUser(
+                          auth.currentUser!.email!, password);
 
-                    setState(() {
-                      isCasualUser = true;
-                    });
+                      setState(() {
+                        isCasualUser = true;
+                      });
 
+                      Navigator.of(context).pop();
+
+                      String title = "Set password successfully";
+                      String content =
+                          "Verification email has been sent. Please check your email !";
+                      showGifDialog(LabGifs.mailGifUrl, title, content);
+                      return ;
+                    }
                     Navigator.of(context).pop();
-
-                    String gifUrl = mailGifUrl;
-                    String title = "Set password successfully";
-                    String content =
-                        "Verification email has been sent. Please check your email !";
-                    showGifDialog(gifUrl, title, content);
-                    return;
-                    // validateResult = "Verification email has been sent. Please check your email !";
-                  }
-                  if (validateResult != "") {
-                    String gifUrl =
-                        "https://raw.githubusercontent.com/Shashank02051997/FancyGifDialog-Android/master/GIF's/gif7.gif";
-                    String title = "There is something wrong";
-                    String content = "$validateResult . Please try again !";
-                    showGifDialog(gifUrl, title, content);
-                  }
-                },
-              ),
-            ],
-          );
+                    if (validateResult != "") {
+                      String title = "There is something wrong !";
+                      String content = "$validateResult . Please try again !";
+                      showGifDialog(LabGifs.errorGifUrl, title, content);
+                    }
+                  },
+                ),
+              ],
+            );
+          });
         });
   }
 
@@ -371,14 +371,13 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
       AuthCredential credential = EmailAuthProvider.credential(
           email: email.trim(), password: password.trim());
       await auth.currentUser?.reauthenticateWithCredential(credential);
-
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == "invalid-credential") {
-        String validateResult =
+        String title = "There is something wrong !";
+        String content =
             "Wrong password, please enter valid password of account";
-
-        showResultSnackbar(validateResult);
+        showGifDialog(LabGifs.errorGifUrl, title, content);
       } else {
         print("Error re-authenticating: ${e.code}");
       }
@@ -390,89 +389,176 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     TextEditingController passwordController = TextEditingController();
     TextEditingController newPasswordController = TextEditingController();
     TextEditingController confirmPasswordController = TextEditingController();
+    bool isPasswordHidden = true;
+    bool isNewPasswordHidden = true;
 
     return showDialog<void>(
         context: context,
         barrierDismissible: false, // User must tap a button to dismiss
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Set a new password'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text('Please enter requirements'),
-                  TextField(
-                    obscureText: false,
-                    controller: passwordController,
-                    decoration: InputDecoration(hintText: "Your Password"),
-                  ),
-                  TextField(
-                    obscureText: false,
-                    controller: newPasswordController,
-                    decoration: InputDecoration(hintText: "New Password"),
-                  ),
-                  TextField(
-                    obscureText: false,
-                    controller: confirmPasswordController,
-                    decoration: InputDecoration(hintText: "Confirm Password"),
-                  ),
-                ],
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Set a new password'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('Please enter requirements'),
+                    TextField(
+                      obscureText: isPasswordHidden,
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                          hintText: "Your Password",
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isPasswordHidden =
+                                    !isPasswordHidden; // Toggle the state to show or hide the password
+                              });
+                            },
+                            child: Icon(
+                              isPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.grey[700],
+                            ),
+                          )),
+                    ),
+                    TextField(
+                      obscureText: isNewPasswordHidden,
+                      controller: newPasswordController,
+                      decoration: InputDecoration(
+                          hintText: "New Password",
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isNewPasswordHidden =
+                                    !isNewPasswordHidden; // Toggle the state to show or hide the password
+                              });
+                            },
+                            child: Icon(
+                              isNewPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.grey[700],
+                            ),
+                          )),
+                    ),
+                    TextField(
+                      obscureText: true,
+                      controller: confirmPasswordController,
+                      decoration: InputDecoration(hintText: "Confirm Password"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the dialog
-                },
-              ),
-              TextButton(
-                child: Text('Submit'),
-                onPressed: () async {
-                  String validateResult = "";
-                  String newPassword = newPasswordController.text;
-                  String password = passwordController.text;
-                  String confirmPassword = confirmPasswordController.text;
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                ),
+                TextButton(
+                  child: Text('Submit'),
+                  onPressed: () async {
+                    String validateResult = "";
+                    String newPassword = newPasswordController.text;
+                    String password = passwordController.text;
+                    String confirmPassword = confirmPasswordController.text;
 
-                  if (password.isEmpty) {
-                    validateResult = "Password field is empty";
-                  } else if (newPassword.isEmpty) {
-                    validateResult = "New password field is empty";
-                  }
-                  if (confirmPassword.isEmpty) {
-                    validateResult = "Confirm password field is empty";
-                  } else if (newPassword != confirmPassword) {
-                    validateResult = "New passwords are not match";
-                  } else if (newPassword == confirmPassword) {
-                    setIndicatorTrue();
-                    String email = user.email!;
-                    bool reAuthen = await reAuthenticateUser(email, password);
-
-                    if (reAuthen) {
-                      await auth.currentUser?.updatePassword(newPassword);
-                      validateResult = "Changed password successfully";
+                    if (password.isEmpty) {
+                      validateResult = "Password field is empty";
+                    } else if (newPassword.isEmpty) {
+                      validateResult = "New password field is empty";
                     }
-                  }
-                  Navigator.of(context).pop();
+                    if (confirmPassword.isEmpty) {
+                      validateResult = "Confirm password field is empty";
+                    } else if (newPassword != confirmPassword) {
+                      validateResult = "New passwords are not match";
+                    } else if (newPassword == confirmPassword) {
+                      String email = user.email!;
+                      bool reAuthen = await reAuthenticateUser(email, password);
 
-                  setIndicatorFalse();
+                      if (reAuthen) {
+                        await auth.currentUser?.updatePassword(newPassword);
+                        await auth.currentUser?.reload();
+                        Navigator.of(context).pop();
 
-                  if (validateResult != "") {
-                    showResultSnackbar(validateResult);
-                  }
-                },
-              ),
-            ],
-          );
+                        String title = "Changed password successfully";
+                        String content =
+                            "Now you could use your new password to sign in";
+                        showGifDialog(LabGifs.correctUrl, title, content);
+                        return;
+                      }
+                    }
+                    Navigator.of(context).pop();
+
+                    if (validateResult != "") {
+                      String title = "There is something wrong !";
+                      String content = "$validateResult . Please try again !";
+                      showGifDialog(LabGifs.errorGifUrl, title, content);
+                    }
+                  },
+                ),
+              ],
+            );
+          });
         });
   }
 
-  void showResultSnackbar(String validateResult) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        duration: Duration(seconds: 2),
-        content: Text(validateResult),
-      ));
+  Future<void> linkGoogleAccountForUser() async {
+    try {
+      setIndicatorTrue();
+
+      late String? idToken;
+      late String? userEmail;
+      String username = auth.currentUser!.displayName!;
+
+      if (kIsWeb) {
+        UserCredential userCredential =
+            await auth.signInWithPopup(authProvider);
+        idToken = await userCredential.user?.getIdToken();
+        userEmail = userCredential.user?.email;
+      } else {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser!.authentication;
+
+        idToken = googleAuth.idToken;
+        userEmail = googleUser.email;
+      }
+
+      auth.currentUser!.updateDisplayName(username);
+      setState(() {
+        isGoogleUser = true;
+      });
+
+      String title = "Linked Google account successfully";
+      String content =
+          "Now you can sign in your app by using your Google account too !";
+      showGifDialog(LabGifs.linkGoogleUrl, title, content);
+
+      // AuthCredential credential = GoogleAuthProvider.credential(
+      //   idToken: idToken,
+      // );
+      //
+      // final User? currentUser = auth.currentUser;
+      // assert(userEmail == currentUser!.email);
+      //
+      // await auth.currentUser?.linkWithCredential(credential);
+      setIndicatorFalse();
+    } on FirebaseAuthException catch (e) {
+      setIndicatorFalse();
+      switch (e.code) {
+        case "provider-already-linked":
+          String title = "There is something wrong !";
+          String content = "The Google account has already been linked to the user";
+          showGifDialog(LabGifs.errorGifUrl, title, content);
+        default:
+          print("Unknown error: ${e.code}");
+          break;
+      }
     }
   }
 
@@ -499,6 +585,10 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, 'OK'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.green, // Button background color
+              ),
               child: const Text('OK'),
             ),
           ],
@@ -533,49 +623,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
               : SizedBox(),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed: (!isGoogleUser)
-                  ? () async {
-                      try {
-                        late String? idToken;
-                        late String? userEmail;
-
-                        if (kIsWeb) {
-                          UserCredential userCredential =
-                              await auth.signInWithPopup(authProvider);
-                          idToken = await userCredential.user?.getIdToken();
-                          userEmail = userCredential.user?.email;
-                        } else {
-                          final GoogleSignInAccount? googleUser =
-                              await GoogleSignIn().signIn();
-                          final GoogleSignInAuthentication googleAuth =
-                              await googleUser!.authentication;
-
-                          idToken = googleAuth.idToken;
-                          userEmail = googleUser.email;
-                        }
-
-                        AuthCredential credential =
-                            GoogleAuthProvider.credential(
-                          idToken: idToken,
-                        );
-
-                        final User? currentUser = auth.currentUser;
-                        assert(userEmail == currentUser!.email);
-
-                        await auth.currentUser?.linkWithCredential(credential);
-                      } on FirebaseAuthException catch (e) {
-                        switch (e.code) {
-                          case "provider-already-linked":
-                            showResultSnackbar(
-                                "The provider has already been linked to the user.");
-                          default:
-                            print("Unknown error: ${e.code}");
-                            break;
-                        }
-                        setIndicatorFalse();
-                      }
-                    }
-                  : () {},
+              onPressed: (!isGoogleUser) ? linkGoogleAccountForUser : () {},
               child: Center(
                 child: Text(isGoogleUser
                     ? "Google account linked"
@@ -616,15 +664,27 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
             TextButton(
               child: Text('Submit'),
               onPressed: () async {
-                await updateUserTopicField('owner', userNameController.text);
-                await updateUserParticipantData(userNameController.text);
-                await auth.currentUser
-                    ?.updateDisplayName(userNameController.text);
-                await auth.currentUser?.reload();
-                setState(() {
-                  // userName = auth.currentUser!.displayName!;
-                });
-                Navigator.of(context).pop(); // Dismiss the dialog
+                String newUserName = userNameController.text;
+
+                if (newUserName.isEmpty) {
+                  String title = "There is something wrong !";
+                  String content = "Username could not be empty";
+                  showGifDialog(LabGifs.errorGifUrl, title, content);
+                } else {
+                  await updateUserTopicField('owner', userNameController.text);
+                  await updateUserParticipantData(userNameController.text);
+                  await auth.currentUser
+                      ?.updateDisplayName(userNameController.text);
+                  await auth.currentUser?.reload();
+                  setState(() {
+                    // userName = auth.currentUser!.displayName!;
+                  });
+                  Navigator.of(context).pop();
+
+                  String title = "Woohoo !";
+                  String content = "Changed username successfully";
+                  showGifDialog(LabGifs.changeGifUrl, title, content);
+                }
               },
             ),
           ],
@@ -768,7 +828,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
   }
 
   Future<void> updateUserParticipantData(String newName) async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = auth.currentUser;
     if (user != null) {
       DataSnapshot topicsSnapshot = await dbRef.child("Topic").get();
 

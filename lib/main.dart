@@ -1,5 +1,4 @@
-import 'package:Fluffy/constants/loading-indicator.dart';
-import 'package:Fluffy/pages/home_navigation.dart';
+
 import 'package:Fluffy/pages/homeNav.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

@@ -348,18 +348,13 @@ class LogInPageState extends State<LogInPage> {
             )
                 .then((_) {
               if (auth.currentUser != null) {
-                // Access user details
                 User user = auth.currentUser!;
-
-
                 if (!user.emailVerified) {
                   UnverifiedDialog();
                 } else {
                   LogUserIn(user);
                 }
               }
-            }).whenComplete(() {
-              setIndicatorFalse();
             });
           } on FirebaseAuthException catch (error) {
             if (error.code == 'wrong-password' || error.code == 'invalid-credential') {
@@ -374,8 +369,6 @@ class LogInPageState extends State<LogInPage> {
             } else {
               print(error);
             }
-
-            setIndicatorFalse();
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -383,6 +376,7 @@ class LogInPageState extends State<LogInPage> {
             content: Text(validateResult),
           ));
         }
+        setIndicatorFalse();
       },
       child: Container(
         height: 50,
