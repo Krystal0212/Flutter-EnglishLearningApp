@@ -479,6 +479,12 @@ class MyProfileState extends State<Profile> {
   }
 
   Future<bool> reAuthenticateUser(String email, String password) async {
+    if(password.length < 5){
+      String title = "There is something wrong !";
+      String content =
+          "Password length must be larger than 5";
+      showGifDialog(LabGifs.errorGifUrl, title, content);
+    }
     try {
       AuthCredential credential = EmailAuthProvider.credential(
           email: email.trim(), password: password.trim());
@@ -488,13 +494,9 @@ class MyProfileState extends State<Profile> {
       if (e.code == "invalid-credential") {
         String title = "There is something wrong !";
         String content =
-            "Wrong password, please enter valid password of account";
+            "Wrong password, please enter valid password for account";
         showGifDialog(LabGifs.errorGifUrl, title, content);
       } else {
-        String title = "There is something wrong !";
-        String content =
-            "Wrong password, please enter valid password of account";
-        showGifDialog(LabGifs.errorGifUrl, title, content);
         print("Error re-authenticating: ${e.code}");
       }
       return false;
@@ -587,8 +589,7 @@ class MyProfileState extends State<Profile> {
                       validateResult = "Password field is empty";
                     } else if (newPassword.isEmpty) {
                       validateResult = "New password field is empty";
-                    }
-                    if (confirmPassword.isEmpty) {
+                    } else if (confirmPassword.isEmpty) {
                       validateResult = "Confirm password field is empty";
                     } else if (newPassword != confirmPassword) {
                       validateResult = "New passwords are not match";
@@ -605,6 +606,12 @@ class MyProfileState extends State<Profile> {
                         String content =
                             "Now you could use your new password to sign in";
                         showGifDialog(LabGifs.correctUrl, title, content);
+                        return;
+                      }else{
+                        String title = "There is something wrong !";
+                        String content =
+                            "Wrong password, please enter valid password  for account";
+                        showGifDialog(LabGifs.errorGifUrl, title, content);
                         return;
                       }
                     }
@@ -720,32 +727,81 @@ class MyProfileState extends State<Profile> {
       child: Column(
         children: [
           SizedBox(height: 20),
-          (isGoogleUser && !isCasualUser)
-              ? ElevatedButton(
-                  onPressed: () async {
-                    linkEmailPasswordForAccount();
-                  },
-                  child: Center(
-                    child: Text("Create a password for your account"),
-                  ))
-              : SizedBox(),
-          isCasualUser
-              ? ElevatedButton(
-                  onPressed: () async {
-                    changePasswordForAccount();
-                  },
-                  child: Center(
-                    child: Text("Change password"),
-                  ))
-              : SizedBox(),
+          if (isGoogleUser && !isCasualUser)
+            ElevatedButton(
+              onPressed: () async {
+                linkEmailPasswordForAccount();
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                backgroundColor: Colors.blueAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                shadowColor: Colors.black45,
+                elevation: 5,
+              ),
+              child: Center(
+                child: Text(
+                  "Create a password for your account",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          if (isCasualUser)
+            ElevatedButton(
+              onPressed: () async {
+                changePasswordForAccount();
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                backgroundColor: Colors.greenAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                shadowColor: Colors.black45,
+                elevation: 5,
+              ),
+              child: Center(
+                child: Text(
+                  "Change password",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed: (!isGoogleUser) ? linkGoogleAccountForUser : () {},
-              child: Center(
-                child: Text(isGoogleUser
+            onPressed: (!isGoogleUser) ? linkGoogleAccountForUser : () {},
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              backgroundColor: isGoogleUser ? Colors.grey : Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              shadowColor: Colors.black45,
+              elevation: 5,
+            ),
+            child: Center(
+              child: Text(
+                isGoogleUser
                     ? "Google account linked"
-                    : "Link with your Google account"),
-              )),
+                    : "Link with your Google account",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
