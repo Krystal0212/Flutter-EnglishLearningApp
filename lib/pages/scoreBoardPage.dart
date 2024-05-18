@@ -35,6 +35,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
   }
 
+  //take participant in topic and sort
   void getParticipant() {
     participantsList = List.from(widget.topic.participant!);
 
@@ -49,6 +50,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     }
   }
 
+  //score board widget
   Widget scoreboard() {
     return Container(
       padding: EdgeInsets.all(10),
@@ -75,7 +77,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                   ),
                 ),
                 width: kIsWeb?190:mainPageWidth*0.3,
-                height: kIsWeb?250:mainPageHeight*0.25,
+                height: kIsWeb?250:mainPageHeight*0.28,
                 child: Column(
                   children: [
                     //user avatar
@@ -147,8 +149,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                     Container(
                       child: Text(
                         'Score: '
-                            '${participantsList[1].multipleChoicesResult!
-                            + participantsList[1].fillWordResult!
+                            '${(participantsList[1].multipleChoicesResult??=0)
+                            + (participantsList[1].fillWordResult??=0)
                         }',
                         textAlign: TextAlign.start,
                         style: TextStyle(
@@ -178,7 +180,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                     ),
                   ),
                   width: kIsWeb?190:mainPageWidth*0.3,
-                  height: kIsWeb?250:mainPageHeight*0.3,
+                  height: kIsWeb?250:mainPageHeight*0.32,
                   child: Column(
                     children: [
                       //user avatar
@@ -257,8 +259,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                       Container(
                         child: Text(
                           'Score: '
-                          '${participantsList[0].multipleChoicesResult!
-                              + participantsList[0].fillWordResult!
+                          '${(participantsList[0].multipleChoicesResult ??= 0)
+                              + (participantsList[0].fillWordResult ??= 0)
                           }',
                           textAlign: TextAlign.start,
                           style: TextStyle(
@@ -289,7 +291,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                   ),
                 ),
                 width: kIsWeb?190:mainPageWidth*0.3,
-                height: kIsWeb?250:mainPageHeight*0.25,
+                height: kIsWeb?250:mainPageHeight*0.28,
                 child: Column(
                   children: [
                     //user avatar
@@ -362,8 +364,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                     Container(
                       child: Text(
                         'Score: '
-                            '${participantsList[2].multipleChoicesResult!
-                            + participantsList[2].fillWordResult!
+                            '${(participantsList[2].multipleChoicesResult??=0)
+                            + (participantsList[2].fillWordResult??=0)
                         }',
                         textAlign: TextAlign.start,
                         style: TextStyle(
@@ -428,8 +430,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
                           trailing: Text(
                             'Score: '
-                            '${participantsList[index+3].multipleChoicesResult!
-                                +participantsList[index+3].fillWordResult!
+                            '${(participantsList[index+3].multipleChoicesResult??=0)
+                                + (participantsList[index+3].fillWordResult??=0)
                             }',
                             textAlign: TextAlign.start,
                             style: TextStyle(
@@ -468,7 +470,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
         title : const Text('Hall of Fame'),
         backgroundColor: Colors.red[800],
         titleTextStyle: const TextStyle(
-            color: Colors.blue,
+            color: CupertinoColors.white,
             fontWeight: FontWeight.bold,
             fontSize: 25
         ),
