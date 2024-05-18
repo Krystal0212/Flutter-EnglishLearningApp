@@ -46,16 +46,15 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
   }
 
-  Future<String> takeImg(String uid) async{
+  Future<String?> takeImg(String uid) async{
     String path = 'userAvatar/$uid';
-    String url;
+    String url = 'https://firebasestorage.googleapis.com/v0/b/cross-platform-final-term.appspot.com/o/profile-img.jpg?alt=media&token=a3619fea-311e-4529-bbc6-dc9809ce8f80';
+
     try {
       url = await FirebaseStorage.instance.ref(path).getDownloadURL();
       return url;
     }
     catch (e){
-      url = await FirebaseStorage.instance.ref('profile-img.jpg').getDownloadURL();
-
       return url;
     }
   }
@@ -73,15 +72,16 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     img = [];
 
     for (Participant p in participantsList){
+      log(name: p.userName as String ,p.userID as String);
       p.userName??='N/A';
     }
 
     int particiList = participantsList.length>3?3:participantsList.length;
-
+    log('$particiList');
     for (int i = 0;i<particiList;i++){
       log(name: '$i',participantsList[i].userID as String);
       var a = await takeImg(participantsList[i].userID as String);
-      log(a);
+      log(a!);
       img.add(a);
     }
 
