@@ -102,7 +102,9 @@ class MyProfileState extends State<Profile> {
                 CircleAvatar(
                   radius: 85,
                   child: CachedNetworkImage(
-                    imageUrl: auth.currentUser!.photoURL!,
+                    imageUrl: auth.currentUser == null
+                        ? defaultLink
+                        : auth.currentUser!.photoURL!,
                     placeholder: (context, url) => AvatarLoadingIndicator(),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                     imageBuilder: (context, imageProvider) => Container(
@@ -144,7 +146,10 @@ class MyProfileState extends State<Profile> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 24.0),
-            child: Text(auth.currentUser?.displayName as String,
+            child: Text(
+                auth.currentUser == null
+                    ? 'N/A'
+                    : auth.currentUser?.displayName as String,
                 style: TextStyle(
                     color: LabColors.black,
                     fontWeight: FontWeight.w600,
@@ -168,15 +173,17 @@ class MyProfileState extends State<Profile> {
     for (UserInfo provider in user.providerData) {
       if (provider.providerId == "google.com") {
         if (mounted) {
-        setState(() {
-          isGoogleUser = true;
-        });}
+          setState(() {
+            isGoogleUser = true;
+          });
+        }
       }
       if (provider.providerId == "password") {
         if (mounted) {
-        setState(() {
-          isCasualUser = true;
-        });}
+          setState(() {
+            isCasualUser = true;
+          });
+        }
       }
     }
   }
@@ -230,11 +237,11 @@ class MyProfileState extends State<Profile> {
 
       if (topicsSnapshot.exists) {
         Map<dynamic, dynamic> topics =
-        topicsSnapshot.value as Map<dynamic, dynamic>;
+            topicsSnapshot.value as Map<dynamic, dynamic>;
         topics.forEach((key, value) async {
           if (value is Map<dynamic, dynamic> && value['participant'] != null) {
             List<dynamic> participants =
-            List<dynamic>.from(value['participant']);
+                List<dynamic>.from(value['participant']);
             participants.asMap().forEach((index, participant) async {
               if (participant is Map<dynamic, dynamic> &&
                   participant['userID'] == user.uid) {
@@ -256,7 +263,7 @@ class MyProfileState extends State<Profile> {
       if (currentUserName == null) return;
 
       Query query =
-      dbRef.child('Topic').orderByChild('owner').equalTo(currentUserName);
+          dbRef.child('Topic').orderByChild('owner').equalTo(currentUserName);
 
       query.once().then((DatabaseEvent event) {
         if (event.snapshot.exists) {
@@ -271,8 +278,6 @@ class MyProfileState extends State<Profile> {
       log("Error updating topic fields: $error");
     }
   }
-
-
 
   Future<void> changeUsername() async {
     TextEditingController userNameController = TextEditingController();
@@ -452,7 +457,8 @@ class MyProfileState extends State<Profile> {
                     } else if (password != confirmPassword) {
                       validateResult = "Passwords are not match";
                     } else if (password == confirmPassword) {
-                      await setPasswordForUser(auth.currentUser!.email!, password);
+                      await setPasswordForUser(
+                          auth.currentUser!.email!, password);
                       await auth.currentUser?.reload();
                       getProviders();
 
@@ -767,8 +773,7 @@ class MyProfileState extends State<Profile> {
                             image: DecorationImage(
                                 image:
                                     AssetImage("assets/gifs/dog-and-cat.gif"),
-                                fit: BoxFit.cover)
-                        ),
+                                fit: BoxFit.cover)),
                         child: Stack(
                           children: <Widget>[
                             SafeArea(

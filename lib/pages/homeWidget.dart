@@ -29,6 +29,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
 
   DatabaseReference dbRef = FirebaseDatabase.instance.ref();
   final FirebaseAuth auth = FirebaseAuth.instance;
+  late final StreamSubscription<User?> userSubscription;
 
   UserActivity? userActivity;
   Topic? recentAccessTopic;
@@ -36,13 +37,28 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     syncUserActivity();
-
+    checkCurrentUser();
+    userSubscription = auth.userChanges().listen((User? user) {
+      if (user != null) {
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
     super.initState();
+  }
+
+  Future<void> checkCurrentUser() async {
+    User? user = auth.currentUser;
+    if (user != null) {
+      await user.reload();
+    }
   }
 
   @override
   void dispose() {
     // _timer?.cancel();
+    userSubscription.cancel();
     super.dispose();
   }
 
@@ -77,10 +93,9 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     var parentHeight = MediaQuery.of(context).size.height;
     var parentWidth = MediaQuery.of(context).size.width;
-    super.build(context);
-
     final randomQuote = getRandomQuote();
 
     return MaterialApp(
@@ -105,13 +120,15 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                   child: Column(children: [
                     FadeInUp(
                       duration: Duration(milliseconds: 600),
-                      child:Container(
-                      height: parentHeight * 0.2,
-                      width: parentWidth,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            top: parentHeight * 0.05, left: parentWidth * 0.05, right: parentWidth * 0.075),
-                        child:  Column(
+                      child: Container(
+                        height: parentHeight * 0.2,
+                        width: parentWidth,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              top: parentHeight * 0.05,
+                              left: parentWidth * 0.05,
+                              right: parentWidth * 0.075),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
@@ -130,8 +147,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                                   letterSpacing: 1),
                                             ),
                                             Text(
-                                              FirebaseAuth
-                                                  .instance.currentUser!.displayName!,
+                                              FirebaseAuth.instance.currentUser!
+                                                  .displayName!,
                                               style: TextStyle(
                                                   fontSize: 25,
                                                   color: Color(0xFF000000),
@@ -144,7 +161,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                         Row(
                                           children: [
                                             Text(
-                                              "Last access since : ${getTimeDifference(userActivity!.timestamp.toString())}",
+                                              "Last topic access since :\n${getTimeDifference(userActivity!.timestamp.toString())}",
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.white54,
@@ -156,21 +173,23 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                       ],
                                     ),
                                   ),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
-                                      child:kIsWeb
-                                      ? Image.network(
-                                          FirebaseAuth
-                                              .instance.currentUser!.photoURL!,
-                                          width: 70,
-                                          height: 70,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : CachedNetworkImage(
-                                          height: 70,
-                                          imageUrl: FirebaseAuth
-                                              .instance.currentUser!.photoURL!,
-                                        ),),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Adjust the radius as needed
+                                    child: kIsWeb
+                                        ? Image.network(
+                                            FirebaseAuth.instance.currentUser!
+                                                .photoURL!,
+                                            width: 70,
+                                            height: 70,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : CachedNetworkImage(
+                                            height: 70,
+                                            imageUrl: FirebaseAuth.instance
+                                                .currentUser!.photoURL!,
+                                          ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -178,8 +197,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                         ),
                       ),
                     ),
-          FadeInUp(
-              duration: Duration(milliseconds: 800),
+                    FadeInUp(
+                      duration: Duration(milliseconds: 800),
                       child: Container(
                         padding: EdgeInsets.only(
                             top: 25,
@@ -209,7 +228,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                 Text(
                                   '- ${randomQuote['author']} -',
                                   style: TextStyle(
-                                      fontSize: 12, fontWeight: FontWeight.bold),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -221,7 +241,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                               ),
                               width: MediaQuery.of(context).size.width * 0.7,
                               height:
-                                  (MediaQuery.of(context).size.width * 0.7) / 1.8,
+                                  (MediaQuery.of(context).size.width * 0.7) /
+                                      1.8,
                               child: Image.network(
                                 LabGifs.exploreUrl,
                                 fit: BoxFit.cover,
@@ -274,7 +295,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                 ),
                                 kIsWeb
                                     ? Image.network(
-                                        recentAccessTopic!.ownerAvtUrl as String,
+                                        recentAccessTopic!.ownerAvtUrl
+                                            as String,
                                         width: 30,
                                         height: 30,
                                         fit: BoxFit.cover,
@@ -335,16 +357,20 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
             if (snapshot.exists) {
               Topic topic =
                   Topic.fromJson(snapshot.value as Map<dynamic, dynamic>);
-              setState(() {
-                recentAccessTopic = topic;
-              });
+              if (mounted) {
+                setState(() {
+                  recentAccessTopic = topic;
+                });
+              }
               // listen event callback
               topicRef.onValue.listen((data) {
                 Topic topic1 = Topic.fromJson(
                     data.snapshot.value as Map<dynamic, dynamic>);
-                setState(() {
-                  recentAccessTopic = topic1;
-                });
+                if (mounted) {
+                  setState(() {
+                    recentAccessTopic = topic1;
+                  });
+                }
               });
             }
           }
@@ -353,7 +379,6 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
         print('No data available.');
       }
     }, onError: (error) {
-      // Xử lý lỗi
       log('Error: $error');
     });
   }

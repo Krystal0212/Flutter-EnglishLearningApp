@@ -26,7 +26,6 @@ class _MyHomePageState extends State<MyHomePage> {
   late PageController _pageController;
   User? user;
 
-
   @override
   void initState() {
     selectedIndex = 0;
@@ -57,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
       darkTheme: ThemeData.light(),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: CupertinoColors.white,
         body: user == null
             ? Center(

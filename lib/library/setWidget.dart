@@ -229,12 +229,13 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
           setState(() {
             topics.insert(0, changedTopic);
           });
+        } else {
+          setState(() {
+            topics.removeAt(index);
+            topics.insert(index, changedTopic);
+          });
         }
       }
-      setState(() {
-        topics.removeAt(index);
-        topics.insert(index, changedTopic);
-      });
     });
     // listen to deleted topic event in Topic node
     dbRef.child('Topic').onChildRemoved.listen((data) {

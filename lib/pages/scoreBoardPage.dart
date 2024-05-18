@@ -53,7 +53,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     } catch (e) {
       url = await FirebaseStorage.instance
           .ref()
-          .child('avatardefault_92824.png')
+          .child('profile-img.jpg')
           .getDownloadURL();
       return url;
     }
@@ -118,7 +118,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                     topLeft: Radius.circular(100),
                                     topRight: Radius.circular(100)),
                               ),
-                              width: kIsWeb ? 190 : mainPageWidth * 0.3,
+                              width: kIsWeb ? 190 : mainPageWidth * 0.289,
                               height: kIsWeb ? 250 : mainPageHeight * 0.28,
                               child: Column(
                                 children: [
@@ -132,8 +132,12 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                           //user avatar border
                                           Container(
                                             margin: EdgeInsets.only(top: 15),
-                                            width: kIsWeb ? 150 : mainPageWidth * 0.19,
-                                            height: kIsWeb ? 150 : mainPageWidth * 0.19,
+                                            width: kIsWeb
+                                                ? 150
+                                                : mainPageWidth * 0.19,
+                                            height: kIsWeb
+                                                ? 150
+                                                : mainPageWidth * 0.19,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               border: Border.all(
@@ -216,7 +220,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                   topLeft: Radius.circular(100),
                                   topRight: Radius.circular(100)),
                             ),
-                            width: kIsWeb ? 190 : mainPageWidth * 0.3,
+                            width: kIsWeb ? 190 : mainPageWidth * 0.289,
                             height: kIsWeb ? 250 : mainPageHeight * 0.32,
                             child: Column(
                               children: [
@@ -231,8 +235,12 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                       Positioned(
                                           top: 40,
                                           child: Container(
-                                            width: kIsWeb ? 90 : mainPageWidth * 0.19,
-                                            height: kIsWeb ? 90 : mainPageWidth * 0.19,
+                                            width: kIsWeb
+                                                ? 90
+                                                : mainPageWidth * 0.19,
+                                            height: kIsWeb
+                                                ? 90
+                                                : mainPageWidth * 0.19,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               border: Border.all(
@@ -325,7 +333,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                   topLeft: Radius.circular(100),
                                   topRight: Radius.circular(100)),
                             ),
-                            width: kIsWeb ? 190 : mainPageWidth * 0.3,
+                            width: kIsWeb ? 190 : mainPageWidth * 0.289,
                             height: kIsWeb ? 250 : mainPageHeight * 0.28,
                             child: Column(
                               children: [
@@ -338,8 +346,12 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                       children: [
                                         //user avatar border
                                         Container(
-                                          width: kIsWeb ? 90 : mainPageWidth * 0.19,
-                                          height: kIsWeb ? 90 : mainPageWidth * 0.19,
+                                          width: kIsWeb
+                                              ? 90
+                                              : mainPageWidth * 0.19,
+                                          height: kIsWeb
+                                              ? 90
+                                              : mainPageWidth * 0.19,
                                           margin: EdgeInsets.only(top: 15),
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
@@ -503,6 +515,27 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
             Navigator.pop(context);
           },
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: Tooltip(
+              triggerMode: TooltipTriggerMode.tap,
+              showDuration: Duration(seconds: 6),
+              textStyle: TextStyle(
+                  color: CupertinoColors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
+              decoration: BoxDecoration(color: Colors.blueAccent),
+              message:
+                  '1 correct answer = 500 scores\nHall of Fame score = Multiple choices quiz + Fill word quiz',
+              child: Icon(
+                Icons.info,
+                size: 24.0,
+                color: CupertinoColors.white,
+              ),
+            ),
+          )
+        ],
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: const Text('Hall of Fame'),

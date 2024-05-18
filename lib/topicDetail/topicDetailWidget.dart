@@ -325,7 +325,9 @@ class _TopicDetailState extends State<TopicDetail> {
   }
 
   void showSelectionDialog(BuildContext context,
-      {bool? isMultipleQuiz = false, bool? isFlashCard = false , bool? isFillWordQuiz = false}) {
+      {bool? isMultipleQuiz = false,
+      bool? isFlashCard = false,
+      bool? isFillWordQuiz = false}) {
     // Initial states for options
     bool language = false;
     bool shuffle = false;
@@ -345,20 +347,20 @@ class _TopicDetailState extends State<TopicDetail> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!isFlashCard!)
-                  ListTile(
-                    title: Text('Answer by Vietnamese'),
-                    subtitle: Text('(default: English)'),
-                    trailing: Switch(
-                      activeColor: Colors.blue,
-                      inactiveTrackColor: Colors.white,
-                      value: language,
-                      onChanged: (bool value) {
-                        setState(() {
-                          language = value;
-                        });
-                      },
+                    ListTile(
+                      title: Text('Answer by Vietnamese'),
+                      subtitle: Text('(default: English)'),
+                      trailing: Switch(
+                        activeColor: Colors.blue,
+                        inactiveTrackColor: Colors.white,
+                        value: language,
+                        onChanged: (bool value) {
+                          setState(() {
+                            language = value;
+                          });
+                        },
+                      ),
                     ),
-                  ),
                   ListTile(
                     title: Text('Shuffle'),
                     subtitle: Text('(default: Off)'),
@@ -416,16 +418,14 @@ class _TopicDetailState extends State<TopicDetail> {
                               topic: selectedTopic,
                               isChangeLanguage: language,
                               isShuffle: shuffle);
-                        } else
-                        if (isFillWordQuiz!) {
+                        } else if (isFillWordQuiz!) {
                           return FillWordQuizPage(
                               topic: selectedTopic,
                               isChangeLanguage: language,
                               isShuffle: shuffle);
                         } else {
                           return FlashcardQuizPage(
-                              topic: selectedTopic,
-                              isShuffle: shuffle);
+                              topic: selectedTopic, isShuffle: shuffle);
                         }
                       }));
                     },
@@ -1288,9 +1288,11 @@ class _TopicDetailState extends State<TopicDetail> {
       Folder folder =
           Folder.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       if (folder.ownerUid == auth.currentUser?.uid) {
-        setState(() {
-          folders.insert(0, folder);
-        });
+        if (mounted) {
+          setState(() {
+            folders.insert(0, folder);
+          });
+        }
       }
     });
   }
