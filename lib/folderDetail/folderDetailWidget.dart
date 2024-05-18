@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import '../constants/loading-indicator.dart';
 import '../objects/folder.dart';
 import '../objects/topic.dart';
+import '../objects/userActivity.dart';
 import '../topicDetail/topicDetailWidget.dart';
 
 class FolderDetail extends StatefulWidget {
@@ -39,6 +40,7 @@ class _FolderDetailState extends State<FolderDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: CupertinoColors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue[50],
@@ -193,9 +195,11 @@ class _FolderDetailState extends State<FolderDetail> {
       Folder changedFolder =
           Folder.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       if (changedFolder.id == widget.folder.id) {
-        setState(() {
-          widget.folder = changedFolder;
-        });
+        if (mounted) {
+          setState(() {
+            widget.folder = changedFolder;
+          });
+        }
       }
     });
   }
@@ -220,10 +224,12 @@ class _FolderDetailState extends State<FolderDetail> {
       Topic changedTopic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       int index = topics.indexWhere((element) => element.id == changedTopic.id);
-      setState(() {
-        topics.removeAt(index);
-        topics.insert(index, changedTopic);
-      });
+      if (mounted) {
+        setState(() {
+          topics.removeAt(index);
+          topics.insert(index, changedTopic);
+        });
+      }
     });
 
     // listen to deleted topic event in Topic node
@@ -231,9 +237,11 @@ class _FolderDetailState extends State<FolderDetail> {
       Topic deletedTopic =
           Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
       int index = topics.indexWhere((element) => element.id == deletedTopic.id);
-      setState(() {
-        topics.removeAt(index);
-      });
+      if (mounted) {
+        setState(() {
+          topics.removeAt(index);
+        });
+      }
     });
   }
 
@@ -292,6 +300,7 @@ class _FolderDetailState extends State<FolderDetail> {
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
           ),
           onTap: () {
+            updateUserActivity(topic);
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -304,6 +313,14 @@ class _FolderDetailState extends State<FolderDetail> {
         ),
       ),
     );
+  }
+
+  void updateUserActivity(Topic topic) {
+    String? key = auth.currentUser?.uid;
+    Map<String, bool> topics = {'${topic.id}': true};
+    UserActivity userActivity = UserActivity(
+        DateTime.now().millisecondsSinceEpoch.toString(), key, topics);
+    dbRef.child('UserActivity/$key').update(userActivity.toMap());
   }
 
   void showConfirmDeleteTopicDialog(Topic topic) {
@@ -478,7 +495,7 @@ class _FolderDetailState extends State<FolderDetail> {
   void updateFolder() {
     String? id = widget.folder.id;
     String name = _folderNameEditingController.text;
-    String? owner = auth.currentUser?.displayName;
+    String? owner = auth.currentUser?.uid;
     Folder updatedFolder = Folder(name, owner, id, widget.folder.topics);
     dbRef.child("Folder/$id").update(updatedFolder.toMap()).then((value) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -29,17 +29,9 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   UserActivity? userActivity;
   Topic? recentAccessTopic;
 
-  // Timer? _timer;
-
   @override
   void initState() {
     syncUserActivity();
-    // func to update topic every x seconds
-    // _timer = Timer.periodic(Duration(minutes: 1), (timer) {
-    //   if (mounted) {
-    //     setState(() {});
-    //   }
-    // });
     super.initState();
   }
 
@@ -91,7 +83,10 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                     style: TextStyle(color: Colors.black)),
               ],
             )
-          : Center(child: LoadingIndicator(title: "Getting data")),
+          : Center(
+              child: CircularProgressIndicator(
+              color: Colors.blue,
+            )),
     );
   }
 
@@ -132,16 +127,22 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
             if (snapshot.exists) {
               Topic topic =
                   Topic.fromJson(snapshot.value as Map<dynamic, dynamic>);
-              setState(() {
-                recentAccessTopic = topic;
-              });
+              if (mounted) {
+                setState(() {
+                  recentAccessTopic = topic;
+                });
+              }
               // listen event callback
               topicRef.onValue.listen((data) {
-                Topic topic1 = Topic.fromJson(
-                    data.snapshot.value as Map<dynamic, dynamic>);
-                setState(() {
-                  recentAccessTopic = topic1;
-                });
+                if (data.snapshot.value != null) {
+                  Topic topic1 = Topic.fromJson(
+                      data.snapshot.value as Map<dynamic, dynamic>);
+                  if (mounted) {
+                    setState(() {
+                      recentAccessTopic = topic1;
+                    });
+                  }
+                }
               });
             }
           }

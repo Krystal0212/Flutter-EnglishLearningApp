@@ -1105,16 +1105,20 @@ class _TopicDetailState extends State<TopicDetail> {
     loadFolderFromDatabase();
     // listen to all change in this Topic node
     dbRef.child('Topic/${widget.topic.id}').onValue.listen((data) {
-      Topic changedTopic =
-          Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
-      setState(() {
-        widget.topic = changedTopic;
-        selected.clear();
-        for (var i = 0; i < widget.topic.word!.length; i++) {
-          selected.add(false);
+      if (data.snapshot.value != null) {
+        Topic changedTopic =
+            Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
+        if (mounted) {
+          setState(() {
+            widget.topic = changedTopic;
+            selected.clear();
+            for (var i = 0; i < widget.topic.word!.length; i++) {
+              selected.add(false);
+            }
+            markedWords.clear();
+          });
         }
-        markedWords.clear();
-      });
+      }
     });
   }
 
