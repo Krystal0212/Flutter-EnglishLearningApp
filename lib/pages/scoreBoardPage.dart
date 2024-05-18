@@ -72,16 +72,16 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
     img = [];
 
     for (Participant p in participantsList) {
-      log(name: p.userName ?? 'null userName', p.userID as String);
+      //log(name: p.userName ?? 'null userName', p.userID as String);
       p.userName ??= 'N/A';
     }
 
     int particiList = participantsList.length > 3 ? 3 : participantsList.length;
-    log('$particiList');
+    //log('$particiList');
     for (int i = 0; i < particiList; i++) {
-      log(name: '$i', participantsList[i].userID as String);
+      //log(name: '$i', participantsList[i].userID as String);
       String a = await takeImg(participantsList[i].userID as String);
-      log(a);
+      //log(a);
       img.add(a);
     }
 
@@ -95,7 +95,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData) {
-              log('${snapshot.data}');
+              //('${snapshot.data}');
               return Container(
                 padding: EdgeInsets.all(10),
                 child: Column(
@@ -124,16 +124,16 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                 children: [
                                   //user avatar
                                   SizedBox(
-                                    width: 150,
-                                    height: 125,
+                                    width: kIsWeb ? 150 : mainPageWidth * 0.23,
+                                    height: kIsWeb ? 125 : mainPageWidth * 0.3,
                                     child: Stack(
                                         alignment: Alignment.topCenter,
                                         children: [
                                           //user avatar border
                                           Container(
                                             margin: EdgeInsets.only(top: 15),
-                                            width: 90,
-                                            height: 90,
+                                            width: kIsWeb ? 150 : mainPageWidth * 0.19,
+                                            height: kIsWeb ? 150 : mainPageWidth * 0.19,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               border: Border.all(
@@ -222,8 +222,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                               children: [
                                 //user avatar
                                 SizedBox(
-                                  width: 150,
-                                  height: 150,
+                                  width: kIsWeb ? 150 : mainPageWidth * 0.23,
+                                  height: kIsWeb ? 150 : mainPageWidth * 0.35,
                                   child: Stack(
                                     alignment: Alignment.topCenter,
                                     children: [
@@ -231,8 +231,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                                       Positioned(
                                           top: 40,
                                           child: Container(
-                                            width: 90,
-                                            height: 90,
+                                            width: kIsWeb ? 90 : mainPageWidth * 0.19,
+                                            height: kIsWeb ? 90 : mainPageWidth * 0.19,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               border: Border.all(
@@ -331,15 +331,15 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                               children: [
                                 //user avatar
                                 SizedBox(
-                                  width: 150,
-                                  height: 125,
+                                  width: kIsWeb ? 150 : mainPageWidth * 0.23,
+                                  height: kIsWeb ? 125 : mainPageWidth * 0.3,
                                   child: Stack(
                                       alignment: Alignment.topCenter,
                                       children: [
                                         //user avatar border
                                         Container(
-                                          width: 90,
-                                          height: 90,
+                                          width: kIsWeb ? 90 : mainPageWidth * 0.19,
+                                          height: kIsWeb ? 90 : mainPageWidth * 0.19,
                                           margin: EdgeInsets.only(top: 15),
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
