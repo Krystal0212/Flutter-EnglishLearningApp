@@ -59,7 +59,20 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     user = auth.currentUser!;
     // userName = user.displayName ?? 'User';
     // getAvatar();
+    checkCurrentUser();
+    FirebaseAuth.instance.userChanges().listen((User? user) {
+      if (user != null) {
+        setState(() {});
+      }
+    });
     getProviders();
+  }
+
+  Future<void> checkCurrentUser() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await user.reload();
+    }
   }
 
   void setIndicatorFalse() {
