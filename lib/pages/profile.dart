@@ -223,6 +223,116 @@ class MyProfileState extends State<Profile> {
     }
   }
 
+  Future<void> updateUserParticipantData(String newName) async {
+    final user = auth.currentUser;
+    if (user != null) {
+      DataSnapshot topicsSnapshot = await dbRef.child("Topic").get();
+
+      if (topicsSnapshot.exists) {
+        Map<dynamic, dynamic> topics =
+        topicsSnapshot.value as Map<dynamic, dynamic>;
+        topics.forEach((key, value) async {
+          if (value is Map<dynamic, dynamic> && value['participant'] != null) {
+            List<dynamic> participants =
+            List<dynamic>.from(value['participant']);
+            participants.asMap().forEach((index, participant) async {
+              if (participant is Map<dynamic, dynamic> &&
+                  participant['userID'] == user.uid) {
+                await dbRef
+                    .child('Topic/$key/participant/$index/userName')
+                    .set(newName);
+              }
+            });
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> updateUserTopicField(String field, String? fieldData) async {
+    try {
+      String? currentUserName = auth.currentUser?.displayName;
+
+      if (currentUserName == null) return;
+
+      Query query =
+      dbRef.child('Topic').orderByChild('owner').equalTo(currentUserName);
+
+      query.once().then((DatabaseEvent event) {
+        if (event.snapshot.exists) {
+          Map<dynamic, dynamic> topics =
+              event.snapshot.value as Map<dynamic, dynamic>? ?? {};
+          topics.forEach((key, value) {
+            dbRef.child('Topic/$key').update({field: fieldData});
+          });
+        }
+      });
+    } catch (error) {
+      log("Error updating topic fields: $error");
+    }
+  }
+
+
+
+  Future<void> changeUsername() async {
+    TextEditingController userNameController = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap a button to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Change Username'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Please enter your new username:'),
+                TextField(
+                  controller: userNameController,
+                  decoration: InputDecoration(hintText: "New Username"),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Submit'),
+              onPressed: () async {
+                String newUserName = userNameController.text;
+
+                if (newUserName.isEmpty) {
+                  String title = "There is something wrong !";
+                  String content = "Username could not be empty";
+                  showGifDialog(LabGifs.errorGifUrl, title, content);
+                } else {
+                  await updateUserTopicField('owner', userNameController.text);
+                  await updateUserParticipantData(userNameController.text);
+                  await auth.currentUser
+                      ?.updateDisplayName(userNameController.text);
+                  await auth.currentUser?.reload();
+                  setState(() {
+                    // userName = auth.currentUser!.displayName!;
+                  });
+                  Navigator.of(context).pop();
+
+                  String title = "Woohoo !";
+                  String content = "Changed username successfully";
+                  showGifDialog(LabGifs.changeGifUrl, title, content);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> changeAvatar() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -637,65 +747,6 @@ class MyProfileState extends State<Profile> {
     );
   }
 
-  Future<void> changeUsername() async {
-    TextEditingController userNameController = TextEditingController();
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // User must tap a button to dismiss
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Change Username'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Please enter your new username:'),
-                TextField(
-                  controller: userNameController,
-                  decoration: InputDecoration(hintText: "New Username"),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
-              },
-            ),
-            TextButton(
-              child: Text('Submit'),
-              onPressed: () async {
-                String newUserName = userNameController.text;
-
-                if (newUserName.isEmpty) {
-                  String title = "There is something wrong !";
-                  String content = "Username could not be empty";
-                  showGifDialog(LabGifs.errorGifUrl, title, content);
-                } else {
-                  await updateUserTopicField('owner', userNameController.text);
-                  await updateUserParticipantData(userNameController.text);
-                  await auth.currentUser
-                      ?.updateDisplayName(userNameController.text);
-                  await auth.currentUser?.reload();
-                  setState(() {
-                    // userName = auth.currentUser!.displayName!;
-                  });
-                  Navigator.of(context).pop();
-
-                  String title = "Woohoo !";
-                  String content = "Changed username successfully";
-                  showGifDialog(LabGifs.changeGifUrl, title, content);
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -716,7 +767,8 @@ class MyProfileState extends State<Profile> {
                             image: DecorationImage(
                                 image:
                                     AssetImage("assets/gifs/dog-and-cat.gif"),
-                                fit: BoxFit.cover)),
+                                fit: BoxFit.cover)
+                        ),
                         child: Stack(
                           children: <Widget>[
                             SafeArea(
@@ -805,54 +857,5 @@ class MyProfileState extends State<Profile> {
         ],
       ),
     );
-  }
-
-  Future<void> updateUserTopicField(String field, String? fieldData) async {
-    try {
-      String? currentUserName = auth.currentUser?.displayName;
-
-      if (currentUserName == null) return;
-
-      Query query =
-          dbRef.child('Topic').orderByChild('owner').equalTo(currentUserName);
-
-      query.once().then((DatabaseEvent event) {
-        if (event.snapshot.exists) {
-          Map<dynamic, dynamic> topics =
-              event.snapshot.value as Map<dynamic, dynamic>? ?? {};
-          topics.forEach((key, value) {
-            dbRef.child('Topic/$key').update({field: fieldData});
-          });
-        }
-      });
-    } catch (error) {
-      log("Error updating topic fields: $error");
-    }
-  }
-
-  Future<void> updateUserParticipantData(String newName) async {
-    final user = auth.currentUser;
-    if (user != null) {
-      DataSnapshot topicsSnapshot = await dbRef.child("Topic").get();
-
-      if (topicsSnapshot.exists) {
-        Map<dynamic, dynamic> topics =
-            topicsSnapshot.value as Map<dynamic, dynamic>;
-        topics.forEach((key, value) async {
-          if (value is Map<dynamic, dynamic> && value['participant'] != null) {
-            List<dynamic> participants =
-                List<dynamic>.from(value['participant']);
-            participants.asMap().forEach((index, participant) async {
-              if (participant is Map<dynamic, dynamic> &&
-                  participant['userID'] == user.uid) {
-                await dbRef
-                    .child('Topic/$key/participant/$index/userName')
-                    .set(newName);
-              }
-            });
-          }
-        });
-      }
-    }
   }
 }
