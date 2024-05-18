@@ -60,7 +60,7 @@ class MyFlippingCard extends StatelessWidget {
       imgAreaColor = CupertinoColors.white,
       cardBorderColor = Colors.black;
 
-  static FlutterTts flutterTts = FlutterTts();
+  static final FlutterTts flutterTts = FlutterTts();
 
   Future _speak(String inputText, String language) async{
     flutterTts.setLanguage(language);
@@ -273,6 +273,7 @@ class MyNormalCard extends StatelessWidget {
   static FlutterTts flutterTts = FlutterTts();
 
   Future _speak(String inputText) async{
+    print('dang speak word $inputText');
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
   }
@@ -346,6 +347,7 @@ class MyNormalCard extends StatelessWidget {
                       IconButton(
                           iconSize: 40,
                           onPressed: () {
+                            print('speak word $word');
                             _speak(word);
                             //_stop();
                           },

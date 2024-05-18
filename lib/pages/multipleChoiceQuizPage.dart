@@ -53,7 +53,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   static dynamic resultTitleColor = Colors.black;
   static bool isProcessingNotification = false;
   static int score = 0;
-  static FlutterTts flutterTts = FlutterTts();
+  static final FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -103,8 +103,8 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
   }
 
   //text to speak word
-  Future _speak(String inputText) async{
-    flutterTts.setLanguage(widget.isChangeLanguage?"en-US":"vi-VN");
+  Future speak(String inputText) async{
+    await flutterTts.setLanguage(widget.isChangeLanguage?"en-US":"vi-VN");
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
   }
@@ -115,6 +115,42 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
         ConfettiController(duration: const Duration(seconds: 3));
     _confettiControllerRight =
         ConfettiController(duration: const Duration(seconds: 3));
+  }
+
+  //generate progress color for progress bar indicator
+  Color getColorForProgress(double progress) {
+    if (progress >= 0.9) {
+      return const Color(0xFF4cac10);
+    } else if (progress >= 0.8) {
+      return const Color(0xFF6eb810);
+    } else if (progress >= 0.7) {
+      return const Color(0xFF93c411);
+    } else if (progress >= 0.6) {
+      return const Color(0xFFbdd011);
+    } else if (progress >= 0.5) {
+      return const Color(0xFFdcce11);
+    } else if (progress >= 0.4) {
+      return const Color(0xFFe9b411);
+    } else if (progress >= 0.3) {
+      return const Color(0xFFef9516);
+    } else if (progress >= 0.2) {
+      return const Color(0xFFf17621);
+    } else if (progress >= 0.1) {
+      return const Color(0xFFf35b2b);
+    } else {
+      return const Color(0xFFf44336);
+    }
+  }
+
+  //implement progress indicator for quiz page
+  Widget progressIndicatorWidget() {
+    return LinearProgressIndicator(
+      minHeight: mainPageHeight * 0.01,
+      value: userSelection.length.toDouble() / (questList.length),
+      valueColor: AlwaysStoppedAnimation<Color>(
+        getColorForProgress(userSelection.length.toDouble() / (questList.length)),
+      ),
+    );
   }
 
   //check if enough word to show in result
@@ -209,7 +245,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
           resultTitle,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: kIsWeb ? 35 : 20,
+            fontSize: kIsWeb ? 35 : 30,
           ),
         ),
         duration: const Duration(milliseconds: 500),
@@ -219,28 +255,28 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.5) {
       resultTitleColor = const Color(0xFFBcc6cc);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
       );
     } else if (finishedQuestCorrectly.length >= userSelection.length * 0.25) {
       resultTitleColor = const Color(0xFF5B391E);
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
       );
     } else {
       resultTitleColor = Colors.black87;
       return Text(
         resultTitle,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: kIsWeb ? 35 : 20, color: resultTitleColor),
+        style: TextStyle(fontSize: kIsWeb ? 35 : 30, color: resultTitleColor),
       );
     }
   }
@@ -415,7 +451,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
             IconButton(
                 iconSize: 40,
                 onPressed: () {
-                  _speak(question);
+                  speak(question);
                   //_stop();
                 },
                 icon: const Icon(Icons.volume_down)
@@ -434,150 +470,156 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
 
   //main content of page (hold question and answer tiles)
   Widget multipleChoicePageWidget() {
-    return Container(
-        width: mainPageWidth,
-        height: mainPageHeight,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (scrollNotification) {
-            if (!isProcessingNotification &&
-                scrollNotification is ScrollUpdateNotification) {
-              isProcessingNotification = true;
-              if (scrollNotification.scrollDelta! < 0 &&
-                  isProcessingNotification) {
-                // User is scrolling down
-                if (currentIndex < wordList.length - 1) {
-                  _pageController
-                      .nextPage(
+    return Column(
+      children: [
+        progressIndicatorWidget(),
+        Container(
+            width: mainPageWidth,
+            height: mainPageHeight* 0.99,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (scrollNotification) {
+                if (!isProcessingNotification &&
+                    scrollNotification is ScrollUpdateNotification) {
+                  isProcessingNotification = true;
+                  if (scrollNotification.scrollDelta! < 0 &&
+                      isProcessingNotification) {
+                    // User is scrolling down
+                    if (currentIndex < wordList.length - 1) {
+                      _pageController
+                          .nextPage(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeIn)
-                      .then((_) {
-                    isProcessingNotification = false;
-                  });
-                  return true;
-                }
-              } else if (scrollNotification.scrollDelta! > 0 &&
-                  isProcessingNotification) {
-                // User is scrolling up
-                if (currentIndex > 0) {
-                  _pageController
-                      .previousPage(
+                          .then((_) {
+                        isProcessingNotification = false;
+                      });
+                      return true;
+                    }
+                  } else if (scrollNotification.scrollDelta! > 0 &&
+                      isProcessingNotification) {
+                    // User is scrolling up
+                    if (currentIndex > 0) {
+                      _pageController
+                          .previousPage(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut)
-                      .then((_) {
-                    isProcessingNotification = false;
-                  });
-                  return true;
+                          .then((_) {
+                        isProcessingNotification = false;
+                      });
+                      return true;
+                    }
+                  }
                 }
-              }
-            }
-            return false; // Return true to allow further handling of the notification
-          },
-          child: PageView.builder(
-            allowImplicitScrolling: false,
-            scrollDirection: Axis.vertical,
-            controller: _pageController,
-            onPageChanged: (i) {
-              setState(() {
-                currentIndex = i;
-              });
-            },
-            pageSnapping: true,
-            itemCount: wordList.length,
-            itemBuilder: (context, index) {
-              return Container(
-                color: CupertinoColors.white,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    //Question widget
-                    questionGroupWidget(questList[index]['question'] as String),
+                return false; // Return true to allow further handling of the notification
+              },
+              child: PageView.builder(
+                allowImplicitScrolling: false,
+                scrollDirection: Axis.vertical,
+                controller: _pageController,
+                onPageChanged: (i) {
+                  setState(() {
+                    currentIndex = i;
+                  });
+                },
+                pageSnapping: true,
+                itemCount: wordList.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    color: CupertinoColors.white,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //Question widget
+                        questionGroupWidget(questList[index]['question'] as String),
 
-                    //Answer widget
-                    answerGroupWidget(
-                        questList[index]['answer'] as List<String>,
-                        questList[index]['result']),
+                        //Answer widget
+                        answerGroupWidget(
+                            questList[index]['answer'] as List<String>,
+                            questList[index]['result']),
 
-                    userSelection[currentIndex] == null
-                        ? AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: !skippedQuest.contains(currentIndex)
-                                ? TextButton(
-                                    child: Container(
-                                      padding: const EdgeInsets.all(15),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey[400],
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          border: Border.all(
-                                            color: Colors.grey.shade800,
-                                            width: 3,
-                                          )),
-                                      child: const Text(
-                                        "I don't Know",
-                                        style: TextStyle(
-                                            color: Colors.black54,
-                                            fontSize: 20),
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      skippedQuest.add(currentIndex);
-                                      userSelection[currentIndex] = 'Skipped';
-                                      setState(() {});
-                                      await Future.delayed(
-                                          const Duration(milliseconds: 300));
-                                      if (isFinished()) {
-                                        return setState(() {
-                                          showResultDialog();
-                                        });
-                                      }
-                                      if (currentIndex < wordList.length - 1) {
-                                        _pageController.nextPage(
-                                            duration: const Duration(
-                                                milliseconds: 300),
-                                            curve: Curves.easeIn);
-                                      }
-                                    })
-                                : Container(
-                                    padding: const EdgeInsets.all(15),
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey[400],
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: Colors.grey.shade800,
-                                          width: 3,
-                                        )),
-                                    child: const Text(
-                                      'You have skipped this quest',
-                                      style: TextStyle(
-                                          color: Colors.black54, fontSize: 20),
-                                    ),
-                                  ),
-                          )
-                        : AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: !skippedQuest.contains(currentIndex)
-                                ? const SizedBox.shrink()
-                                : Container(
-                                    padding: const EdgeInsets.all(15),
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey[400],
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: Colors.grey.shade800,
-                                          width: 3,
-                                        )),
-                                    child: const Text(
-                                      'You have skipped this quest',
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                  ),
+                        userSelection[currentIndex] == null
+                            ? AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: !skippedQuest.contains(currentIndex)
+                              ? TextButton(
+                              child: Container(
+                                padding: const EdgeInsets.all(15),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[400],
+                                    borderRadius:
+                                    BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.grey.shade800,
+                                      width: 3,
+                                    )),
+                                child: const Text(
+                                  "I don't Know",
+                                  style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 20),
+                                ),
+                              ),
+                              onPressed: () async {
+                                skippedQuest.add(currentIndex);
+                                userSelection[currentIndex] = 'Skipped';
+                                setState(() {});
+                                await Future.delayed(
+                                    const Duration(milliseconds: 300));
+                                if (isFinished()) {
+                                  return setState(() {
+                                    showResultDialog();
+                                  });
+                                }
+                                if (currentIndex < wordList.length - 1) {
+                                  _pageController.nextPage(
+                                      duration: const Duration(
+                                          milliseconds: 300),
+                                      curve: Curves.easeIn);
+                                }
+                              })
+                              : Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                                color: Colors.grey[400],
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.grey.shade800,
+                                  width: 3,
+                                )),
+                            child: const Text(
+                              'You have skipped this quest',
+                              style: TextStyle(
+                                  color: Colors.black54, fontSize: 20),
+                            ),
                           ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ));
+                        )
+                            : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: !skippedQuest.contains(currentIndex)
+                              ? const SizedBox.shrink()
+                              : Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                                color: Colors.grey[400],
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.grey.shade800,
+                                  width: 3,
+                                )),
+                            child: const Text(
+                              'You have skipped this quest',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            )
+        ),
+      ],
+    );
   }
 
   //finished page that has content and redirect button (if web)

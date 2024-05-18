@@ -38,7 +38,7 @@ class _TopicDetailState extends State<TopicDetail> {
       TextEditingController();
   final _titleKey = GlobalKey<FormFieldState>();
   List<FocusNode> focusNodes = [];
-  static FlutterTts flutterTts = FlutterTts();
+  static final FlutterTts flutterTts = FlutterTts();
 
   // thay doi list word mới, participant khong thay doi
   // list words này chỉ dùng để lưu các words trong edit topic
@@ -80,7 +80,7 @@ class _TopicDetailState extends State<TopicDetail> {
     super.dispose();
   }
 
-  Future _speak(String inputText, String language) async {
+  Future speak(String inputText, String language) async {
     flutterTts.setLanguage(language);
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
@@ -146,10 +146,12 @@ class _TopicDetailState extends State<TopicDetail> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              /*
               Text(
                 "MINI FLASH CARD HERE",
                 style: TextStyle(color: Colors.black),
               ),
+               */
               SizedBox(
                 height: 8,
               ),
@@ -468,7 +470,7 @@ class _TopicDetailState extends State<TopicDetail> {
                 ),
                 IconButton(
                   onPressed: () {
-                    _speak(word.english as String, 'en-US');
+                    speak(word.english as String, 'en-US');
                   },
                   icon: Icon(FluentIcons.speaker_2_16_filled),
                   color: Colors.black,

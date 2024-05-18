@@ -91,7 +91,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                     style: TextStyle(color: Colors.black)),
               ],
             )
-          : Center(child: LoadingIndicator(title: "Getting data")),
+          : Center(child: CircularProgressIndicator()),
     );
   }
 
