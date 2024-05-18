@@ -287,27 +287,44 @@ class MyProfileState extends State<Profile> {
       barrierDismissible: false, // User must tap a button to dismiss
       builder: (BuildContext context) {
         return AlertDialog(
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: CupertinoColors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.blue[300] as Color, width: 1),
+            borderRadius: BorderRadius.circular(8),
+          ),
           title: Text('Change Username'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text('Please enter your new username:'),
                 TextField(
+                  cursorColor: Colors.blue,
                   controller: userNameController,
-                  decoration: InputDecoration(hintText: "New Username"),
+                  decoration: const InputDecoration(
+                      helperText: "Username",
+                      hintText: "New username",
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black)),
+                      helperStyle: TextStyle(fontSize: 13)),
                 ),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.red),
+              ),
               onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
               },
             ),
             TextButton(
-              child: Text('Submit'),
+              child: Text('Submit', style: TextStyle(color: Colors.blue)),
               onPressed: () async {
                 String newUserName = userNameController.text;
 
@@ -517,6 +534,8 @@ class MyProfileState extends State<Profile> {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
+              surfaceTintColor: Colors.transparent,
+              backgroundColor: CupertinoColors.white,
               title: Text('Set a new password'),
               content: SingleChildScrollView(
                 child: ListBody(
@@ -607,6 +626,12 @@ class MyProfileState extends State<Profile> {
                         String content =
                             "Now you could use your new password to sign in";
                         showGifDialog(LabGifs.correctUrl, title, content);
+                        return;
+                      } else {
+                        String title = "There is something wrong !";
+                        String content =
+                            "Wrong password, please enter valid password for account";
+                        showGifDialog(LabGifs.errorGifUrl, title, content);
                         return;
                       }
                     }
@@ -722,32 +747,81 @@ class MyProfileState extends State<Profile> {
       child: Column(
         children: [
           SizedBox(height: 20),
-          (isGoogleUser && !isCasualUser)
-              ? ElevatedButton(
-                  onPressed: () async {
-                    linkEmailPasswordForAccount();
-                  },
-                  child: Center(
-                    child: Text("Create a password for your account"),
-                  ))
-              : SizedBox(),
-          isCasualUser
-              ? ElevatedButton(
-                  onPressed: () async {
-                    changePasswordForAccount();
-                  },
-                  child: Center(
-                    child: Text("Change password"),
-                  ))
-              : SizedBox(),
+          if (isGoogleUser && !isCasualUser)
+            ElevatedButton(
+              onPressed: () async {
+                linkEmailPasswordForAccount();
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                backgroundColor: Colors.blueAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                shadowColor: Colors.black45,
+                elevation: 5,
+              ),
+              child: Center(
+                child: Text(
+                  "Create a password for your account",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          if (isCasualUser)
+            ElevatedButton(
+              onPressed: () async {
+                changePasswordForAccount();
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                backgroundColor: Colors.greenAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                shadowColor: Colors.black45,
+                elevation: 5,
+              ),
+              child: Center(
+                child: Text(
+                  "Change password",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
           SizedBox(height: 20),
           ElevatedButton(
-              onPressed: (!isGoogleUser) ? linkGoogleAccountForUser : () {},
-              child: Center(
-                child: Text(isGoogleUser
+            onPressed: (!isGoogleUser) ? linkGoogleAccountForUser : () {},
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              backgroundColor: isGoogleUser ? Colors.grey : Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              shadowColor: Colors.black45,
+              elevation: 5,
+            ),
+            child: Center(
+              child: Text(
+                isGoogleUser
                     ? "Google account linked"
-                    : "Link with your Google account"),
-              )),
+                    : "Link with your Google account",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

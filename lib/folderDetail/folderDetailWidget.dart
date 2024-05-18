@@ -527,7 +527,7 @@ class _FolderDetailState extends State<FolderDetail> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Center(
-                child: Text('Are you sure you want to delete this topic ?',
+                child: Text('Are you sure you want to delete this folder ?',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.black, fontSize: 20)),
               ),
