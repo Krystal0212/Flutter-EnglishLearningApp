@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
@@ -42,7 +43,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
               Container(
                 alignment: Alignment.topCenter,
-                margin: EdgeInsets.symmetric(horizontal: 15),
+                margin: EdgeInsets.symmetric(horizontal: kIsWeb?15:5),
                 decoration: BoxDecoration(
                   color: Color(0xFFcbd0d4),
                   border: Border.all(
@@ -54,8 +55,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                       topRight: Radius.circular(100)
                   ),
                 ),
-                width: 190,
-                height: 250,
+                width: kIsWeb?190:mainPageWidth*0.3,
+                height: kIsWeb?250:mainPageHeight*0.25,
                 child: Column(
                   children: [
                     SizedBox(
@@ -148,8 +149,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                       topRight: Radius.circular(100)
                   ),
                 ),
-                width: 190,
-                height: 300,
+                width: kIsWeb?190:mainPageWidth*0.3,
+                height: kIsWeb?250:mainPageHeight*0.3,
                 child: Column(
                   children: [
                     SizedBox(
@@ -238,7 +239,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
               Container(
                 alignment: Alignment.topCenter,
-                margin: EdgeInsets.symmetric(horizontal: 15),
+                margin: EdgeInsets.symmetric(horizontal: kIsWeb?15:5),
                 decoration: BoxDecoration(
                   color: Color(0xFF9c4e15),
                   border: Border.all(
@@ -250,8 +251,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
                       topRight: Radius.circular(100)
                   ),
                 ),
-                width: 190,
-                height: 250,
+                width: kIsWeb?190:mainPageWidth*0.3,
+                height: kIsWeb?250:mainPageHeight*0.25,
                 child: Column(
                   children: [
                     SizedBox(
@@ -430,8 +431,8 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
           return Center(
             child: Container(
               color: CupertinoColors.white,
-              width: mainPageWidth * 0.7,
-              height: mainPageHeight * 0.85,
+              width: kIsWeb? mainPageWidth * 0.7 : mainPageWidth,
+              height: kIsWeb? mainPageHeight * 0.85 : mainPageHeight,
               child: scoreboard(),
             ),
           );
