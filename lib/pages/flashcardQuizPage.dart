@@ -8,20 +8,21 @@ import 'package:flutter_flip_card/flutter_flip_card.dart';
 import '../objects/topic.dart';
 
 class FlashcardQuizPage extends StatefulWidget {
-  const FlashcardQuizPage({super.key, required this.topic});
+  const FlashcardQuizPage({super.key,
+    required this.topic,
+    required this.isShuffle,
+  });
 
   final Topic topic;
+  final bool isShuffle;
 
   @override
   State<FlashcardQuizPage> createState() => _FlashcardQuizPageState();
 }
 
 class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
-  static Color appbarColor = Colors.blue[200] as Color,
-      appbarTextColor = Colors.black,
-      cardPageBackground = Colors.blue[50] as Color;
-
-  static double appbarTextSize = 20;
+  static Color cardPageBackground = Colors.blue[50] as Color;
+  
   static bool isAutoFlashcard = false;
 
   late PageController _controller;
@@ -64,8 +65,10 @@ class _FlashcardQuizPageState extends State<FlashcardQuizPage> {
   }
 
   void initWordList() {
-    wordList = widget.topic.word as List<Word>;
-    //wordList.shuffle(Random());
+    wordList = List.from(widget.topic.word as List<Word>);
+    if (widget.isShuffle){
+      wordList.shuffle(Random());
+    }
   }
 
   void initCardsAnimation() {

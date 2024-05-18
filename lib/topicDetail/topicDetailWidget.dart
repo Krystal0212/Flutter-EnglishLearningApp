@@ -235,11 +235,7 @@ class _TopicDetailState extends State<TopicDetail> {
                           style: TextStyle(color: Colors.black),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FlashcardQuizPage(topic: widget.topic)));
+                          showSelectionDialog(context, isFlashCard: true);
                         },
                       ),
                     ),
@@ -275,7 +271,7 @@ class _TopicDetailState extends State<TopicDetail> {
                           style: TextStyle(color: Colors.black),
                         ),
                         onTap: () {
-                          showSelectionDialog(context, isMultipleQuiz: false);
+                          showSelectionDialog(context, isFillWordQuiz: true);
                         },
                       ),
                     ),
@@ -326,7 +322,8 @@ class _TopicDetailState extends State<TopicDetail> {
     );
   }
 
-  void showSelectionDialog(BuildContext context, {bool? isMultipleQuiz}) {
+  void showSelectionDialog(BuildContext context,
+      {bool? isMultipleQuiz = false, bool? isFlashCard = false , bool? isFillWordQuiz = false}) {
     // Initial states for options
     bool language = false;
     bool shuffle = false;
@@ -345,6 +342,7 @@ class _TopicDetailState extends State<TopicDetail> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!isFlashCard!)
                   ListTile(
                     title: Text('Answer by Vietnamese'),
                     subtitle: Text('(default: English)'),
@@ -416,24 +414,29 @@ class _TopicDetailState extends State<TopicDetail> {
                               topic: selectedTopic,
                               isChangeLanguage: language,
                               isShuffle: shuffle);
-                        } else {
+                        } else
+                        if (isFillWordQuiz!) {
                           return FillWordQuizPage(
                               topic: selectedTopic,
                               isChangeLanguage: language,
                               isShuffle: shuffle);
+                        } else {
+                          return FlashcardQuizPage(
+                              topic: selectedTopic,
+                              isShuffle: shuffle);
                         }
                       }));
                     },
-                    child: Text(
-                      'OK',
-                      style:
-                          TextStyle(color: CupertinoColors.white, fontSize: 15),
-                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
+                    ),
+                    child: Text(
+                      'OK',
+                      style:
+                          TextStyle(color: CupertinoColors.white, fontSize: 15),
                     ),
                   ),
                 ],
