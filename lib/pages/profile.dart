@@ -25,9 +25,7 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => MyProfileState();
 }
 
-class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
+class MyProfileState extends State<Profile> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final GoogleAuthProvider authProvider = GoogleAuthProvider();
   DatabaseReference dbRef = FirebaseDatabase.instance.ref();
@@ -58,7 +56,9 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
     checkCurrentUser();
     userSubscription = auth.userChanges().listen((User? user) {
       if (user != null) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
     getProviders();
@@ -352,7 +352,7 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
                       String content =
                           "Verification email has been sent. Please check your email !";
                       showGifDialog(LabGifs.mailGifUrl, title, content);
-                      return ;
+                      return;
                     }
                     Navigator.of(context).pop();
                     if (validateResult != "") {
@@ -555,7 +555,8 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
       switch (e.code) {
         case "provider-already-linked":
           String title = "There is something wrong !";
-          String content = "The Google account has already been linked to the user";
+          String content =
+              "The Google account has already been linked to the user";
           showGifDialog(LabGifs.errorGifUrl, title, content);
         default:
           print("Unknown error: ${e.code}");
@@ -697,8 +698,8 @@ class MyProfileState extends State<Profile> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: LabColors.bgColorScreen,
       body: Stack(

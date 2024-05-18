@@ -38,7 +38,7 @@ class _TopicDetailState extends State<TopicDetail> {
       TextEditingController();
   final _titleKey = GlobalKey<FormFieldState>();
   List<FocusNode> focusNodes = [];
-  static FlutterTts flutterTts = FlutterTts();
+  static final FlutterTts flutterTts = FlutterTts();
 
   // thay doi list word mới, participant khong thay doi
   // list words này chỉ dùng để lưu các words trong edit topic
@@ -80,7 +80,7 @@ class _TopicDetailState extends State<TopicDetail> {
     super.dispose();
   }
 
-  Future _speak(String inputText, String language) async {
+  Future speak(String inputText, String language) async {
     flutterTts.setLanguage(language);
     flutterTts.setVolume(1);
     await flutterTts.speak(inputText);
@@ -146,10 +146,12 @@ class _TopicDetailState extends State<TopicDetail> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              /*
               Text(
                 "MINI FLASH CARD HERE",
                 style: TextStyle(color: Colors.black),
               ),
+               */
               SizedBox(
                 height: 8,
               ),
@@ -235,11 +237,7 @@ class _TopicDetailState extends State<TopicDetail> {
                           style: TextStyle(color: Colors.black),
                         ),
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FlashcardQuizPage(topic: widget.topic)));
+                          showSelectionDialog(context, isFlashCard: true);
                         },
                       ),
                     ),
@@ -275,7 +273,7 @@ class _TopicDetailState extends State<TopicDetail> {
                           style: TextStyle(color: Colors.black),
                         ),
                         onTap: () {
-                          showSelectionDialog(context, isMultipleQuiz: false);
+                          showSelectionDialog(context, isFillWordQuiz: true);
                         },
                       ),
                     ),
@@ -326,7 +324,8 @@ class _TopicDetailState extends State<TopicDetail> {
     );
   }
 
-  void showSelectionDialog(BuildContext context, {bool? isMultipleQuiz}) {
+  void showSelectionDialog(BuildContext context,
+      {bool? isMultipleQuiz = false, bool? isFlashCard = false , bool? isFillWordQuiz = false}) {
     // Initial states for options
     bool language = false;
     bool shuffle = false;
@@ -345,6 +344,7 @@ class _TopicDetailState extends State<TopicDetail> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (!isFlashCard!)
                   ListTile(
                     title: Text('Answer by Vietnamese'),
                     subtitle: Text('(default: English)'),
@@ -416,24 +416,29 @@ class _TopicDetailState extends State<TopicDetail> {
                               topic: selectedTopic,
                               isChangeLanguage: language,
                               isShuffle: shuffle);
-                        } else {
+                        } else
+                        if (isFillWordQuiz!) {
                           return FillWordQuizPage(
                               topic: selectedTopic,
                               isChangeLanguage: language,
                               isShuffle: shuffle);
+                        } else {
+                          return FlashcardQuizPage(
+                              topic: selectedTopic,
+                              isShuffle: shuffle);
                         }
                       }));
                     },
-                    child: Text(
-                      'OK',
-                      style:
-                          TextStyle(color: CupertinoColors.white, fontSize: 15),
-                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
+                    ),
+                    child: Text(
+                      'OK',
+                      style:
+                          TextStyle(color: CupertinoColors.white, fontSize: 15),
                     ),
                   ),
                 ],
@@ -465,7 +470,7 @@ class _TopicDetailState extends State<TopicDetail> {
                 ),
                 IconButton(
                   onPressed: () {
-                    _speak(word.english as String, 'en-US');
+                    speak(word.english as String, 'en-US');
                   },
                   icon: Icon(FluentIcons.speaker_2_16_filled),
                   color: Colors.black,
@@ -1105,16 +1110,20 @@ class _TopicDetailState extends State<TopicDetail> {
     loadFolderFromDatabase();
     // listen to all change in this Topic node
     dbRef.child('Topic/${widget.topic.id}').onValue.listen((data) {
-      Topic changedTopic =
-          Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
-      setState(() {
-        widget.topic = changedTopic;
-        selected.clear();
-        for (var i = 0; i < widget.topic.word!.length; i++) {
-          selected.add(false);
+      if (data.snapshot.value != null) {
+        Topic changedTopic =
+            Topic.fromJson(data.snapshot.value as Map<dynamic, dynamic>);
+        if (mounted) {
+          setState(() {
+            widget.topic = changedTopic;
+            selected.clear();
+            for (var i = 0; i < widget.topic.word!.length; i++) {
+              selected.add(false);
+            }
+            markedWords.clear();
+          });
         }
-        markedWords.clear();
-      });
+      }
     });
   }
 
