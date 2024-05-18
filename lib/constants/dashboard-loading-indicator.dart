@@ -1,37 +1,24 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
-class LoadingIndicator extends StatefulWidget {
-  LoadingIndicator({super.key, this.title});
+class DashboardLoadingIndicator extends StatefulWidget {
+  DashboardLoadingIndicator({super.key, this.title});
 
   final String? title;
 
   @override
-  State<LoadingIndicator> createState() => LoadingTextAnimationState();
+  State<DashboardLoadingIndicator> createState() => DashboardLoadingTextAnimationState();
 }
 
-class LoadingTextAnimationState extends State<LoadingIndicator>{
-
-  late String loadingText;
+class DashboardLoadingTextAnimationState extends State<DashboardLoadingIndicator>{
   int dotCount = 0;
-  late Timer timer;
 
   @override
   void initState() {
     super.initState();
-    String receivedText = widget.title ?? "Loading";
-    loadingText = receivedText;
-    timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-      setState(() {
-        dotCount = (dotCount + 1) % 4; // Cycle through 0 to 3
-        loadingText = receivedText + "." * dotCount; // Concatenate dots based on count
-      });
-    });
   }
 
   @override
   void dispose() {
-    timer.cancel();
     super.dispose();
   }
 
@@ -53,16 +40,16 @@ class LoadingTextAnimationState extends State<LoadingIndicator>{
                 topRight: Radius.circular(20),
               ), // Rounded corners at the top of the image
               child: Image.asset(
-                'assets/gifs/campfire-loading-indicator.gif',
-                width: 200,
-                height: 200,
+                'assets/gifs/sparkle.gif',
+                width: 300,
+                height: 300,
                 fit: BoxFit.cover, // Ensures the image covers the container
               ),
             ),
             Padding(
                 padding: EdgeInsets.all(10), // Padding around the text
                 child: Text(
-                  loadingText,
+                  "Loading...",
                   style: TextStyle(
                     fontFamily: 'Gill Sans Ultra Bold', // Use the font family name declared in pubspec.yaml
                     fontSize: 22,
