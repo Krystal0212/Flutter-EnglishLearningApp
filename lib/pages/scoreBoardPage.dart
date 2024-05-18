@@ -33,7 +33,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
 
   @override
   void initState() {
-    getParticipant();
+    //getParticipant();
     super.initState();
   }
 
