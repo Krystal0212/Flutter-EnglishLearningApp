@@ -105,40 +105,38 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                   child: Column(children: [
                     FadeInUp(
                       duration: Duration(milliseconds: 600),
-                      child:Container(
-                      height: parentHeight * 0.2,
-                      width: parentWidth,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            top: parentHeight * 0.05, left: parentWidth * 0.05, right: parentWidth * 0.075),
-                        child:  Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Container(
+                        height: parentHeight * 0.25,
+                        width: parentWidth,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              top: parentHeight * 0.05,
+                              left: parentWidth * 0.05,
+                              right: parentWidth * 0.075),
+                          child: Column(
                             children: [
                               Row(
                                 children: [
                                   Expanded(
                                     child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "Welcome back, ",
-                                              style: TextStyle(
-                                                  fontSize: 25,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500,
-                                                  letterSpacing: 1),
-                                            ),
-                                            Text(
-                                              FirebaseAuth
-                                                  .instance.currentUser!.displayName!,
-                                              style: TextStyle(
-                                                  fontSize: 25,
-                                                  color: Color(0xFF000000),
-                                                  fontWeight: FontWeight.bold,
-                                                  letterSpacing: 1),
-                                            ),
-                                          ],
+                                        Text(
+                                          "Welcome back, ",
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500,
+                                              letterSpacing: 1),
+                                        ),
+                                        Text(
+                                          FirebaseAuth.instance.currentUser!
+                                              .displayName!,
+                                          style: TextStyle(
+                                              fontSize: 25,
+                                              color: Color(0xFF000000),
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1),
                                         ),
                                         SizedBox(height: 10),
                                         Row(
@@ -156,21 +154,23 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                       ],
                                     ),
                                   ),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
-                                      child:kIsWeb
-                                      ? Image.network(
-                                          FirebaseAuth
-                                              .instance.currentUser!.photoURL!,
-                                          width: 70,
-                                          height: 70,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : CachedNetworkImage(
-                                          height: 70,
-                                          imageUrl: FirebaseAuth
-                                              .instance.currentUser!.photoURL!,
-                                        ),),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    // Adjust the radius as needed
+                                    child: kIsWeb
+                                        ? Image.network(
+                                            FirebaseAuth.instance.currentUser!
+                                                .photoURL!,
+                                            width: 90,
+                                            height: 90,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : CachedNetworkImage(
+                                            height: 90,
+                                            imageUrl: FirebaseAuth.instance
+                                                .currentUser!.photoURL!,
+                                          ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -178,8 +178,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                         ),
                       ),
                     ),
-          FadeInUp(
-              duration: Duration(milliseconds: 800),
+                    FadeInUp(
+                      duration: Duration(milliseconds: 800),
                       child: Container(
                         padding: EdgeInsets.only(
                             top: 25,
@@ -209,7 +209,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                 Text(
                                   '- ${randomQuote['author']} -',
                                   style: TextStyle(
-                                      fontSize: 12, fontWeight: FontWeight.bold),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -221,7 +222,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                               ),
                               width: MediaQuery.of(context).size.width * 0.7,
                               height:
-                                  (MediaQuery.of(context).size.width * 0.7) / 1.8,
+                                  (MediaQuery.of(context).size.width * 0.7) /
+                                      1.8,
                               child: Image.network(
                                 LabGifs.exploreUrl,
                                 fit: BoxFit.cover,
@@ -274,7 +276,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
                                 ),
                                 kIsWeb
                                     ? Image.network(
-                                        recentAccessTopic!.ownerAvtUrl as String,
+                                        recentAccessTopic!.ownerAvtUrl
+                                            as String,
                                         width: 30,
                                         height: 30,
                                         fit: BoxFit.cover,
