@@ -449,7 +449,7 @@ class _MultipleChoiceQuizPageState extends State<MultipleChoiceQuizPage> {
                   fontWeight: FontWeight.bold),
             ),
             IconButton(
-                iconSize: 40,
+                iconSize: kIsWeb? 40:30,
                 onPressed: () {
                   speak(question);
                   //_stop();
