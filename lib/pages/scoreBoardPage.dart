@@ -539,7 +539,7 @@ class _TopicAchievementPageState extends State<TopicAchievementPage> {
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: const Text('Hall of Fame'),
-        backgroundColor: Colors.blue[800],
+        backgroundColor: Colors.amber,
         titleTextStyle: const TextStyle(
             color: CupertinoColors.white,
             fontWeight: FontWeight.bold,

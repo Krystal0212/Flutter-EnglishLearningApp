@@ -219,103 +219,99 @@ class _TopicDetailState extends State<TopicDetail> {
               SizedBox(
                 height: 8,
               ),
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      elevation: 4,
-                      margin: EdgeInsets.all(9),
-                      color: Colors.blue[50],
-                      child: ListTile(
-                        leading: Icon(
-                          FluentIcons.copy_16_regular,
-                          color: Colors.black,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Card(
+                    elevation: 4,
+                    margin: EdgeInsets.all(9),
+                    color: Colors.blue[50],
+                    child: ListTile(
+                      leading: Icon(
+                        FluentIcons.copy_16_regular,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Flashcard",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      onTap: () {
+                        showSelectionDialog(context, isFlashCard: true);
+                      },
+                    ),
+                  ),
+                  Card(
+                    elevation: 4,
+                    margin: EdgeInsets.all(9),
+                    color: Colors.blue[50],
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.quiz_outlined,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Multiple choices",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      onTap: () {
+                        showSelectionDialog(context, isMultipleQuiz: true);
+                      },
+                    ),
+                  ),
+                  Card(
+                    elevation: 4,
+                    margin: EdgeInsets.all(9),
+                    color: Colors.blue[50],
+                    child: ListTile(
+                      leading: Icon(
+                        FluentIcons.pen_16_regular,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Fill words",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      onTap: () {
+                        showSelectionDialog(context, isFillWordQuiz: true);
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        EdgeInsets.only(top: 8, left: 8, bottom: 8, right: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Terms",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black),
                         ),
-                        title: Text(
-                          "Flashcard",
+                        Expanded(child: SizedBox()),
+                        Text(
+                          "${markedWords.length} words marked",
                           style: TextStyle(color: Colors.black),
                         ),
-                        onTap: () {
-                          showSelectionDialog(context, isFlashCard: true);
-                        },
-                      ),
+                      ],
                     ),
-                    Card(
-                      elevation: 4,
-                      margin: EdgeInsets.all(9),
-                      color: Colors.blue[50],
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.quiz_outlined,
-                          color: Colors.black,
-                        ),
-                        title: Text(
-                          "Multiple choices",
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        onTap: () {
-                          showSelectionDialog(context, isMultipleQuiz: true);
-                        },
-                      ),
+                  ),
+                  SizedBox(
+                    height: kIsWeb ? 800 : 400,
+                    child: ListView.builder(
+                      padding: EdgeInsets.all(5),
+                      itemCount: widget.topic.word?.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (widget.topic.word?[index] != null) {
+                          Word? word = widget.topic.word?[index];
+                          return wordBlock(word!, index);
+                        }
+                        return null;
+                      },
                     ),
-                    Card(
-                      elevation: 4,
-                      margin: EdgeInsets.all(9),
-                      color: Colors.blue[50],
-                      child: ListTile(
-                        leading: Icon(
-                          FluentIcons.pen_16_regular,
-                          color: Colors.black,
-                        ),
-                        title: Text(
-                          "Fill words",
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        onTap: () {
-                          showSelectionDialog(context, isFillWordQuiz: true);
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.only(top: 8, left: 8, bottom: 8, right: 8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Terms",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.black),
-                          ),
-                          Expanded(child: SizedBox()),
-                          Text(
-                            "${markedWords.length} words marked",
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height -
-                          kToolbarHeight -
-                          48,
-                      child: ListView.builder(
-                        padding: EdgeInsets.all(5),
-                        itemCount: widget.topic.word?.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          if (widget.topic.word?[index] != null) {
-                            Word? word = widget.topic.word?[index];
-                            return wordBlock(word!, index);
-                          }
-                          return null;
-                        },
-                      ),
-                    )
-                  ],
-                ),
+                  )
+                ],
               )
             ],
           ),
@@ -689,11 +685,12 @@ class _TopicDetailState extends State<TopicDetail> {
                         TextButton(
                             onPressed: () {
                               if (validateCreateTopic()) {
-                                updateTopic(
+                                if (updateTopic(
                                     termControllers,
                                     definitionControllers,
-                                    descriptionControllers);
-                                Navigator.of(context).pop();
+                                    descriptionControllers)) {
+                                  Navigator.of(context).pop();
+                                }
                               } else {
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
@@ -1024,7 +1021,7 @@ class _TopicDetailState extends State<TopicDetail> {
     }
   }
 
-  void updateTopic(
+  bool updateTopic(
       List<TextEditingController> termControllers,
       List<TextEditingController> definitionControllers,
       List<TextEditingController> descriptionControllers) {
@@ -1061,8 +1058,10 @@ class _TopicDetailState extends State<TopicDetail> {
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             )));
       });
+      return true;
     } else {
-      showAlertDialog("Please fill at least 4 words", Colors.red);
+      showAlertDialog("You need to fill at least 4 words", Colors.red);
+      return false;
     }
   }
 
@@ -1261,12 +1260,8 @@ class _TopicDetailState extends State<TopicDetail> {
                   ),
                 ),
                 SizedBox(
-                  height: 300,
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: kIsWeb ? 5 : 2.2,
-                    ),
+                  height: kIsWeb ? 600 : 300,
+                  child: ListView.builder(
                     itemBuilder: (BuildContext context, int index) {
                       Folder folder = folders[index];
                       return folderBlock(folder);
@@ -1311,7 +1306,7 @@ class _TopicDetailState extends State<TopicDetail> {
           folder.name as String,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
-        subtitle: Wrap(
+        trailing: Wrap(
           runSpacing: 4.0,
           children: [
             Container(

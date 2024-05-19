@@ -6,10 +6,12 @@ class DashboardLoadingIndicator extends StatefulWidget {
   final String? title;
 
   @override
-  State<DashboardLoadingIndicator> createState() => DashboardLoadingTextAnimationState();
+  State<DashboardLoadingIndicator> createState() =>
+      DashboardLoadingTextAnimationState();
 }
 
-class DashboardLoadingTextAnimationState extends State<DashboardLoadingIndicator>{
+class DashboardLoadingTextAnimationState
+    extends State<DashboardLoadingIndicator> {
   int dotCount = 0;
 
   @override
@@ -32,7 +34,8 @@ class DashboardLoadingTextAnimationState extends State<DashboardLoadingIndicator
           borderRadius: BorderRadius.circular(20), // Rounded rectangle
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Aligns the Column's children to the center
+          mainAxisSize:
+              MainAxisSize.min, // Aligns the Column's children to the center
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.only(
@@ -49,14 +52,14 @@ class DashboardLoadingTextAnimationState extends State<DashboardLoadingIndicator
             Padding(
                 padding: EdgeInsets.all(10), // Padding around the text
                 child: Text(
-                  "Loading...",
+                  "Hi there, welcome to Fluffy",
                   style: TextStyle(
-                    fontFamily: 'Gill Sans Ultra Bold', // Use the font family name declared in pubspec.yaml
+                    fontFamily: 'Gill Sans Ultra Bold',
+                    // Use the font family name declared in pubspec.yaml
                     fontSize: 22,
                     color: Colors.black,
                   ),
-                )
-            ),
+                )),
           ],
         ),
       ),

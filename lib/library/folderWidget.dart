@@ -52,7 +52,7 @@ class _FolderTabState extends State<FolderTab>
           ? GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: kIsWeb ? 5 : 2.2,
+                childAspectRatio: kIsWeb ? 5 : 2.1,
               ),
               itemBuilder: (BuildContext context, int index) {
                 Folder folder = folders[index];

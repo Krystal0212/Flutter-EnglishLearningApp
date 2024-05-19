@@ -315,11 +315,12 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
                         TextButton(
                             onPressed: () {
                               if (validateCreateTopic()) {
-                                saveTopic(
+                                if (saveTopic(
                                     termControllers,
                                     definitionControllers,
-                                    descriptionControllers);
-                                Navigator.of(context).pop();
+                                    descriptionControllers)) {
+                                  Navigator.of(context).pop();
+                                }
                               } else {
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
@@ -629,10 +630,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void saveTopic(
+  bool saveTopic(
       List<TextEditingController> termControllers,
       List<TextEditingController> definitionControllers,
-      List<TextEditingController> descriptionControllers) async {
+      List<TextEditingController> descriptionControllers) {
     String? key = dbRef.child("Topic").push().key;
     // VAN DE O DAY KHI MERGE CODE
     // SUA cách gán name bằng đối tượng User từ DB (hoac la khong can ?)
@@ -674,8 +675,10 @@ class _SetState extends State<Set> with AutomaticKeepAliveClientMixin {
             )));
         _topicTitleEditingController.clear();
       });
+      return true;
     } else {
       showAlertDialog("Please fill at least 4 words", Colors.red);
+      return false;
     }
   }
 

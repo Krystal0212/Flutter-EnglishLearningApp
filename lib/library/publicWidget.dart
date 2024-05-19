@@ -229,7 +229,9 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
       if (topic.access == 'PUBLIC') {
         topics.insert(0, topic);
         foundTopics.insert(0, topic);
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
     // listen to all change in Topic node
@@ -240,11 +242,15 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
       int index_1 =
           foundTopics.indexWhere((element) => element.id == changedTopic.id);
       setState(() {
-        topics.removeAt(index);
-        topics.insert(index, changedTopic);
+        if (index != -1) {
+          topics.removeAt(index);
+          topics.insert(index, changedTopic);
+        }
         // also update this list
-        foundTopics.removeAt(index_1);
-        foundTopics.insert(index_1, changedTopic);
+        if (index_1 != -1) {
+          foundTopics.removeAt(index_1);
+          foundTopics.insert(index_1, changedTopic);
+        }
       });
     });
     // listen to deleted topic event in Topic node
@@ -255,8 +261,12 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
       int index_1 =
           foundTopics.indexWhere((element) => element.id == deletedTopic.id);
       setState(() {
-        topics.removeAt(index);
-        foundTopics.removeAt(index_1);
+        if (index != -1) {
+          topics.removeAt(index);
+        }
+        if (index_1 != -1) {
+          foundTopics.removeAt(index_1);
+        }
       });
     });
   }
