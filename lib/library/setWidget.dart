@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:Fluffy/objects/participant.dart';
 import 'package:Fluffy/topicDetail/topicDetailWidget.dart';

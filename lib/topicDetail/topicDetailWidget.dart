@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:universal_html/html.dart' as html;
 import 'package:Fluffy/pages/flashcardQuizPage.dart';

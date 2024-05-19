@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Fluffy/objects/topic.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -10,7 +9,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart';
 
-import '../constants/loading-indicator.dart';
 import '../objects/participant.dart';
 import '../objects/userActivity.dart';
 import '../topicDetail/topicDetailWidget.dart';
